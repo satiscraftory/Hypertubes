@@ -22,6 +22,9 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.ugi.sf_hypertube.block.HypertubeBlock;
+import net.ugi.sf_hypertube.block.ModBlocks;
+import net.ugi.sf_hypertube.item.ModCreativeModeTabs;
+import net.ugi.sf_hypertube.item.ModItems;
 import org.slf4j.Logger;
 import com.mojang.logging.LogUtils;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -57,6 +60,74 @@ public class SfHyperTube {
     public static final String MOD_ID = "sf_hypertube";
     private static final Logger LOGGER = LogUtils.getLogger();
 
+
+
+
+    // The constructor for the mod class is the first code that is run when your mod is loaded.
+    // FML will recognize some parameter types like IEventBus or ModContainer and pass them in automatically.
+    public SfHyperTube(IEventBus modEventBus, ModContainer modContainer) {
+        // Register the commonSetup method for modloading
+        modEventBus.addListener(this::commonSetup);
+
+        // Register ourselves for server and other game events we are interested in.
+        // Note that this is necessary if and only if we want *this* class (ExampleMod) to respond directly to events.
+        // Do not add this line if there are no @SubscribeEvent-annotated functions in this class, like onServerStarting() below.
+        NeoForge.EVENT_BUS.register(this);
+
+        ModCreativeModeTabs.register(modEventBus);
+
+        ModItems.register(modEventBus);
+        ModBlocks.register(modEventBus);
+
+        // Register the item to a creative tab
+        modEventBus.addListener(this::addCreative);
+        // Register our mod's ModConfigSpec so that FML can create and load the config file for us
+        modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
+    }
+
+    private void commonSetup(final FMLCommonSetupEvent event) {
+
+    }
+
+    // Add the example block item to the building blocks tab
+    private void addCreative(BuildCreativeModeTabContentsEvent event) {
+        if(event.getTabKey() == CreativeModeTabs.INGREDIENTS) {
+            event.accept(ModItems.BISMUTH);
+        }
+
+        if(event.getTabKey() == CreativeModeTabs.BUILDING_BLOCKS) {
+            event.accept(ModBlocks.MAGIC_BLOCK);
+        }
+    }
+
+    // You can use SubscribeEvent and let the Event Bus discover methods to call
+    @SubscribeEvent
+    public void onServerStarting(ServerStartingEvent event) {
+
+    }
+
+    // You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
+    @EventBusSubscriber(modid = MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+    public static class ClientModEvents {
+        @SubscribeEvent
+        public static void onClientSetup(FMLClientSetupEvent event) {
+
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+/*
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(MOD_ID);
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(MOD_ID);
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MOD_ID);
@@ -69,7 +140,9 @@ public class SfHyperTube {
 
     // Use your current registration method. Here we also call our helper to register a BlockItem.
     public static final DeferredBlock<Block> HYPERTUBE_BLOCK = registerBlock("hypertube_block",
-            () -> new HypertubeBlock(BlockBehaviour.Properties.of().noOcclusion()/*.setId(ResourceKey.create(ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(MOD_ID,"hypertube_block")),ResourceLocation.fromNamespaceAndPath(MOD_ID,"hypertube_block")))*/));
+            () -> new HypertubeBlock(BlockBehaviour.Properties.of().noOcclusion()*/
+/*.setId(ResourceKey.create(ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(MOD_ID,"hypertube_block")),ResourceLocation.fromNamespaceAndPath(MOD_ID,"hypertube_block")))*//*
+));
     public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(Registries.ENTITY_TYPE, MOD_ID);
     //public static final DeferredItem<BlockItem> HYPERTUBE_ITEM = ITEMS.registerSimpleBlockItem("hypertube_block", HYPERTUBE_BLOCK);
     public static final DeferredHolder<EntityType<?>, EntityType<HypertubeEntity>> HYPERTUBE_ENTITY_TYPE =
@@ -127,7 +200,9 @@ public class SfHyperTube {
     }
 
     private static <T extends Block> void registerBlockItem(String name, DeferredBlock<T> block) {
-        ITEMS.register(name, () -> new BlockItem(block.get(), new Item.Properties()/*.setId(ResourceKey.create(ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(MOD_ID, name)),ResourceLocation.fromNamespaceAndPath(MOD_ID, name)) )*/));
+        ITEMS.register(name, () -> new BlockItem(block.get(), new Item.Properties()*/
+/*.setId(ResourceKey.create(ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(MOD_ID, name)),ResourceLocation.fromNamespaceAndPath(MOD_ID, name)) )*//*
+));
     }
 
     public SfHyperTube(IEventBus modEventBus, ModContainer modContainer) {
@@ -264,3 +339,4 @@ public class SfHyperTube {
     }
     // --- End of HypertubeEntity ---
 }
+*/
