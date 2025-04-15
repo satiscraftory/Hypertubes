@@ -27,7 +27,7 @@ import net.ugi.sf_hypertube.item.ModItems;
 import org.jetbrains.annotations.Nullable;
 
 public class HypertubeSupport extends BaseEntityBlock {
-    public static final VoxelShape SHAPE = Block.box(0, 0, 0, 16, 1, 16);
+    public static final VoxelShape SHAPE = Block.box(0, 0, 0, 16, 16, 16);
     public static final MapCodec<HypertubeSupport> CODEC = simpleCodec(HypertubeSupport::new);
     public static final EnumProperty<Direction.Axis> AXIS = BlockStateProperties.AXIS;
 
