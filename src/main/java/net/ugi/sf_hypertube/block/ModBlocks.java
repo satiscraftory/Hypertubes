@@ -27,7 +27,7 @@ public class ModBlocks {
                     BlockBehaviour.Properties.of().strength(4f).requiresCorrectToolForDrops().sound(SoundType.DEEPSLATE)));
 */
 
-    public static final DeferredBlock<Block> MAGIC_BLOCK = registerBlock("magic_block",
+    public static final DeferredBlock<Block> HYPERTUBE_SUPPORT = registerBlock("hypertube_support",
             () -> new HypertubeBlock(BlockBehaviour.Properties.of().strength(2f).noLootTable()));
 
 
