@@ -8,6 +8,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.ugi.sf_hypertube.SfHyperTube;
+import net.ugi.sf_hypertube.block.custom.HypertubeSupport;
 import net.ugi.sf_hypertube.item.ModItems;
 
 import java.util.function.Supplier;
@@ -15,20 +16,10 @@ import java.util.function.Supplier;
 public class ModBlocks {
     public static final DeferredRegister.Blocks BLOCKS =
             DeferredRegister.createBlocks(SfHyperTube.MOD_ID);
-/*
-    public static final DeferredBlock<Block> BISMUTH_BLOCK = registerBlock("bismuth_block",
-            () -> new Block(BlockBehaviour.Properties.of()
-                    .strength(4f).requiresCorrectToolForDrops().sound(SoundType.AMETHYST)));
-    public static final DeferredBlock<Block> BISMUTH_ORE = registerBlock("bismuth_ore",
-            () -> new DropExperienceBlock(UniformInt.of(2, 4),
-                    BlockBehaviour.Properties.of().strength(3f).requiresCorrectToolForDrops().sound(SoundType.STONE)));
-    public static final DeferredBlock<Block> BISMUTH_DEEPSLATE_ORE = registerBlock("bismuth_deepslate_ore",
-            () -> new DropExperienceBlock(UniformInt.of(3, 6),
-                    BlockBehaviour.Properties.of().strength(4f).requiresCorrectToolForDrops().sound(SoundType.DEEPSLATE)));
-*/
 
     public static final DeferredBlock<Block> HYPERTUBE_SUPPORT = registerBlock("hypertube_support",
-            () -> new HypertubeBlock(BlockBehaviour.Properties.of().strength(2f).noLootTable()));
+            () -> new HypertubeSupport(BlockBehaviour.Properties.of().strength(2f).noLootTable().noOcclusion()));
+
 
 
     private static <T extends Block> DeferredBlock<T> registerBlock(String name, Supplier<T> block) {
