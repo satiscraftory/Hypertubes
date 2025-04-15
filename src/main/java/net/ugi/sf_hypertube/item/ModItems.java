@@ -28,6 +28,7 @@ public class ModItems {
                     super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
                 }
             });
+            hello
 
     public static final DeferredItem<Item> FROSTFIRE_ICE = ITEMS.register("frostfire_ice",
             () -> new FuelItem(new Item.Properties(), 800));
