@@ -14,8 +14,16 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.items.ItemStackHandler;
 
 import javax.annotation.Nullable;
+import java.util.List;
+
+
 
 public class HypertubeSupportBlockEntity extends BlockEntity {
+
+    public BlockPos target1;
+    public BlockPos target2;
+
+
     public final ItemStackHandler inventory = new ItemStackHandler(1) {
         @Override
         protected int getStackLimit(int slot, ItemStack stack) {
@@ -30,7 +38,6 @@ public class HypertubeSupportBlockEntity extends BlockEntity {
             }
         }
     };
-
 
 
     public HypertubeSupportBlockEntity(BlockPos pos, BlockState blockState) {
@@ -54,12 +61,20 @@ public class HypertubeSupportBlockEntity extends BlockEntity {
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
         tag.put("inventory", inventory.serializeNBT(registries));
+        if(target1 != null) {
+            tag.putIntArray("target1", List.of(target1.getX(), target1.getY(), target1.getZ()));
+        }
+        if(target2 != null) {
+            tag.putIntArray("target2", List.of(target2.getX(), target2.getY(), target2.getZ()));
+        }
     }
 
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
         inventory.deserializeNBT(registries, tag.getCompound("inventory"));
+        tag.getIntArray("target1");
+        tag.getIntArray("target2");
     }
 
     @Nullable

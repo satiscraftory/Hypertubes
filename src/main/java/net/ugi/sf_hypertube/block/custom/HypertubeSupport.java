@@ -109,6 +109,8 @@ public class HypertubeSupport extends BaseEntityBlock {
         if(level.getBlockEntity(pos) instanceof HypertubeSupportBlockEntity hypertubeSupportBlockEntity) {
             if(hypertubeSupportBlockEntity.inventory.getStackInSlot(0).isEmpty() && stack.is(ModItems.BISMUTH)) {
                 hypertubeSupportBlockEntity.inventory.insertItem(0, stack.copy(), false);
+                hypertubeSupportBlockEntity.target1 = player.getOnPos();//example on how to edit data
+                hypertubeSupportBlockEntity.target2 = player.getBlockPosBelowThatAffectsMyMovement();
                 stack.shrink(1);
                 level.playSound(player, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 1f, 2f);
             } else if(stack.isEmpty()) {
