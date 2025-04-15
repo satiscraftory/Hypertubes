@@ -72,7 +72,7 @@ public class HyperTubeItem extends Item {
             BlockPos pos2;
             BlockPos pos3 = block2Pos;
             double distanceBetweenBlocks =  block2Pos.getCenter().distanceTo(block1Pos.getCenter());
-            double bezierHelpPosMultiplier = 3;
+            double bezierHelpPosMultiplier = 0.5;//default 0.5
             double helperPosOffSet = distanceBetweenBlocks * bezierHelpPosMultiplier;
             pos1 = block2Pos.getCenter().distanceTo(block1Pos.offset(getVectorFromAxis(block1State.getValue(BlockStateProperties.AXIS),(int)helperPosOffSet)).getCenter()) < distanceBetweenBlocks  ? block1Pos.offset(getVectorFromAxis(block1State.getValue(BlockStateProperties.AXIS),(int)helperPosOffSet)) : block1Pos.offset(getVectorFromAxis(block1State.getValue(BlockStateProperties.AXIS),-(int)helperPosOffSet));
             pos2 = block1Pos.getCenter().distanceTo(block2Pos.offset(getVectorFromAxis(block2State.getValue(BlockStateProperties.AXIS),(int)helperPosOffSet)).getCenter()) < distanceBetweenBlocks  ? block2Pos.offset(getVectorFromAxis(block2State.getValue(BlockStateProperties.AXIS),(int)helperPosOffSet)) : block2Pos.offset(getVectorFromAxis(block2State.getValue(BlockStateProperties.AXIS),-(int)helperPosOffSet));
