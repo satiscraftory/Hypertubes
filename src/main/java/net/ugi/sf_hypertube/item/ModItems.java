@@ -5,14 +5,13 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.ugi.sf_hypertube.SfHyperTube;
+import net.ugi.sf_hypertube.item.custom.HyperTubeItem;
 
 public class ModItems {
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(SfHyperTube.MOD_ID);
 
-    public static final DeferredItem<Item> BISMUTH = ITEMS.register("bismuth",
-            () -> new Item(new Item.Properties()));
-    public static final DeferredItem<Item> RAW_BISMUTH = ITEMS.register("raw_bismuth",
-            () -> new Item(new Item.Properties()));
+    public static final DeferredItem<Item> HYPERTUBE = ITEMS.register("hypertube",
+            () -> new HyperTubeItem(new Item.Properties()));
 
 /*
     public static final DeferredItem<Item> CHISEL = ITEMS.register("chisel",

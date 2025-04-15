@@ -22,8 +22,7 @@ public class ModCreativeModeTabs {
                     .title(Component.translatable("creativetab.sf_hypertube.all"))
                     .displayItems((itemDisplayParameters, output) -> {
                         output.accept(ModBlocks.HYPERTUBE_SUPPORT);
-                        output.accept(ModItems.BISMUTH);
-                        output.accept(ModItems.RAW_BISMUTH);
+                        output.accept(ModItems.HYPERTUBE);
                     }).build());
 
 
