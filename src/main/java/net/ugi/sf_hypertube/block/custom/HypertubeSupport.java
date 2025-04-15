@@ -23,6 +23,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.ugi.sf_hypertube.block.entity.HypertubeSupportBlockEntity;
+import net.ugi.sf_hypertube.item.ModItems;
 import org.jetbrains.annotations.Nullable;
 
 public class HypertubeSupport extends BaseEntityBlock {
@@ -106,7 +107,7 @@ public class HypertubeSupport extends BaseEntityBlock {
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
                                               Player player, InteractionHand hand, BlockHitResult hitResult) {
         if(level.getBlockEntity(pos) instanceof HypertubeSupportBlockEntity hypertubeSupportBlockEntity) {
-            if(hypertubeSupportBlockEntity.inventory.getStackInSlot(0).isEmpty() && !stack.isEmpty()) {
+            if(hypertubeSupportBlockEntity.inventory.getStackInSlot(0).isEmpty() && stack.is(ModItems.BISMUTH)) {
                 hypertubeSupportBlockEntity.inventory.insertItem(0, stack.copy(), false);
                 stack.shrink(1);
                 level.playSound(player, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 1f, 2f);
