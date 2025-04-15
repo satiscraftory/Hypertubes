@@ -73,8 +73,19 @@ public class HypertubeSupportBlockEntity extends BlockEntity {
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
         inventory.deserializeNBT(registries, tag.getCompound("inventory"));
-        tag.getIntArray("target1");
-        tag.getIntArray("target2");
+        if (tag.contains("target1")) {
+            int[] arr = tag.getIntArray("target1");
+            if (arr.length == 3) {
+                target1 = new BlockPos(arr[0], arr[1], arr[2]);
+            }
+        }
+
+        if (tag.contains("target2")) {
+            int[] arr = tag.getIntArray("target2");
+            if (arr.length == 3) {
+                target2 = new BlockPos(arr[0], arr[1], arr[2]);
+            }
+        }
     }
 
     @Nullable
