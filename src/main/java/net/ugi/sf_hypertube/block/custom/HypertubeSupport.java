@@ -1,6 +1,5 @@
 package net.ugi.sf_hypertube.block.custom;
 
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -96,7 +95,7 @@ public class HypertubeSupport extends BaseEntityBlock {
     protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
         if(state.getBlock() != newState.getBlock()) {
             if(level.getBlockEntity(pos) instanceof HypertubeSupportBlockEntity hypertubeSupportBlockEntity){
-                hypertubeSupportBlockEntity.drops();//probably not needed for hypertubeblockentity
+                hypertubeSupportBlockEntity.drops();
                 level.updateNeighbourForOutputSignal(pos, this);
             }
         }
@@ -109,8 +108,8 @@ public class HypertubeSupport extends BaseEntityBlock {
         if(level.getBlockEntity(pos) instanceof HypertubeSupportBlockEntity hypertubeSupportBlockEntity) {
             if(hypertubeSupportBlockEntity.inventory.getStackInSlot(0).isEmpty() && stack.is(ModItems.BISMUTH)) {
                 hypertubeSupportBlockEntity.inventory.insertItem(0, stack.copy(), false);
-                hypertubeSupportBlockEntity.target1 = player.getOnPos();//example on how to edit data
-                hypertubeSupportBlockEntity.target2 = player.getBlockPosBelowThatAffectsMyMovement();
+                hypertubeSupportBlockEntity.targetPositive = player.getOnPos();//example on how to edit data
+                hypertubeSupportBlockEntity.targetNegative = player.getBlockPosBelowThatAffectsMyMovement();
                 stack.shrink(1);
                 level.playSound(player, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 1f, 2f);
             } else if(stack.isEmpty()) {

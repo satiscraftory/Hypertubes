@@ -20,8 +20,8 @@ import java.util.List;
 
 public class HypertubeSupportBlockEntity extends BlockEntity {
 
-    public BlockPos target1;
-    public BlockPos target2;
+    public BlockPos targetPositive;
+    public BlockPos targetNegative;
 
 
     public final ItemStackHandler inventory = new ItemStackHandler(1) {
@@ -61,11 +61,11 @@ public class HypertubeSupportBlockEntity extends BlockEntity {
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
         tag.put("inventory", inventory.serializeNBT(registries));
-        if(target1 != null) {
-            tag.putIntArray("target1", List.of(target1.getX(), target1.getY(), target1.getZ()));
+        if(targetPositive != null) {
+            tag.putIntArray("target_positive", List.of(targetPositive.getX(), targetPositive.getY(), targetPositive.getZ()));
         }
-        if(target2 != null) {
-            tag.putIntArray("target2", List.of(target2.getX(), target2.getY(), target2.getZ()));
+        if(targetNegative != null) {
+            tag.putIntArray("target_negative", List.of(targetNegative.getX(), targetNegative.getY(), targetNegative.getZ()));
         }
     }
 
@@ -73,17 +73,17 @@ public class HypertubeSupportBlockEntity extends BlockEntity {
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
         inventory.deserializeNBT(registries, tag.getCompound("inventory"));
-        if (tag.contains("target1")) {
-            int[] arr = tag.getIntArray("target1");
+        if (tag.contains("target_positive")) {
+            int[] arr = tag.getIntArray("target_positive");
             if (arr.length == 3) {
-                target1 = new BlockPos(arr[0], arr[1], arr[2]);
+                targetPositive = new BlockPos(arr[0], arr[1], arr[2]);
             }
         }
 
-        if (tag.contains("target2")) {
-            int[] arr = tag.getIntArray("target2");
+        if (tag.contains("target_negative")) {
+            int[] arr = tag.getIntArray("target_negative");
             if (arr.length == 3) {
-                target2 = new BlockPos(arr[0], arr[1], arr[2]);
+                targetNegative = new BlockPos(arr[0], arr[1], arr[2]);
             }
         }
     }
