@@ -19,7 +19,7 @@ public class ModBlockTagProvider extends BlockTagsProvider {
     @Override
     protected void addTags(HolderLookup.Provider provider) {
         tag(BlockTags.MINEABLE_WITH_PICKAXE)
-                .add(ModBlocks.MAGIC_BLOCK.get());
+                .add(ModBlocks.HYPERTUBE_SUPPORT.get());
 /*
                 .add(ModBlocks.BISMUTH_ORE.get())
                 .add(ModBlocks.BISMUTH_DEEPSLATE_ORE.get());

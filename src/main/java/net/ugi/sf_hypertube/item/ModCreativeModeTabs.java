@@ -18,10 +18,10 @@ public class ModCreativeModeTabs {
 
 
     public static final Supplier<CreativeModeTab> SF_HYPERTUBE = CREATIVE_MODE_TAB.register("sf_hypertube_tab",
-            () -> CreativeModeTab.builder().icon(() -> new ItemStack(ModBlocks.MAGIC_BLOCK))
+            () -> CreativeModeTab.builder().icon(() -> new ItemStack(ModBlocks.HYPERTUBE_SUPPORT))
                     .title(Component.translatable("creativetab.sf_hypertube.all"))
                     .displayItems((itemDisplayParameters, output) -> {
-                        output.accept(ModBlocks.MAGIC_BLOCK);
+                        output.accept(ModBlocks.HYPERTUBE_SUPPORT);
                         output.accept(ModItems.BISMUTH);
                         output.accept(ModItems.RAW_BISMUTH);
                     }).build());
