@@ -18,6 +18,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.Block;
@@ -52,6 +53,7 @@ public class HyperTubeItem extends Item {
     double bezierHelpPosMultiplier =0.5;//default 0.5
     DeferredBlock<Block> hyperTubeSupportBlock = ModBlocks.HYPERTUBE_SUPPORT;
     Block hyperTubeBlock = Blocks.GLASS;
+    double placeDistance = 20;
 
     private BlockPos[] calcBezierArray(){
         BlockPos pos0 = block1Pos;
@@ -116,30 +118,27 @@ public class HyperTubeItem extends Item {
     }
 
 
-    /**
-     * Called when this item is used when targeting a Block
-     */
+
     @Override
-    public InteractionResult useOn(UseOnContext context) {
-        Player player = context.getPlayer();
-        Level level = context.getLevel();
-        BlockPos blockpos = context.getClickedPos();
-        if (level.isClientSide()) return InteractionResult.FAIL;
-        //if (!level.getBlockState(blockpos).is(ModBlocks.HYPERTUBE_SUPPORT)) return InteractionResult.PASS;
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand) {
+        if (level.isClientSide()) return InteractionResultHolder.fail(player.getItemInHand(usedHand));
+        Vec3 looking = player.getLookAngle();
+        BlockPos blockpos = level.clip(new ClipContext(player.getEyePosition(), player.getEyePosition().add(looking.x * placeDistance, looking.y * placeDistance, looking.z * placeDistance), ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, player)).getBlockPos();
+
+
+        if (level.getBlockState(blockpos).isAir()) return InteractionResultHolder.fail(player.getItemInHand(usedHand));
 
         if(!selectedBlock1){ // get first block pos
-            if (level.getBlockState(blockpos).is(hyperTubeSupportBlock)){
+            if (level.getBlockState(blockpos).is(hyperTubeSupportBlock)){ // if clicking on hypertyubeSupportBlock
                 block1Pos = blockpos;
                 block1Axis = level.getBlockState(block1Pos).getValue(BlockStateProperties.AXIS);
 
                 boolean dir1IsHyperTube = level.getBlockState(block1Pos.offset(getVectorFromAxis(block1Axis,1))).is(hyperTubeBlock);
                 boolean dir2IsHyperTube = level.getBlockState(block1Pos.offset(getVectorFromAxis(block1Axis,-1))).is(hyperTubeBlock);
-                System.out.println("dir1IsHyperTube: "+dir1IsHyperTube);
-                System.out.println("dir2IsHyperTube: "+dir2IsHyperTube);
 
-                if (dir1IsHyperTube && dir2IsHyperTube) return InteractionResult.PASS; // no connection possible to this tube
+                if (dir1IsHyperTube && dir2IsHyperTube) return InteractionResultHolder.pass(player.getItemInHand(usedHand));; // no connection possible to this tube
                 block1Direction = intValue(dir2IsHyperTube) - intValue(dir1IsHyperTube); // gives the direction the tubes need to be , if 0 => code chooses later ( both available)
-                System.out.println("block1Direction: "+block1Direction);
+
                 selectedBlock1 = true;
             }
             else { //if clicking on ground to start placing a hypertube
@@ -149,13 +148,14 @@ public class HyperTubeItem extends Item {
 
                 assert player != null;
                 Vec3 lookingVec = player.getLookAngle();
-                if (Math.abs(lookingVec.x) > Math.abs(lookingVec.y) && Math.abs(lookingVec.x) > Math.abs(lookingVec.z)) {
+                Vec3 biasLookingVec = new Vec3(lookingVec.x,lookingVec.y/1.9,lookingVec.z);
+                if (Math.abs(biasLookingVec.x) > Math.abs(biasLookingVec.y) && Math.abs(biasLookingVec.x) > Math.abs(biasLookingVec.z)) {
                     block1Axis = Direction.Axis.X;
                 }
-                if (Math.abs(lookingVec.y) > Math.abs(lookingVec.x) && Math.abs(lookingVec.y) > Math.abs(lookingVec.z)) {
+                if (Math.abs(biasLookingVec.y) > Math.abs(biasLookingVec.x) && Math.abs(biasLookingVec.y) > Math.abs(biasLookingVec.z)) {
                     block1Axis = Direction.Axis.Y;
                 }
-                if (Math.abs(lookingVec.z) > Math.abs(lookingVec.y) && Math.abs(lookingVec.z) > Math.abs(lookingVec.x)) {
+                if (Math.abs(biasLookingVec.z) > Math.abs(lookingVec.y) && Math.abs(biasLookingVec.z) > Math.abs(biasLookingVec.x)) {
                     block1Axis = Direction.Axis.Z;
                 }
                 level.setBlock(block1Pos, hyperTubeSupportBlock.get().defaultBlockState().setValue(BlockStateProperties.AXIS, block1Axis),2 );
@@ -173,12 +173,10 @@ public class HyperTubeItem extends Item {
 
                 boolean dir1IsHyperTube = level.getBlockState(blockpos.offset(getVectorFromAxis(block2Axis,1))).is(hyperTubeBlock);
                 boolean dir2IsHyperTube = level.getBlockState(blockpos.offset(getVectorFromAxis(block2Axis,-1))).is(hyperTubeBlock);
-                System.out.println("dir1IsHyperTube: "+dir1IsHyperTube);
-                System.out.println("dir2IsHyperTube: "+dir2IsHyperTube);
 
-                if (dir1IsHyperTube && dir2IsHyperTube) return InteractionResult.PASS; // no connection possible to this tube
+                if (dir1IsHyperTube && dir2IsHyperTube) return InteractionResultHolder.pass(player.getItemInHand(usedHand)); // no connection possible to this tube
                 block2Direction = intValue(dir2IsHyperTube) - intValue(dir1IsHyperTube); // gives the direction the tubes need to be , if 0 => code chooses later ( both available)
-                System.out.println("block2Direction: "+block2Direction);
+
             }
             else { //if clicking on ground to end placing a hypertube
                 block2Pos = blockpos.above(2);
@@ -187,18 +185,26 @@ public class HyperTubeItem extends Item {
 
                 assert player != null;
                 Vec3 lookingVec = player.getLookAngle();
-                if (Math.abs(lookingVec.x) > Math.abs(lookingVec.y) && Math.abs(lookingVec.x) > Math.abs(lookingVec.z)) {
+                Vec3 biasLookingVec = new Vec3(lookingVec.x,lookingVec.y/1.9,lookingVec.z);
+                if (Math.abs(biasLookingVec.x) > Math.abs(biasLookingVec.y) && Math.abs(biasLookingVec.x) > Math.abs(biasLookingVec.z)) {
                     block2Axis = Direction.Axis.X;
                 }
-                if (Math.abs(lookingVec.y) > Math.abs(lookingVec.x) && Math.abs(lookingVec.y) > Math.abs(lookingVec.z)) {
+                if (Math.abs(biasLookingVec.y) > Math.abs(biasLookingVec.x) && Math.abs(biasLookingVec.y) > Math.abs(biasLookingVec.z)) {
                     block2Axis = Direction.Axis.Y;
                 }
-                if (Math.abs(lookingVec.z) > Math.abs(lookingVec.y) && Math.abs(lookingVec.z) > Math.abs(lookingVec.x)) {
+                if (Math.abs(biasLookingVec.z) > Math.abs(biasLookingVec.y) && Math.abs(biasLookingVec.z) > Math.abs(biasLookingVec.x)) {
                     block2Axis = Direction.Axis.Z;
                 }
             }
 
             BlockPos[] blockPosArray = calcBezierArray();
+            boolean isValid = true;
+            for (int i = 0; i < blockPosArray.length; i++) {
+                if(!(level.getBlockState(blockPosArray[i]).isAir() || level.getBlockState(blockPosArray[i]).is(ModBlocks.HYPERTUBE_SUPPORT))){
+                    isValid = false;
+                }
+            }
+            if (!isValid) return InteractionResultHolder.pass(player.getItemInHand(usedHand));
 
             for (int i = 0; i < blockPosArray.length; i++) {
                 if (level.getBlockState(blockPosArray[i]).is(hyperTubeSupportBlock)) continue;
@@ -211,80 +217,49 @@ public class HyperTubeItem extends Item {
             level.blockUpdated(block2Pos.below(1),Blocks.BRICK_WALL);
             selectedBlock1 = false;
         }
-        return InteractionResult.SUCCESS;
 
+        return super.use(level, player, usedHand);
     }
-
-    @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand) {
-        if(level.isClientSide()) return InteractionResultHolder.pass(player.getItemInHand(usedHand));
-
-        if(selectedBlock1) {
-            Vec3 vec =  player.getLookAngle().multiply(new Vec3(3,3,3)).add(player.position());
-            block2Pos = new BlockPos((int)Math.round(vec.x),(int)Math.round(vec.y),(int)Math.round(vec.z));
-
-            assert player != null;
-            Vec3 lookingVec = player.getLookAngle();
-            if (Math.abs(lookingVec.x) > Math.abs(lookingVec.y) && Math.abs(lookingVec.x) > Math.abs(lookingVec.z)) {
-                block2Axis = Direction.Axis.X;
-                block2Direction = (int)(lookingVec.x / Math.abs(lookingVec.x));
-            }
-            if (Math.abs(lookingVec.y) > Math.abs(lookingVec.x) && Math.abs(lookingVec.y) > Math.abs(lookingVec.z)) {
-                block2Axis = Direction.Axis.Y;
-                block2Direction = (int)(lookingVec.y / Math.abs(lookingVec.y));
-            }
-            if (Math.abs(lookingVec.z) > Math.abs(lookingVec.y) && Math.abs(lookingVec.z) > Math.abs(lookingVec.x)) {
-                block2Axis = Direction.Axis.Z;
-                block2Direction = (int)(lookingVec.z / Math.abs(lookingVec.z));
-            }
-
-            BlockPos[] blockPosArray = calcBezierArray();
-
-            Vector3f color = new Vector3f(0,255,255);
-            boolean isValid = true;
-            for (int i = 0; i < blockPosArray.length; i++) {
-                if(!(level.getBlockState(blockPosArray[i]).isAir() || level.getBlockState(blockPosArray[i]).is(ModBlocks.HYPERTUBE_SUPPORT))){
-                    isValid = false;
-                }
-            }
-            if (!isValid) {
-                color = new Vector3f(255,0,0);
-            }
-
-            for (int i = 0; i < blockPosArray.length; i++) {
-                level.setBlock(blockPosArray[i], Blocks.GLASS.defaultBlockState(),2 );
-                level.blockUpdated(blockPosArray[i],Blocks.GLASS);
-            }
-        }
-        selectedBlock1 = false;
-        return InteractionResultHolder.success(player.getItemInHand(usedHand));
-    }
-
-
 
     @Override
     public void inventoryTick(ItemStack stack, Level level, Entity entity, int slotId, boolean isSelected) {
         super.inventoryTick(stack, level, entity, slotId, isSelected);
 
         if(level.isClientSide()) return;
-
-
+        Vec3 looking = entity.getLookAngle();
         if(selectedBlock1) {
-            Vec3 vec =  entity.getLookAngle().multiply(new Vec3(3,3,3)).add(entity.position());
-            block2Pos = new BlockPos((int)Math.round(vec.x),(int)Math.round(vec.y),(int)Math.round(vec.z));
+            block2Pos =  level.clip(new ClipContext(entity.getEyePosition(), entity.getEyePosition().add(looking.x * placeDistance, looking.y * placeDistance, looking.z * placeDistance), ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, entity)).getBlockPos();
 
-            Vec3 lookingVec = entity.getLookAngle();
-            if (Math.abs(lookingVec.x) > Math.abs(lookingVec.y) && Math.abs(lookingVec.x) > Math.abs(lookingVec.z)) {
-                block2Axis = Direction.Axis.X;
-                block2Direction = (int)(lookingVec.x / Math.abs(lookingVec.x));
+            if (level.getBlockState(block2Pos).is(hyperTubeSupportBlock)){ // if clicking on hypertyubeSupportBlock
+                block2Axis = level.getBlockState(block2Pos).getValue(BlockStateProperties.AXIS);
+
+                boolean dir1IsHyperTube = level.getBlockState(block2Pos.offset(getVectorFromAxis(block2Axis,1))).is(hyperTubeBlock);
+                boolean dir2IsHyperTube = level.getBlockState(block2Pos.offset(getVectorFromAxis(block2Axis,-1))).is(hyperTubeBlock);
+
+                if (!(dir1IsHyperTube && dir2IsHyperTube)) { // no connection possible to this tube
+                    block2Direction = intValue(dir2IsHyperTube) - intValue(dir1IsHyperTube); // gives the direction the tubes need to be , if 0 => code chooses later ( both available)
+                }
             }
-            if (Math.abs(lookingVec.y) > Math.abs(lookingVec.x) && Math.abs(lookingVec.y) > Math.abs(lookingVec.z)) {
-                block2Axis = Direction.Axis.Y;
-                block2Direction = (int)(lookingVec.y / Math.abs(lookingVec.y));
-            }
-            if (Math.abs(lookingVec.z) > Math.abs(lookingVec.y) && Math.abs(lookingVec.z) > Math.abs(lookingVec.x)) {
-                block2Axis = Direction.Axis.Z;
-                block2Direction = (int)(lookingVec.z / Math.abs(lookingVec.z));
+            else {
+
+                if (!level.getBlockState(block2Pos).isAir()) {
+                    block2Pos = block2Pos.above(2);
+                }
+
+
+                Vec3 biasLookingVec = new Vec3(looking.x, looking.y / 1.9, looking.z);
+                if (Math.abs(biasLookingVec.x) > Math.abs(biasLookingVec.y) && Math.abs(biasLookingVec.x) > Math.abs(biasLookingVec.z)) {
+                    block2Axis = Direction.Axis.X;
+                    block2Direction = 0;//(int)(lookingVec.x / Math.abs(lookingVec.x));
+                }
+                if (Math.abs(biasLookingVec.y) > Math.abs(biasLookingVec.x) && Math.abs(biasLookingVec.y) > Math.abs(biasLookingVec.z)) {
+                    block2Axis = Direction.Axis.Y;
+                    block2Direction = 0;//(int)(lookingVec.y / Math.abs(lookingVec.y));
+                }
+                if (Math.abs(biasLookingVec.z) > Math.abs(biasLookingVec.y) && Math.abs(biasLookingVec.z) > Math.abs(biasLookingVec.x)) {
+                    block2Axis = Direction.Axis.Z;
+                    block2Direction = 0;//(int)(lookingVec.z / Math.abs(lookingVec.z));
+                }
             }
 
             BlockPos[] blockPosArray = calcBezierArray();
