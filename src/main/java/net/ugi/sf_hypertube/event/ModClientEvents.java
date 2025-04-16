@@ -21,13 +21,9 @@ public class ModClientEvents {
         Player player = Minecraft.getInstance().player;
         if(player == null) return;
         if(player.isCreative()) return;
-        System.out.println("player exits");
         if (player.getVehicle() instanceof HypertubeEntity) {
-            System.out.println("player rides");
             InputConstants.Key key = Minecraft.getInstance().options.keyShift.getKey();
             KeyMapping.set(key, false);
-
-
         }
     }
 }
