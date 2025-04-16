@@ -22,7 +22,8 @@ public class HypertubeSupportBlockEntity extends BlockEntity {
 
     public BlockPos targetPositive;
     public BlockPos targetNegative;
-
+    public String targetPositiveType;
+    public String targetNegativeType;
 
     public final ItemStackHandler inventory = new ItemStackHandler(1) {
         @Override
@@ -64,8 +65,14 @@ public class HypertubeSupportBlockEntity extends BlockEntity {
         if(targetPositive != null) {
             tag.putIntArray("target_positive", List.of(targetPositive.getX(), targetPositive.getY(), targetPositive.getZ()));
         }
+        if(targetPositiveType != null) {
+            tag.putString("target_positive_type", targetPositiveType);
+        }
         if(targetNegative != null) {
             tag.putIntArray("target_negative", List.of(targetNegative.getX(), targetNegative.getY(), targetNegative.getZ()));
+        }
+        if(targetNegativeType != null) {
+            tag.putString("target_negative_type", targetNegativeType);
         }
     }
 
@@ -79,12 +86,18 @@ public class HypertubeSupportBlockEntity extends BlockEntity {
                 targetPositive = new BlockPos(arr[0], arr[1], arr[2]);
             }
         }
+        if(tag.contains("target_positive_type")) {
+            targetPositiveType = tag.getString("target_positive_type");
+        }
 
         if (tag.contains("target_negative")) {
             int[] arr = tag.getIntArray("target_negative");
             if (arr.length == 3) {
                 targetNegative = new BlockPos(arr[0], arr[1], arr[2]);
             }
+        }
+        if(tag.contains("target_negative_type")) {
+            targetNegativeType = tag.getString("target_negative_type");
         }
     }
 
