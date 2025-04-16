@@ -1,10 +1,13 @@
 package net.ugi.sf_hypertube;
 
+import net.minecraft.client.renderer.entity.EntityRenderers;
+import net.minecraft.client.renderer.entity.NoopRenderer;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.ugi.sf_hypertube.block.ModBlocks;
 import net.ugi.sf_hypertube.block.entity.ModBlockEntities;
+import net.ugi.sf_hypertube.entity.ModEntities;
 import net.ugi.sf_hypertube.item.ModCreativeModeTabs;
 import net.ugi.sf_hypertube.item.ModItems;
 import org.slf4j.Logger;
@@ -45,6 +48,7 @@ public class SfHyperTube {
         ModItems.register(modEventBus);
         ModBlocks.register(modEventBus);
         ModBlockEntities.register(modEventBus);
+        ModEntities.register(modEventBus);
 
         // Register the item to a creative tab
         modEventBus.addListener(this::addCreative);
@@ -78,7 +82,7 @@ public class SfHyperTube {
     public static class ClientModEvents {
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
-
+            EntityRenderers.register(ModEntities.HYPERTUBE_ENTITY.get(), NoopRenderer::new);
         }
     }
 }
