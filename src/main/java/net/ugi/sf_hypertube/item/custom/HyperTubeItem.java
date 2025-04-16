@@ -169,7 +169,7 @@ public class HyperTubeItem extends Item {
         else { // get second block pos
             if (level.getBlockState(blockpos).is(hyperTubeSupportBlock)){
                 block2Pos = blockpos;
-                block2Axis = level.getBlockState(block1Pos).getValue(BlockStateProperties.AXIS);
+                block2Axis = level.getBlockState(block2Pos).getValue(BlockStateProperties.AXIS);
 
                 boolean dir1IsHyperTube = level.getBlockState(blockpos.offset(getVectorFromAxis(block2Axis,1))).is(hyperTubeBlock);
                 boolean dir2IsHyperTube = level.getBlockState(blockpos.offset(getVectorFromAxis(block2Axis,-1))).is(hyperTubeBlock);
