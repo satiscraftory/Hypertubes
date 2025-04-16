@@ -27,22 +27,81 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.registries.DeferredBlock;
 import net.ugi.sf_hypertube.block.ModBlocks;
 import org.joml.Vector3f;
 
 import java.util.Date;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 
 public class HyperTubeItem extends Item {
-    public HyperTubeItem(Item.Properties properties) {
+    public HyperTubeItem(Properties properties) {
         super(properties);
     }
 
-
     BlockPos block1Pos;
-    BlockState block1State;
+    Direction.Axis block1Axis;
+    int block1Direction = 0;
     boolean selectedBlock1 = false;
     BlockPos block2Pos;
-    BlockState block2State;
+    Direction.Axis block2Axis;
+    int block2Direction = 0;
+
+    double bezierHelpPosMultiplier =0.5;//default 0.5
+    DeferredBlock<Block> hyperTubeSupportBlock = ModBlocks.HYPERTUBE_SUPPORT;
+    Block hyperTubeBlock = Blocks.GLASS;
+
+    private BlockPos[] calcBezierArray(){
+        BlockPos pos0 = block1Pos;
+        BlockPos pos1 = null;
+        BlockPos pos2 = null;
+        BlockPos pos3 = block2Pos;
+        double distanceBetweenBlocks =  block2Pos.getCenter().distanceTo(block1Pos.getCenter());
+        double helperPosOffSet = distanceBetweenBlocks * bezierHelpPosMultiplier;
+
+        if (block1Direction == 0) { // 2 sides available
+            pos1 = block2Pos.getCenter().distanceTo(block1Pos.offset(getVectorFromAxis(block1Axis, (int) helperPosOffSet)).getCenter()) < block2Pos.getCenter().distanceTo(block1Pos.offset(getVectorFromAxis(block1Axis, -(int) helperPosOffSet)).getCenter()) ? block1Pos.offset(getVectorFromAxis(block1Axis, (int) helperPosOffSet)) : block1Pos.offset(getVectorFromAxis(block1Axis, -(int) helperPosOffSet));
+        }
+        else { // 1 side available
+            pos1 = block1Pos.offset(getVectorFromAxis(block1Axis, (int) helperPosOffSet * block1Direction));
+        }
+
+        if (block2Direction == 0) { // 2 sides available
+            pos2 = block1Pos.getCenter().distanceTo(block2Pos.offset(getVectorFromAxis(block2Axis,(int)helperPosOffSet)).getCenter()) < block1Pos.getCenter().distanceTo(block2Pos.offset(getVectorFromAxis(block2Axis,-(int)helperPosOffSet)).getCenter())  ? block2Pos.offset(getVectorFromAxis(block2Axis,(int)helperPosOffSet)) : block2Pos.offset(getVectorFromAxis(block2Axis,-(int)helperPosOffSet));
+        }
+        else { // 1 side available
+            pos2 = block2Pos.offset(getVectorFromAxis(block2Axis,(int)helperPosOffSet * block2Direction));
+        }
+
+        int steps = (int)(1.5*Math.abs(block1Pos.getX() - block2Pos.getX()) + 1.5*Math.abs(block1Pos.getY() - block2Pos.getY()) + 1.5*Math.abs(block1Pos.getZ() - block2Pos.getZ()) + 10);
+
+
+        BlockPos[] blockPosArray = new BlockPos[steps];
+
+        //bezier curve calc
+        //https://www.desmos.com/calculator/cahqdxeshd?lang=nl
+        //3D version of this
+
+        for(int i = 0 ; i < steps; i++) {
+            double t = i/(double)steps;
+
+            int x = (int)Math.round((1-t)*((1-t)*((1-t)*pos0.getX() + t*pos1.getX()) + t*((1-t)*pos1.getX() + t*pos2.getX())) + t*((1-t)*((1-t)*pos1.getX() + t*pos2.getX()) + t*((1-t)*pos2.getX() + t*pos3.getX())));
+            int y = (int)Math.round((1-t)*((1-t)*((1-t)*pos0.getY() + t*pos1.getY()) + t*((1-t)*pos1.getY() + t*pos2.getY())) + t*((1-t)*((1-t)*pos1.getY() + t*pos2.getY()) + t*((1-t)*pos2.getY() + t*pos3.getY())));
+            int z = (int)Math.round((1-t)*((1-t)*((1-t)*pos0.getZ() + t*pos1.getZ()) + t*((1-t)*pos1.getZ() + t*pos2.getZ())) + t*((1-t)*((1-t)*pos1.getZ() + t*pos2.getZ()) + t*((1-t)*pos2.getZ() + t*pos3.getZ())));
+
+            blockPosArray[i] = new BlockPos(x,y,z);
+        }
+        Set<BlockPos> blockSet = new LinkedHashSet<>();
+        for (BlockPos pos : blockPosArray) {
+            if (pos != null) {
+                blockSet.add(pos);
+            }
+        }
+
+        return blockSet.toArray(new BlockPos[0]);
+    }
 
     private BlockPos getVectorFromAxis(Direction.Axis axis, int offset){
         BlockPos vector = new BlockPos(offset,0,0);
@@ -50,6 +109,10 @@ public class HyperTubeItem extends Item {
         if (axis == Direction.Axis.Y)vector = new BlockPos(0,offset,0);
         if (axis == Direction.Axis.Z)vector = new BlockPos(0,0,offset);
         return vector;
+    }
+
+    private int intValue(boolean val){
+        return val ? 1 : 0;
     }
 
 
@@ -62,52 +125,92 @@ public class HyperTubeItem extends Item {
         Level level = context.getLevel();
         BlockPos blockpos = context.getClickedPos();
         if (level.isClientSide()) return InteractionResult.FAIL;
-        //if (!level.getBlockState(blockpos).is(ModBlocks.HYPERTUBE_SUPPORT)) return InteractionResult.FAIL;
+        //if (!level.getBlockState(blockpos).is(ModBlocks.HYPERTUBE_SUPPORT)) return InteractionResult.PASS;
 
 
-        if(!selectedBlock1) {
-            block1Pos = blockpos;
-            block1State = level.getBlockState(block1Pos);
-            selectedBlock1 = true;
+        if(!selectedBlock1){ // get first block pos
+            if (level.getBlockState(blockpos).is(hyperTubeSupportBlock)){
+                block1Pos = blockpos;
+                block1Axis = level.getBlockState(block1Pos).getValue(BlockStateProperties.AXIS);
+
+                boolean dir1IsHyperTube = level.getBlockState(block1Pos.offset(getVectorFromAxis(block1Axis,1))).is(hyperTubeBlock);
+                boolean dir2IsHyperTube = level.getBlockState(block1Pos.offset(getVectorFromAxis(block1Axis,-1))).is(hyperTubeBlock);
+                System.out.println("dir1IsHyperTube: "+dir1IsHyperTube);
+                System.out.println("dir2IsHyperTube: "+dir2IsHyperTube);
+
+                if (dir1IsHyperTube && dir2IsHyperTube) return InteractionResult.PASS; // no connection possible to this tube
+                block1Direction = intValue(dir2IsHyperTube) - intValue(dir1IsHyperTube); // gives the direction the tubes need to be , if 0 => code chooses later ( both available)
+                System.out.println("block1Direction: "+block1Direction);
+                selectedBlock1 = true;
+            }
+            else { //if clicking on ground to start placing a hypertube
+                block1Pos = blockpos.above(2);
+                block1Axis = Direction.Axis.X; // default axis
+                block1Direction = 0; // default
+
+                assert player != null;
+                Vec3 lookingVec = player.getLookAngle();
+                if (Math.abs(lookingVec.x) > Math.abs(lookingVec.y) && Math.abs(lookingVec.x) > Math.abs(lookingVec.z)) {
+                    block1Axis = Direction.Axis.X;
+                }
+                if (Math.abs(lookingVec.y) > Math.abs(lookingVec.x) && Math.abs(lookingVec.y) > Math.abs(lookingVec.z)) {
+                    block1Axis = Direction.Axis.Y;
+                }
+                if (Math.abs(lookingVec.z) > Math.abs(lookingVec.y) && Math.abs(lookingVec.z) > Math.abs(lookingVec.x)) {
+                    block1Axis = Direction.Axis.Z;
+                }
+                level.setBlock(block1Pos, hyperTubeSupportBlock.get().defaultBlockState().setValue(BlockStateProperties.AXIS, block1Axis),2 );
+                level.blockUpdated(block1Pos,hyperTubeSupportBlock.get());
+                level.setBlock(block1Pos.below(1), Blocks.BRICK_WALL.defaultBlockState(),2 );
+                level.blockUpdated(block1Pos.below(1),Blocks.BRICK_WALL);
+                selectedBlock1 = true;
+            }
         }
-        else {
-            System.out.println(new Date().getTime());
-            block2Pos = blockpos;
-            block2State = level.getBlockState(block2Pos);
 
-            //bezier curve calc
-            //https://www.desmos.com/calculator/cahqdxeshd?lang=nl
-            //3D version of this
-            BlockPos pos0 = block1Pos;
-            BlockPos pos1;
-            BlockPos pos2;
-            BlockPos pos3 = block2Pos;
-            double distanceBetweenBlocks =  block2Pos.getCenter().distanceTo(block1Pos.getCenter());
-            double bezierHelpPosMultiplier = 0.5;//default 0.5
-            double helperPosOffSet = distanceBetweenBlocks * bezierHelpPosMultiplier;
-            pos1 = block2Pos.getCenter().distanceTo(block1Pos.offset(getVectorFromAxis(block1State.getValue(BlockStateProperties.AXIS),(int)helperPosOffSet)).getCenter()) < block2Pos.getCenter().distanceTo(block1Pos.offset(getVectorFromAxis(block1State.getValue(BlockStateProperties.AXIS),-(int)helperPosOffSet)).getCenter())  ? block1Pos.offset(getVectorFromAxis(block1State.getValue(BlockStateProperties.AXIS),(int)helperPosOffSet)) : block1Pos.offset(getVectorFromAxis(block1State.getValue(BlockStateProperties.AXIS),-(int)helperPosOffSet));
-            pos2 = block1Pos.getCenter().distanceTo(block2Pos.offset(getVectorFromAxis(block2State.getValue(BlockStateProperties.AXIS),(int)helperPosOffSet)).getCenter()) < block1Pos.getCenter().distanceTo(block2Pos.offset(getVectorFromAxis(block2State.getValue(BlockStateProperties.AXIS),-(int)helperPosOffSet)).getCenter())  ? block2Pos.offset(getVectorFromAxis(block2State.getValue(BlockStateProperties.AXIS),(int)helperPosOffSet)) : block2Pos.offset(getVectorFromAxis(block2State.getValue(BlockStateProperties.AXIS),-(int)helperPosOffSet));
+        else { // get second block pos
+            if (level.getBlockState(blockpos).is(hyperTubeSupportBlock)){
+                block2Pos = blockpos;
+                block2Axis = level.getBlockState(block1Pos).getValue(BlockStateProperties.AXIS);
 
-            int steps = (int)(1.5*Math.abs(block1Pos.getX() - block2Pos.getX()) + 1.5*Math.abs(block1Pos.getY() - block2Pos.getY()) + 1.5*Math.abs(block1Pos.getZ() - block2Pos.getZ()) + 10);
+                boolean dir1IsHyperTube = level.getBlockState(blockpos.offset(getVectorFromAxis(block2Axis,1))).is(hyperTubeBlock);
+                boolean dir2IsHyperTube = level.getBlockState(blockpos.offset(getVectorFromAxis(block2Axis,-1))).is(hyperTubeBlock);
+                System.out.println("dir1IsHyperTube: "+dir1IsHyperTube);
+                System.out.println("dir2IsHyperTube: "+dir2IsHyperTube);
 
-            BlockPos[] blockPosArray = new BlockPos[steps];
-
-            for(int i = 0 ; i < steps; i++) {
-                double t = i/(double)steps;
-
-                 int x = (int)Math.round((1-t)*((1-t)*((1-t)*pos0.getX() + t*pos1.getX()) + t*((1-t)*pos1.getX() + t*pos2.getX())) + t*((1-t)*((1-t)*pos1.getX() + t*pos2.getX()) + t*((1-t)*pos2.getX() + t*pos3.getX())));
-                 int y = (int)Math.round((1-t)*((1-t)*((1-t)*pos0.getY() + t*pos1.getY()) + t*((1-t)*pos1.getY() + t*pos2.getY())) + t*((1-t)*((1-t)*pos1.getY() + t*pos2.getY()) + t*((1-t)*pos2.getY() + t*pos3.getY())));
-                 int z = (int)Math.round((1-t)*((1-t)*((1-t)*pos0.getZ() + t*pos1.getZ()) + t*((1-t)*pos1.getZ() + t*pos2.getZ())) + t*((1-t)*((1-t)*pos1.getZ() + t*pos2.getZ()) + t*((1-t)*pos2.getZ() + t*pos3.getZ())));
-
-                 blockPosArray[i] = new BlockPos(x,y,z);
+                if (dir1IsHyperTube && dir2IsHyperTube) return InteractionResult.PASS; // no connection possible to this tube
+                block2Direction = intValue(dir2IsHyperTube) - intValue(dir1IsHyperTube); // gives the direction the tubes need to be , if 0 => code chooses later ( both available)
+                System.out.println("block2Direction: "+block2Direction);
             }
-            System.out.println(new Date().getTime());
-            for (int i = 0; i < steps; i++) {
-                level.setBlock(blockPosArray[i], Blocks.GLASS.defaultBlockState(),2 );
-                level.blockUpdated(blockPosArray[i],Blocks.GLASS);
+            else { //if clicking on ground to end placing a hypertube
+                block2Pos = blockpos.above(2);
+                block2Axis = Direction.Axis.X; // default axis
+                block2Direction = 0; // default
+
+                assert player != null;
+                Vec3 lookingVec = player.getLookAngle();
+                if (Math.abs(lookingVec.x) > Math.abs(lookingVec.y) && Math.abs(lookingVec.x) > Math.abs(lookingVec.z)) {
+                    block2Axis = Direction.Axis.X;
+                }
+                if (Math.abs(lookingVec.y) > Math.abs(lookingVec.x) && Math.abs(lookingVec.y) > Math.abs(lookingVec.z)) {
+                    block2Axis = Direction.Axis.Y;
+                }
+                if (Math.abs(lookingVec.z) > Math.abs(lookingVec.y) && Math.abs(lookingVec.z) > Math.abs(lookingVec.x)) {
+                    block2Axis = Direction.Axis.Z;
+                }
             }
+
+            BlockPos[] blockPosArray = calcBezierArray();
+
+            for (int i = 0; i < blockPosArray.length; i++) {
+                if (level.getBlockState(blockPosArray[i]).is(hyperTubeSupportBlock)) continue;
+                level.setBlock(blockPosArray[i], hyperTubeBlock.defaultBlockState(),2 );
+                level.blockUpdated(blockPosArray[i],hyperTubeBlock);
+            }
+            level.setBlock(block2Pos, hyperTubeSupportBlock.get().defaultBlockState().setValue(BlockStateProperties.AXIS, block2Axis),2 );
+            level.blockUpdated(block2Pos,hyperTubeSupportBlock.get());
+            level.setBlock(block2Pos.below(1), Blocks.BRICK_WALL.defaultBlockState(),2 );
+            level.blockUpdated(block2Pos.below(1),Blocks.BRICK_WALL);
             selectedBlock1 = false;
-            System.out.println(new Date().getTime());
         }
         return InteractionResult.SUCCESS;
 
@@ -117,54 +220,30 @@ public class HyperTubeItem extends Item {
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand) {
         if(level.isClientSide()) return InteractionResultHolder.pass(player.getItemInHand(usedHand));
 
-
         if(selectedBlock1) {
             Vec3 vec =  player.getLookAngle().multiply(new Vec3(3,3,3)).add(player.position());
             block2Pos = new BlockPos((int)Math.round(vec.x),(int)Math.round(vec.y),(int)Math.round(vec.z));
-            block2State = level.getBlockState(block2Pos);
 
+            assert player != null;
             Vec3 lookingVec = player.getLookAngle();
             if (Math.abs(lookingVec.x) > Math.abs(lookingVec.y) && Math.abs(lookingVec.x) > Math.abs(lookingVec.z)) {
-                lookingVec = new Vec3(lookingVec.x / Math.abs(lookingVec.x),0,0);
+                block2Axis = Direction.Axis.X;
+                block2Direction = (int)(lookingVec.x / Math.abs(lookingVec.x));
             }
             if (Math.abs(lookingVec.y) > Math.abs(lookingVec.x) && Math.abs(lookingVec.y) > Math.abs(lookingVec.z)) {
-                lookingVec = new Vec3(0,lookingVec.y / Math.abs(lookingVec.y),0);
+                block2Axis = Direction.Axis.Y;
+                block2Direction = (int)(lookingVec.y / Math.abs(lookingVec.y));
             }
             if (Math.abs(lookingVec.z) > Math.abs(lookingVec.y) && Math.abs(lookingVec.z) > Math.abs(lookingVec.x)) {
-                lookingVec = new Vec3(0,0,lookingVec.z / Math.abs(lookingVec.z));
+                block2Axis = Direction.Axis.Z;
+                block2Direction = (int)(lookingVec.z / Math.abs(lookingVec.z));
             }
 
+            BlockPos[] blockPosArray = calcBezierArray();
 
-            //bezier curve calc
-            //https://www.desmos.com/calculator/cahqdxeshd?lang=nl
-            //3D version of this
-            BlockPos pos0 = block1Pos;
-            BlockPos pos1;
-            BlockPos pos2;
-            BlockPos pos3 = block2Pos;
-            double distanceBetweenBlocks =  block2Pos.getCenter().distanceTo(block1Pos.getCenter());
-            double bezierHelpPosMultiplier = 0.5;//default 0.5
-            double helperPosOffSet = distanceBetweenBlocks * bezierHelpPosMultiplier;
-            pos1 = block2Pos.getCenter().distanceTo(block1Pos.offset(getVectorFromAxis(block1State.getValue(BlockStateProperties.AXIS),(int)helperPosOffSet)).getCenter()) < block2Pos.getCenter().distanceTo(block1Pos.offset(getVectorFromAxis(block1State.getValue(BlockStateProperties.AXIS),-(int)helperPosOffSet)).getCenter())  ? block1Pos.offset(getVectorFromAxis(block1State.getValue(BlockStateProperties.AXIS),(int)helperPosOffSet)) : block1Pos.offset(getVectorFromAxis(block1State.getValue(BlockStateProperties.AXIS),-(int)helperPosOffSet));
-            Vec3 offset =  lookingVec.multiply(new Vec3((int)helperPosOffSet,(int)helperPosOffSet,(int)helperPosOffSet));
-            pos2 = block2Pos.offset(new Vec3i((int)Math.round(offset.x),(int)Math.round(offset.y),(int)Math.round(offset.z)));
-
-            int steps = (int)(1.5*Math.abs(block1Pos.getX() - block2Pos.getX()) + 1.5*Math.abs(block1Pos.getY() - block2Pos.getY()) + 1.5*Math.abs(block1Pos.getZ() - block2Pos.getZ()) + 10);
-
-            BlockPos[] blockPosArray = new BlockPos[steps];
-
-            for(int i = 0 ; i < steps; i++) {
-                double t = i/(double)steps;
-
-                int x = (int)Math.round((1-t)*((1-t)*((1-t)*pos0.getX() + t*pos1.getX()) + t*((1-t)*pos1.getX() + t*pos2.getX())) + t*((1-t)*((1-t)*pos1.getX() + t*pos2.getX()) + t*((1-t)*pos2.getX() + t*pos3.getX())));
-                int y = (int)Math.round((1-t)*((1-t)*((1-t)*pos0.getY() + t*pos1.getY()) + t*((1-t)*pos1.getY() + t*pos2.getY())) + t*((1-t)*((1-t)*pos1.getY() + t*pos2.getY()) + t*((1-t)*pos2.getY() + t*pos3.getY())));
-                int z = (int)Math.round((1-t)*((1-t)*((1-t)*pos0.getZ() + t*pos1.getZ()) + t*((1-t)*pos1.getZ() + t*pos2.getZ())) + t*((1-t)*((1-t)*pos1.getZ() + t*pos2.getZ()) + t*((1-t)*pos2.getZ() + t*pos3.getZ())));
-
-                blockPosArray[i] = new BlockPos(x,y,z);
-            }
             Vector3f color = new Vector3f(0,255,255);
             boolean isValid = true;
-            for (int i = 0; i < steps; i++) {
+            for (int i = 0; i < blockPosArray.length; i++) {
                 if(!(level.getBlockState(blockPosArray[i]).isAir() || level.getBlockState(blockPosArray[i]).is(ModBlocks.HYPERTUBE_SUPPORT))){
                     isValid = false;
                 }
@@ -173,7 +252,7 @@ public class HyperTubeItem extends Item {
                 color = new Vector3f(255,0,0);
             }
 
-            for (int i = 0; i < steps; i++) {
+            for (int i = 0; i < blockPosArray.length; i++) {
                 level.setBlock(blockPosArray[i], Blocks.GLASS.defaultBlockState(),2 );
                 level.blockUpdated(blockPosArray[i],Blocks.GLASS);
             }
@@ -181,6 +260,8 @@ public class HyperTubeItem extends Item {
         selectedBlock1 = false;
         return InteractionResultHolder.success(player.getItemInHand(usedHand));
     }
+
+
 
     @Override
     public void inventoryTick(ItemStack stack, Level level, Entity entity, int slotId, boolean isSelected) {
@@ -192,50 +273,26 @@ public class HyperTubeItem extends Item {
         if(selectedBlock1) {
             Vec3 vec =  entity.getLookAngle().multiply(new Vec3(3,3,3)).add(entity.position());
             block2Pos = new BlockPos((int)Math.round(vec.x),(int)Math.round(vec.y),(int)Math.round(vec.z));
-            block2State = level.getBlockState(block2Pos);
 
             Vec3 lookingVec = entity.getLookAngle();
             if (Math.abs(lookingVec.x) > Math.abs(lookingVec.y) && Math.abs(lookingVec.x) > Math.abs(lookingVec.z)) {
-                lookingVec = new Vec3(lookingVec.x / Math.abs(lookingVec.x),0,0);
+                block2Axis = Direction.Axis.X;
+                block2Direction = (int)(lookingVec.x / Math.abs(lookingVec.x));
             }
             if (Math.abs(lookingVec.y) > Math.abs(lookingVec.x) && Math.abs(lookingVec.y) > Math.abs(lookingVec.z)) {
-                lookingVec = new Vec3(0,lookingVec.y / Math.abs(lookingVec.y),0);
+                block2Axis = Direction.Axis.Y;
+                block2Direction = (int)(lookingVec.y / Math.abs(lookingVec.y));
             }
             if (Math.abs(lookingVec.z) > Math.abs(lookingVec.y) && Math.abs(lookingVec.z) > Math.abs(lookingVec.x)) {
-                lookingVec = new Vec3(0,0,lookingVec.z / Math.abs(lookingVec.z));
+                block2Axis = Direction.Axis.Z;
+                block2Direction = (int)(lookingVec.z / Math.abs(lookingVec.z));
             }
 
+            BlockPos[] blockPosArray = calcBezierArray();
 
-            //bezier curve calc
-            //https://www.desmos.com/calculator/cahqdxeshd?lang=nl
-            //3D version of this
-            BlockPos pos0 = block1Pos;
-            BlockPos pos1;
-            BlockPos pos2;
-            BlockPos pos3 = block2Pos;
-            double distanceBetweenBlocks =  block2Pos.getCenter().distanceTo(block1Pos.getCenter());
-            double bezierHelpPosMultiplier = 0.5;//default 0.5
-            double helperPosOffSet = distanceBetweenBlocks * bezierHelpPosMultiplier;
-            pos1 = block2Pos.getCenter().distanceTo(block1Pos.offset(getVectorFromAxis(block1State.getValue(BlockStateProperties.AXIS),(int)helperPosOffSet)).getCenter()) < block2Pos.getCenter().distanceTo(block1Pos.offset(getVectorFromAxis(block1State.getValue(BlockStateProperties.AXIS),-(int)helperPosOffSet)).getCenter())  ? block1Pos.offset(getVectorFromAxis(block1State.getValue(BlockStateProperties.AXIS),(int)helperPosOffSet)) : block1Pos.offset(getVectorFromAxis(block1State.getValue(BlockStateProperties.AXIS),-(int)helperPosOffSet));
-            Vec3 offset =  lookingVec.multiply(new Vec3((int)helperPosOffSet,(int)helperPosOffSet,(int)helperPosOffSet));
-            pos2 = block2Pos.offset(new Vec3i((int)Math.round(offset.x),(int)Math.round(offset.y),(int)Math.round(offset.z)));
-
-            int steps = (int)(1.5*Math.abs(block1Pos.getX() - block2Pos.getX()) + 1.5*Math.abs(block1Pos.getY() - block2Pos.getY()) + 1.5*Math.abs(block1Pos.getZ() - block2Pos.getZ()) + 10);
-
-            BlockPos[] blockPosArray = new BlockPos[steps];
-
-            for(int i = 0 ; i < steps; i++) {
-                double t = i/(double)steps;
-
-                int x = (int)Math.round((1-t)*((1-t)*((1-t)*pos0.getX() + t*pos1.getX()) + t*((1-t)*pos1.getX() + t*pos2.getX())) + t*((1-t)*((1-t)*pos1.getX() + t*pos2.getX()) + t*((1-t)*pos2.getX() + t*pos3.getX())));
-                int y = (int)Math.round((1-t)*((1-t)*((1-t)*pos0.getY() + t*pos1.getY()) + t*((1-t)*pos1.getY() + t*pos2.getY())) + t*((1-t)*((1-t)*pos1.getY() + t*pos2.getY()) + t*((1-t)*pos2.getY() + t*pos3.getY())));
-                int z = (int)Math.round((1-t)*((1-t)*((1-t)*pos0.getZ() + t*pos1.getZ()) + t*((1-t)*pos1.getZ() + t*pos2.getZ())) + t*((1-t)*((1-t)*pos1.getZ() + t*pos2.getZ()) + t*((1-t)*pos2.getZ() + t*pos3.getZ())));
-
-                blockPosArray[i] = new BlockPos(x,y,z);
-            }
             Vector3f color = new Vector3f(0,255,255);
             boolean isValid = true;
-            for (int i = 0; i < steps; i++) {
+            for (int i = 0; i < blockPosArray.length; i++) {
                 if(!(level.getBlockState(blockPosArray[i]).isAir() || level.getBlockState(blockPosArray[i]).is(ModBlocks.HYPERTUBE_SUPPORT))){
                     isValid = false;
                 }
@@ -243,7 +300,7 @@ public class HyperTubeItem extends Item {
             if (!isValid) {
                 color = new Vector3f(255,0,0);
             }
-            for (int i = 0; i < steps; i++) {
+            for (int i = 0; i < blockPosArray.length; i++) {
                 for(int j = 0; j < level.players().size(); ++j) {
                     ServerPlayer serverplayer = (ServerPlayer)level.players().get(j);
                     ((ServerLevel) level).sendParticles(serverplayer, new DustParticleOptions(color,1), true,
