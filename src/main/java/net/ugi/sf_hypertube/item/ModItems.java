@@ -5,7 +5,6 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.ugi.sf_hypertube.SfHyperTube;
-import net.ugi.sf_hypertube.item.custom.CustomItem;
 import net.ugi.sf_hypertube.item.custom.HyperTubeItem;
 
 public class ModItems {
@@ -14,8 +13,6 @@ public class ModItems {
     public static final DeferredItem<Item> HYPERTUBE = ITEMS.register("hypertube",
             () -> new HyperTubeItem(new Item.Properties()));
 
-    public static final DeferredItem<Item> CUSTOM = ITEMS.register("custom",
-            () -> new CustomItem(new Item.Properties()));
 
 /*
     public static final DeferredItem<Item> CHISEL = ITEMS.register("chisel",
