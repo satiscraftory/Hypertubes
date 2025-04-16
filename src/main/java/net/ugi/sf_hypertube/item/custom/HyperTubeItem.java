@@ -127,7 +127,6 @@ public class HyperTubeItem extends Item {
         if (level.isClientSide()) return InteractionResult.FAIL;
         //if (!level.getBlockState(blockpos).is(ModBlocks.HYPERTUBE_SUPPORT)) return InteractionResult.PASS;
 
-
         if(!selectedBlock1){ // get first block pos
             if (level.getBlockState(blockpos).is(hyperTubeSupportBlock)){
                 block1Pos = blockpos;

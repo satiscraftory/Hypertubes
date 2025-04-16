@@ -24,7 +24,6 @@ public class HypertubeSupportBlockEntity extends BlockEntity {
     public BlockPos targetNegative;
     public String targetPositiveType;
     public String targetNegativeType;
-
     public final ItemStackHandler inventory = new ItemStackHandler(1) {
         @Override
         protected int getStackLimit(int slot, ItemStack stack) {
@@ -40,7 +39,7 @@ public class HypertubeSupportBlockEntity extends BlockEntity {
         }
     };
 
-
+    //constructor
     public HypertubeSupportBlockEntity(BlockPos pos, BlockState blockState) {
         super(ModBlockEntities.HYPERTUBE_SUPPORT_BE.get(), pos, blockState);
     }
@@ -110,6 +109,18 @@ public class HypertubeSupportBlockEntity extends BlockEntity {
     @Override
     public CompoundTag getUpdateTag(HolderLookup.Provider pRegistries) {
         return saveWithoutMetadata(pRegistries);
+    }
+
+    public Integer getDirection(BlockPos previousBlockPos){
+        if(this.targetPositive == previousBlockPos) return 1;
+        if(this.targetNegative == previousBlockPos) return -1;
+        return 0;
+    }
+
+    public BlockPos getTargetPos(Integer direction){
+        if(direction==1) return targetPositive;
+        if(direction==-1) return targetNegative;
+        return null;
     }
 
 }
