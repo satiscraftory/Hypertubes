@@ -5,6 +5,7 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -25,6 +26,7 @@ public class ModClientEvents {
         if (player.getVehicle() instanceof HypertubeEntity) {
             InputConstants.Key key = Minecraft.getInstance().options.keyShift.getKey();
             KeyMapping.set(key, false);
+            //player.setPose(Pose.FALL_FLYING);
         }
     }
 }
