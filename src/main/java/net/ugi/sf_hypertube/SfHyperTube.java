@@ -127,7 +127,7 @@ public class SfHyperTube {
     @EventBusSubscriber(modid = MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class ClientModEvents {
         @SubscribeEvent
-        public static void onClientSetup(FMLClientSetupEvent event) {
+        public static void onClientSetup(FMLClientSetupEvent event){
             //ModItemProperties.addCustomItemProperties();
 
             EntityRenderers.register(HYPERTUBE_ENTITY_TYPE.get(), HypertubeEntityRenderer::new);
