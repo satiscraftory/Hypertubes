@@ -74,7 +74,6 @@ public class HypertubeEntity extends Entity {
     protected void positionRider(Entity passenger, Entity.MoveFunction callback) {
         super.positionRider(passenger, callback);
         if (!passenger.getType().is(EntityTypeTags.CAN_TURN_IN_BOATS)) {
-            this.clampRotation(passenger);
             if (passenger instanceof Animal && this.getPassengers().size() == 1) {
                 int i = passenger.getId() % 2 == 0 ? 90 : 270;
                 passenger.setYBodyRot(((Animal)passenger).yBodyRot + (float)i);
