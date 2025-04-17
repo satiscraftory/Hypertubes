@@ -18,6 +18,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -30,12 +31,14 @@ import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.ugi.sf_hypertube.block.ModBlocks;
+import net.ugi.sf_hypertube.block.entity.HypertubeSupportBlockEntity;
 import net.ugi.sf_hypertube.item.ModItems;
 import net.ugi.sf_hypertube.util.Bezier;
 import org.joml.Vector3f;
@@ -56,6 +59,7 @@ public class HyperTubeItem extends Item {
     private final WeakHashMap<ItemStack, BlockPos> block2Pos = new WeakHashMap<>();
     private final WeakHashMap<ItemStack, Direction.Axis> block2Axis = new WeakHashMap<>();
     private final WeakHashMap<ItemStack, Integer> block2Direction  = new WeakHashMap<>();
+    private final WeakHashMap<ItemStack, String> curveType  = new WeakHashMap<>();
 
 
     double bezierHelpPosMultiplier =0.5;//default 0.5
@@ -65,14 +69,6 @@ public class HyperTubeItem extends Item {
 
     Bezier bezier = new Bezier(bezierHelpPosMultiplier);
 
-
-    private BlockPos getVectorFromAxis(Direction.Axis axis, int offset){
-        BlockPos vector = new BlockPos(offset,0,0);
-        if (axis == Direction.Axis.X)vector = new BlockPos(offset,0,0);
-        if (axis == Direction.Axis.Y)vector = new BlockPos(0,offset,0);
-        if (axis == Direction.Axis.Z)vector = new BlockPos(0,0,offset);
-        return vector;
-    }
 
     private int intValue(boolean val){
         return val ? 1 : 0;
@@ -96,18 +92,38 @@ public class HyperTubeItem extends Item {
         level.blockUpdated(pos.below(1),Blocks.BRICK_WALL);
     }
 
+    private void modifyData(Level level, BlockPos pos, int dir,BlockPos targetPos, String curveType){
+        BlockEntity blockEntity = level.getBlockEntity(pos);
+        if (blockEntity instanceof HypertubeSupportBlockEntity hypertubeSupportBlockEntity){
+            if(dir == 1){
+                hypertubeSupportBlockEntity.targetPositive = targetPos;
+                hypertubeSupportBlockEntity.targetPositiveType = curveType;
+            }
+            if(dir == -1){
+                hypertubeSupportBlockEntity.targetNegative = targetPos;
+                hypertubeSupportBlockEntity.targetNegativeType = curveType;
+
+            }
+        }
+
+    }
 
 
 
-    private boolean calcBlockIfHyperTubSupport(Level level, ItemStack stack, BlockPos blockpos, WeakHashMap<ItemStack, BlockPos> blockPosMap, WeakHashMap<ItemStack, Direction.Axis> blockAxisMap, WeakHashMap<ItemStack, Integer> blockDirectionMap){
+    private boolean calcBlockIfHyperTubeSupport(Level level, ItemStack stack, BlockPos blockpos, WeakHashMap<ItemStack, BlockPos> blockPosMap, WeakHashMap<ItemStack, Direction.Axis> blockAxisMap, WeakHashMap<ItemStack, Integer> blockDirectionMap){
         blockPosMap.put(stack,blockpos);
         blockAxisMap.put(stack,level.getBlockState(blockPosMap.get(stack)).getValue(BlockStateProperties.AXIS));
 
-        boolean dir1IsHyperTube = level.getBlockState(blockPosMap.get(stack).offset(getVectorFromAxis(blockAxisMap.get(stack),1))).is(hyperTubeBlock);
-        boolean dir2IsHyperTube = level.getBlockState(blockPosMap.get(stack).offset(getVectorFromAxis(blockAxisMap.get(stack),-1))).is(hyperTubeBlock);
+        BlockEntity blockEntity = level.getBlockEntity(blockpos);
+        if (blockEntity instanceof HypertubeSupportBlockEntity hypertubeSupportBlockEntity){
 
-        if (dir1IsHyperTube && dir2IsHyperTube) return false; // no connection possible to this tube
-        blockDirectionMap.put(stack,intValue(dir2IsHyperTube) - intValue(dir1IsHyperTube)); // gives the direction the tubes need to be , if 0 => code chooses later ( both available)
+            boolean dir1IsHyperTube = hypertubeSupportBlockEntity.targetPositive != null;
+            boolean dir2IsHyperTube = hypertubeSupportBlockEntity.targetNegative != null;
+
+
+            if (dir1IsHyperTube && dir2IsHyperTube) return false; // no connection possible to this tube
+            blockDirectionMap.put(stack,intValue(dir2IsHyperTube) - intValue(dir1IsHyperTube)); // gives the direction the tubes need to be , if 0 => code chooses later ( both available)
+        }
         return true;
     }
 
@@ -125,7 +141,7 @@ public class HyperTubeItem extends Item {
         if (Math.abs(biasLookingVec.y) > Math.abs(biasLookingVec.x) && Math.abs(biasLookingVec.y) > Math.abs(biasLookingVec.z)) {
             blockAxisMap.put(stack,Direction.Axis.Y);
         }
-        if (Math.abs(biasLookingVec.z) > Math.abs(lookingVec.y) && Math.abs(biasLookingVec.z) > Math.abs(biasLookingVec.x)) {
+        if (Math.abs(biasLookingVec.z) > Math.abs(biasLookingVec.y) && Math.abs(biasLookingVec.z) > Math.abs(biasLookingVec.x)) {
             blockAxisMap.put(stack,Direction.Axis.Z);
         }
         return true;
@@ -139,10 +155,12 @@ public class HyperTubeItem extends Item {
 
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand) {
+
         if (level.isClientSide()) return InteractionResultHolder.fail(player.getItemInHand(usedHand));
         ItemStack stack = player.getItemInHand(usedHand);
 
         selectedBlock1.putIfAbsent(stack, false);
+        curveType.putIfAbsent(stack, "Curved");
 
         Vec3 looking = player.getLookAngle();
         BlockPos blockpos = level.clip(new ClipContext(player.getEyePosition(), player.getEyePosition().add(looking.x * placeDistance, looking.y * placeDistance, looking.z * placeDistance), ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, player)).getBlockPos();
@@ -153,7 +171,7 @@ public class HyperTubeItem extends Item {
         if(!selectedBlock1.get(stack)){ // get first block pos
             if (level.getBlockState(blockpos).is(hyperTubeSupportBlock)){ // if clicking on hypertyubeSupportBlock
 
-                boolean result = calcBlockIfHyperTubSupport(level,stack,blockpos,block1Pos,block1Axis,block1Direction);
+                boolean result = calcBlockIfHyperTubeSupport(level,stack,blockpos,block1Pos,block1Axis,block1Direction);
                 if (!result) return InteractionResultHolder.fail(player.getItemInHand(usedHand));
 
                 selectedBlock1.put(stack,true);
@@ -172,7 +190,7 @@ public class HyperTubeItem extends Item {
 
         else { // get second block pos
             if (level.getBlockState(blockpos).is(hyperTubeSupportBlock)){
-                boolean result = calcBlockIfHyperTubSupport(level,stack,blockpos,block2Pos,block2Axis,block2Direction);
+                boolean result = calcBlockIfHyperTubeSupport(level,stack,blockpos,block2Pos,block2Axis,block2Direction);
                 if (!result) return InteractionResultHolder.fail(player.getItemInHand(usedHand));
 
             }
@@ -195,6 +213,10 @@ public class HyperTubeItem extends Item {
                 level.blockUpdated(blockPosArray[i],hyperTubeBlock);
             }
             placeHypertubeSupport(level,block2Pos.get(stack),block2Axis.get(stack));
+
+            modifyData(level,block1Pos.get(stack),bezier.getBlock1Direction(),block2Pos.get(stack), curveType.get(stack));
+            modifyData(level,block2Pos.get(stack),bezier.getBlock2Direction(),block1Pos.get(stack), curveType.get(stack));
+
             selectedBlock1.put(stack,false);
         }
 
@@ -218,7 +240,7 @@ public class HyperTubeItem extends Item {
 
                 if (level.getBlockState(blockpos).is(hyperTubeSupportBlock)){ // if clicking on hypertyubeSupportBlock
 
-                    boolean result = calcBlockIfHyperTubSupport(level,stack,blockpos,block2Pos,block2Axis,block2Direction);
+                    boolean result = calcBlockIfHyperTubeSupport(level,stack,blockpos,block2Pos,block2Axis,block2Direction);
                     if (!result) return;
                 }
                 else {

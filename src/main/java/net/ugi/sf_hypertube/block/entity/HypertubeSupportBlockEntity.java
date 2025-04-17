@@ -20,10 +20,10 @@ import java.util.List;
 
 public class HypertubeSupportBlockEntity extends BlockEntity {
 
-    public BlockPos targetPositive;
-    public BlockPos targetNegative;
-    public String targetPositiveType;
-    public String targetNegativeType;
+    public BlockPos targetPositive = null;
+    public BlockPos targetNegative = null;
+    public String targetPositiveType = null;
+    public String targetNegativeType = null;
     public final ItemStackHandler inventory = new ItemStackHandler(1) {
         @Override
         protected int getStackLimit(int slot, ItemStack stack) {
@@ -79,6 +79,12 @@ public class HypertubeSupportBlockEntity extends BlockEntity {
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
         inventory.deserializeNBT(registries, tag.getCompound("inventory"));
+
+        targetPositive = null;
+        targetPositiveType = null;
+        targetNegative = null;
+        targetNegativeType = null;
+
         if (tag.contains("target_positive")) {
             int[] arr = tag.getIntArray("target_positive");
             if (arr.length == 3) {
@@ -88,7 +94,6 @@ public class HypertubeSupportBlockEntity extends BlockEntity {
         if(tag.contains("target_positive_type")) {
             targetPositiveType = tag.getString("target_positive_type");
         }
-
         if (tag.contains("target_negative")) {
             int[] arr = tag.getIntArray("target_negative");
             if (arr.length == 3) {

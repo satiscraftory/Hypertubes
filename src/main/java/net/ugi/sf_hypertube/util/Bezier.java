@@ -13,40 +13,46 @@ import java.util.Set;
 
 public class Bezier {
 
-    double bezierHelpPosMultiplier =0.5;//default 0.5
+    private double bezierHelpPosMultiplier;//default 0.5
+
+    private int block1UsedDirection = 0;
+    private int block2UsedDirection = 0;
 
     public Bezier(double helpPosMultiplier) {
         this.bezierHelpPosMultiplier = helpPosMultiplier;
     }
 
-    private BlockPos getVectorFromAxis(Direction.Axis axis, int offset){
-        BlockPos vector = new BlockPos(offset,0,0);
-        if (axis == Direction.Axis.X)vector = new BlockPos(offset,0,0);
-        if (axis == Direction.Axis.Y)vector = new BlockPos(0,offset,0);
-        if (axis == Direction.Axis.Z)vector = new BlockPos(0,0,offset);
-        return vector;
+    public int getBlock1Direction(){
+        return block1UsedDirection;
+    }
+    public int getBlock2Direction(){
+        return block2UsedDirection;
     }
 
-    public BlockPos[] calcBezierArray(BlockPos b1Pos, Direction.Axis b1Axis, int b1Direction, BlockPos b2Pos, Direction.Axis b2Axis, int b2Direction){
+    public BlockPos[] calcBezierArray(BlockPos b1Pos, Direction.Axis b1Axis, int b1Direction, BlockPos b2Pos, Direction.Axis b2Axis, int b2Direction) {
         BlockPos pos0 = b1Pos;
         BlockPos pos1 = null;
         BlockPos pos2 = null;
         BlockPos pos3 = b2Pos;
-        double distanceBetweenBlocks =  b2Pos.getCenter().distanceTo(b1Pos.getCenter());
+        double distanceBetweenBlocks = b2Pos.getCenter().distanceTo(b1Pos.getCenter());
         double helperPosOffSet = distanceBetweenBlocks * bezierHelpPosMultiplier;
 
         if (b1Direction == 0) { // 2 sides available
-            pos1 = b2Pos.getCenter().distanceTo(b1Pos.offset(getVectorFromAxis(b1Axis, (int) helperPosOffSet)).getCenter()) < b2Pos.getCenter().distanceTo(b1Pos.offset(getVectorFromAxis(b1Axis, -(int) helperPosOffSet)).getCenter()) ? b1Pos.offset(getVectorFromAxis(b1Axis, (int) helperPosOffSet)) : b1Pos.offset(getVectorFromAxis(b1Axis, -(int) helperPosOffSet));
-        }
-        else { // 1 side available
-            pos1 = b1Pos.offset(getVectorFromAxis(b1Axis, (int) helperPosOffSet * b1Direction));
+            pos1 = b2Pos.getCenter().distanceTo(b1Pos.relative(b1Axis,(int) helperPosOffSet).getCenter()) < b2Pos.getCenter().distanceTo(b1Pos.relative(b1Axis,-(int) helperPosOffSet).getCenter()) ? b1Pos.relative(b1Axis,(int) helperPosOffSet) : b1Pos.relative(b1Axis,-(int) helperPosOffSet);
+            this.block1UsedDirection = b2Pos.getCenter().distanceTo(b1Pos.relative(b1Axis,(int) helperPosOffSet).getCenter()) < b2Pos.getCenter().distanceTo(b1Pos.relative(b1Axis,-(int) helperPosOffSet).getCenter()) ? 1:-1;
+
+        } else { // 1 side available
+            pos1 = b1Pos.relative(b1Axis, (int) helperPosOffSet * b1Direction);
+            this.block1UsedDirection = b1Direction;
         }
 
         if (b2Direction == 0) { // 2 sides available
-            pos2 = b1Pos.getCenter().distanceTo(b2Pos.offset(getVectorFromAxis(b2Axis,(int)helperPosOffSet)).getCenter()) < b1Pos.getCenter().distanceTo(b2Pos.offset(getVectorFromAxis(b2Axis,-(int)helperPosOffSet)).getCenter())  ? b2Pos.offset(getVectorFromAxis(b2Axis,(int)helperPosOffSet)) : b2Pos.offset(getVectorFromAxis(b2Axis,-(int)helperPosOffSet));
-        }
-        else { // 1 side available
-            pos2 = b2Pos.offset(getVectorFromAxis(b2Axis,(int)helperPosOffSet * b2Direction));
+            pos2 = b1Pos.getCenter().distanceTo(b2Pos.relative(b2Axis, (int) helperPosOffSet).getCenter()) < b1Pos.getCenter().distanceTo(b2Pos.relative(b2Axis, -(int) helperPosOffSet).getCenter()) ? b2Pos.relative(b2Axis, (int) helperPosOffSet) : b2Pos.relative(b2Axis, -(int) helperPosOffSet);
+            this.block2UsedDirection = b1Pos.getCenter().distanceTo(b2Pos.relative(b2Axis, (int) helperPosOffSet).getCenter()) < b1Pos.getCenter().distanceTo(b2Pos.relative(b2Axis, -(int) helperPosOffSet).getCenter()) ? 1 : -1;
+
+        } else { // 1 side available
+            pos2 = b2Pos.relative(b2Axis, (int) helperPosOffSet * b2Direction);
+            this.block2UsedDirection = b2Direction;
         }
 
         int steps = (int)(1.5*Math.abs(b1Pos.getX() - b2Pos.getX()) + 1.5*Math.abs(b1Pos.getY() - b2Pos.getY()) + 1.5*Math.abs(b1Pos.getZ() - b2Pos.getZ()) + 10);

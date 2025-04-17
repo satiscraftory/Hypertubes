@@ -3,10 +3,16 @@ package net.ugi.sf_hypertube.block.custom;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -19,12 +25,21 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.ugi.sf_hypertube.block.entity.HypertubeSupportBlockEntity;
+import net.ugi.sf_hypertube.entity.HypertubeEntity;
+import net.ugi.sf_hypertube.entity.ModEntities;
 import net.ugi.sf_hypertube.item.ModItems;
+import net.ugi.sf_hypertube.util.Bezier;
 import org.jetbrains.annotations.Nullable;
+
+import java.awt.geom.Area;
+import java.util.Arrays;
+import java.util.List;
 
 public class HypertubeSupport extends BaseEntityBlock {
     public static final VoxelShape SHAPE = Block.box(0, 0, 0, 16, 16, 16);
@@ -73,6 +88,7 @@ public class HypertubeSupport extends BaseEntityBlock {
         builder.add(AXIS);
     }
 
+
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
         return this.defaultBlockState().setValue(AXIS, context.getClickedFace().getAxis());
@@ -84,6 +100,60 @@ public class HypertubeSupport extends BaseEntityBlock {
     @Override
     protected RenderShape getRenderShape(BlockState state) {
         return RenderShape.MODEL;
+    }
+
+    @Override
+    protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+        level.scheduleTick(new BlockPos(pos), this, 1);
+
+        BlockEntity blockEntity = level.getBlockEntity(pos);
+        Direction.Axis axis = state.getValue(BlockStateProperties.AXIS);
+        if (blockEntity instanceof HypertubeSupportBlockEntity hypertubeSupportBlockEntity ) {
+            BlockPos checkpos = null;
+            if (hypertubeSupportBlockEntity.targetNegative != null && hypertubeSupportBlockEntity.targetPositive == null) {
+                checkpos  = pos.relative(axis, 2);
+            }
+            if (hypertubeSupportBlockEntity.targetNegative == null && hypertubeSupportBlockEntity.targetPositive != null) {
+                checkpos = pos.relative(axis, -2);
+            }
+
+            if (checkpos == null) return;
+            List<Entity> entities = level.getEntities(null, new AABB(checkpos.offset(1,2,1).getBottomCenter(), checkpos.offset(-1,0,-1).getBottomCenter()));
+            if(entities.isEmpty()) return;
+
+            BlockPos finalCheckpos = checkpos;
+            entities.forEach(entity -> {
+                HypertubeEntity hyperTubeEntity = new HypertubeEntity(ModEntities.HYPERTUBE_ENTITY.get(), level);
+                hyperTubeEntity.setPos(pos.getX()+ 0.5,pos.getY(),pos.getZ() + 0.5);
+                //hyperTubeEntity.path
+                //level.addFreshEntity(hyperTubeEntity);
+
+                //entity.startRiding(hyperTubeEntity);
+                BlockPos b1Pos = pos;
+                Direction.Axis b1Axis = level.getBlockState(b1Pos).getValue(AXIS);
+                int dir = ((pos.getX() - finalCheckpos.getX()) + (pos.getY() - finalCheckpos.getY()) + (pos.getZ() - finalCheckpos.getZ()));
+                int b1Direction = (dir) > 0 ? 1 : -1;
+                BlockPos b2Pos = hypertubeSupportBlockEntity.getTargetPos(b1Direction);
+                Direction.Axis b2Axis = level.getBlockState(b2Pos).getValue(AXIS);
+                BlockEntity b2Entity = level.getBlockEntity(b2Pos);
+                int b2Direction = 0;
+                if(b2Entity instanceof HypertubeSupportBlockEntity b2HypertubeSupportBlockEntity) {
+                    b2Direction = b2HypertubeSupportBlockEntity.getDirection(b1Pos);
+                }
+                hyperTubeEntity.setPath(Arrays.stream(new Bezier(0.5).calcBezierArray(b1Pos,b1Axis,b1Direction,b2Pos,b2Axis,b2Direction)).toList()); //todo : 0.5 needs to be a variable depending on target(+-)Type
+                level.addFreshEntity(hyperTubeEntity);
+                entity.startRiding(hyperTubeEntity);
+            });
+
+
+        }
+        super.tick(state, level, pos, random);
+    }
+
+    @Override
+    protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {
+        super.onPlace(state, level, pos, oldState, movedByPiston);
+        level.scheduleTick(new BlockPos(pos), this, 1);
     }
 
     @Nullable
