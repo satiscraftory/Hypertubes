@@ -235,6 +235,7 @@ public class HyperTubeItem extends Item {
 
         if(level.isClientSide()) return;
         Player player = level.getNearestPlayer(entity,0.01);
+        if (player == null) return;
         ItemStack selectedItem = player.getMainHandItem().getItem() == ModItems.HYPERTUBE.get()? player.getMainHandItem() : player.getOffhandItem();
         if(selectedItem != stack) return;
 
