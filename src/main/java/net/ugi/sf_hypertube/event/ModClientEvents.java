@@ -21,6 +21,7 @@ public class ModClientEvents {
         Player player = Minecraft.getInstance().player;
         if(player == null) return;
         if(player.isCreative()) return;
+        //if(player.getVehicle() == null) return;//maybe not needed
         if (player.getVehicle() instanceof HypertubeEntity) {
             InputConstants.Key key = Minecraft.getInstance().options.keyShift.getKey();
             KeyMapping.set(key, false);
