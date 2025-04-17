@@ -1,25 +1,29 @@
 package net.ugi.sf_hypertube.entity;
 
 import com.google.common.collect.ImmutableList;
+import com.mojang.datafixers.types.templates.CompoundList;
+import com.mojang.datafixers.types.templates.TypeTemplate;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.util.Mth;
+import net.minecraft.world.CompoundContainer;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.Vec3;
+import net.ugi.sf_hypertube.block.custom.HypertubeSupport;
+import net.ugi.sf_hypertube.block.entity.HypertubeSupportBlockEntity;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
 public class HypertubeEntity extends Entity {
-    private ImmutableList<Entity> passengers = ImmutableList.of();
-    protected int boardingCooldown;
-    private Entity vehicle;
     private int lerpSteps;
     private double lerpX;
     private double lerpY;
@@ -28,11 +32,11 @@ public class HypertubeEntity extends Entity {
     private double lerpXRot;
     private Vec3 targetDeltaMovement = Vec3.ZERO;
     private boolean inTube;
-    public List<BlockPos> path = new ArrayList<>();
-    public List<BlockPos> path2 = new ArrayList<>();
+    private List<BlockPos> path = new ArrayList<>();
+    private BlockPos previousPos;
+    private BlockPos currentPos;
     private int speed = 10;
     private int currentPathIndex = 0;
-    private int currentPath2Index = 0;
 
 
 
@@ -46,13 +50,42 @@ public class HypertubeEntity extends Entity {
 
     }
 
+    ///-----------data saving------
     @Override
-    protected void readAdditionalSaveData(CompoundTag compound) {
-
+    protected void addAdditionalSaveData(CompoundTag compound) {
+        if(previousPos != null) {
+            compound.putIntArray("previous_pos", new int[]{previousPos.getX(), previousPos.getY(), previousPos.getZ()});
+        }
+        if(currentPos != null) {
+            compound.putIntArray("current_pos", new int[]{currentPos.getX(), currentPos.getY(), currentPos.getZ()});
+        }
+        if(currentPathIndex > 0) {
+            compound.putInt("current_path_index", currentPathIndex);
+        }
+/*        if(!path.isEmpty()) {
+            compound.put("path", );
+        }*/
     }
 
     @Override
-    protected void addAdditionalSaveData(CompoundTag compound) {
+    protected void readAdditionalSaveData(CompoundTag compound) {
+        previousPos = null;
+        currentPos = null;
+        if(compound.contains("previous_pos")) {
+            int[] arr = compound.getIntArray("previous_pos");
+            if (arr.length == 3) {
+                previousPos = new BlockPos(arr[0], arr[1], arr[2]);
+            }
+        }
+        if(compound.contains("current_pos")) {
+            int[] arr = compound.getIntArray("current_pos");
+            if (arr.length == 3) {
+                currentPos = new BlockPos(arr[0], arr[1], arr[2]);
+            }
+        }
+        if(compound.contains("current_path_index")) {
+            this.currentPathIndex = compound.getInt("current_path_index");
+        }
 
     }
 
@@ -115,9 +148,13 @@ public class HypertubeEntity extends Entity {
             this.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), this.getXRot());
         }
     }
-    public void setPath(List<BlockPos> path) {
-        this.path = path;
+
+    public void addPath(List<BlockPos> path, BlockPos previousPos, BlockPos currentPos) {
+        this.path.addAll(path);
+        this.previousPos = previousPos;
+        this.currentPos = currentPos;
     }
+
     // ─── Copy of Boat#lerpTo ───────────────────────────────────────────────────
     @Override
     public void lerpTo(double x, double y, double z, float yRot, float xRot, int steps) {
@@ -184,6 +221,20 @@ public class HypertubeEntity extends Entity {
                     this.setYRot(yaw);
                 }
             } else {
+                if ( path != null){
+                    Block block = this.level().getBlockState(this.currentPos).getBlock();
+
+                    if(block instanceof HypertubeSupport hypertubeSupport){
+                        if(hypertubeSupport.isConnectedBothSides(this.level(), this.currentPos)){
+                            hypertubeSupport.getNextPath(this.level(),this.previousPos,this.currentPos,this);
+                        }else{
+                            //yeet player
+                        }
+                    }
+                }
+
+
+
                 // no path or done – stop moving
                 this.setDeltaMovement(Vec3.ZERO);
             }
@@ -229,5 +280,6 @@ public class HypertubeEntity extends Entity {
     public boolean canRiderInteract() {
         return false;
     }
+
 
 }

@@ -8,6 +8,7 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.Containers;
 import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -116,15 +117,16 @@ public class HypertubeSupportBlockEntity extends BlockEntity {
         return saveWithoutMetadata(pRegistries);
     }
 
-    public Integer getDirection(BlockPos previousBlockPos){
-        if(this.targetPositive == previousBlockPos) return 1;
-        if(this.targetNegative == previousBlockPos) return -1;
+    public int getDirection(BlockPos previousBlockPos){
+        if(targetPositive !=null &&  targetPositive.equals(previousBlockPos)) return 1;
+        if(targetNegative !=null &&  targetNegative.equals(previousBlockPos)) return -1;
         return 0;
     }
 
     public BlockPos getTargetPos(Integer direction){
         if(direction==1) return targetPositive;
         if(direction==-1) return targetNegative;
+        System.out.println(direction);
         return null;
     }
 
