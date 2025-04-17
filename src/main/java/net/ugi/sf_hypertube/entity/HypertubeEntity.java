@@ -75,19 +75,28 @@ public class HypertubeEntity extends Entity {
         if (!passenger.getType().is(EntityTypeTags.CAN_TURN_IN_BOATS)) {
             //passenger.setYRot(passenger.getVehicle().getYRot());
             //passenger.setYHeadRot(passenger.getYHeadRot() + this.deltaRotation);
+            //passenger.setPose(Pose.FALL_FLYING);
             this.clampRotation(passenger);
             if (passenger instanceof Animal && this.getPassengers().size() == 1) {
                 passenger.setYBodyRot(passenger.getVehicle().getYRot());
+
                 //passenger.setYHeadRot(passenger.getYHeadRot() + (float)i);
 
             }
         }
     }
 
+/*    public void tick() {
+        super.tick();
+        if(this.passengers.isEmpty())return;
+        Entity passenger = this.passengers.getFirst();
+        passenger.setPose(Pose.FALL_FLYING);
+    }*/
+
 
     @Override
     public boolean shouldRiderSit() {
-        return false;
+        return true;
     }
 
     @Override

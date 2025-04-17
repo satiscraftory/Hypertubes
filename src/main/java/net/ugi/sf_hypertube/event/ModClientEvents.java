@@ -26,7 +26,8 @@ public class ModClientEvents {
         if (player.getVehicle() instanceof HypertubeEntity) {
             InputConstants.Key key = Minecraft.getInstance().options.keyShift.getKey();
             KeyMapping.set(key, false);
-            //player.setPose(Pose.FALL_FLYING);
+/*            player.setForcedPose(Pose.FALL_FLYING);
+            player.setPose(Pose.FALL_FLYING);*/
         }
     }
 }
