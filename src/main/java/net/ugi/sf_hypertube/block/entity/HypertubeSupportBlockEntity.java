@@ -123,10 +123,15 @@ public class HypertubeSupportBlockEntity extends BlockEntity {
         return 0;
     }
 
+    public String getCurveType(int direction){
+        if(direction==1) return targetPositiveType;
+        if(direction==-1) return targetNegativeType;
+        return null;
+    }
+
     public BlockPos getTargetPos(Integer direction){
         if(direction==1) return targetPositive;
         if(direction==-1) return targetNegative;
-        System.out.println(direction);
         return null;
     }
 

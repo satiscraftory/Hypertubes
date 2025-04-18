@@ -10,7 +10,7 @@ import net.ugi.sf_hypertube.item.custom.HyperTubeItem;
 public class ModItems {
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(SfHyperTube.MOD_ID);
 
-    public static final DeferredItem<Item> HYPERTUBE = ITEMS.register("hypertube",
+    public static final DeferredItem<Item> HYPERTUBEPLACER = ITEMS.register("hypertubeplacer",
             () -> new HyperTubeItem(new Item.Properties()));
 
 

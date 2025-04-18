@@ -13,13 +13,13 @@ import java.util.Set;
 
 public class Bezier {
 
-    private double bezierHelpPosMultiplier;//default 0.5
+    private double bezierHelpPosMultiplier = 0.5;//default 0.5
 
     private int block1UsedDirection = 0;
     private int block2UsedDirection = 0;
 
-    public Bezier(double helpPosMultiplier) {
-        this.bezierHelpPosMultiplier = helpPosMultiplier;
+    public Bezier() {
+
     }
 
     public int getBlock1Direction(){
@@ -27,6 +27,18 @@ public class Bezier {
     }
     public int getBlock2Direction(){
         return block2UsedDirection;
+    }
+
+    public void setCurve(String name){
+        if (name.equals("Curved")) {
+            this.bezierHelpPosMultiplier = 0.5;
+        }
+        if (name.equals("Overkill")) {
+            this.bezierHelpPosMultiplier = 3;
+        }
+        if (name.equals("Straight")) {
+            this.bezierHelpPosMultiplier = 0;
+        }
     }
 
     public BlockPos[] calcBezierArray(BlockPos b1Pos, Direction.Axis b1Axis, int b1Direction, BlockPos b2Pos, Direction.Axis b2Axis, int b2Direction) {
@@ -53,6 +65,38 @@ public class Bezier {
         } else { // 1 side available
             pos2 = b2Pos.relative(b2Axis, (int) helperPosOffSet * b2Direction);
             this.block2UsedDirection = b2Direction;
+        }
+
+        //fix connection problems ( with direction ) in Straight mode (posmultiplier = 0)
+        if(bezierHelpPosMultiplier == 0){
+            if (b1Direction == 0) {
+                if (b1Axis == Direction.Axis.X) {
+                    this.block1UsedDirection = (pos3.getX() - pos0.getX());
+                }
+                if (b1Axis == Direction.Axis.Y) {
+                    this.block1UsedDirection = (pos3.getY() - pos0.getY());
+                }
+                if (b1Axis == Direction.Axis.Z) {
+                    this.block1UsedDirection = (pos3.getZ() - pos0.getZ());
+                }
+                if (this.block1UsedDirection == 0) this.block1UsedDirection = 1;
+                this.block1UsedDirection = this.block1UsedDirection / Math.abs(this.block1UsedDirection);
+            }
+
+            if (b2Direction == 0) {
+                if (b2Axis == Direction.Axis.X) {
+                    this.block2UsedDirection = (pos3.getX() - pos0.getX());
+                }
+                if (b2Axis == Direction.Axis.Y) {
+                    this.block2UsedDirection = (pos3.getY() - pos0.getY());
+                }
+                if (b2Axis == Direction.Axis.Z) {
+                    this.block2UsedDirection = (pos3.getZ() - pos0.getZ());
+                }
+                if (this.block2UsedDirection == 0) this.block2UsedDirection = 1;
+                this.block2UsedDirection = -this.block2UsedDirection / Math.abs(this.block2UsedDirection);
+            }
+
         }
 
         int steps = (int)(1.5*Math.abs(b1Pos.getX() - b2Pos.getX()) + 1.5*Math.abs(b1Pos.getY() - b2Pos.getY()) + 1.5*Math.abs(b1Pos.getZ() - b2Pos.getZ()) + 10);

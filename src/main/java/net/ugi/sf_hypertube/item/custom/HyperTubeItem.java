@@ -63,11 +63,11 @@ public class HyperTubeItem extends Item {
 
 
     double bezierHelpPosMultiplier =0.5;//default 0.5
-    DeferredBlock<Block> hyperTubeSupportBlock = ModBlocks.HYPERTUBE_SUPPORT;
-    Block hyperTubeBlock = Blocks.GLASS;
+    Block hyperTubeSupportBlock = ModBlocks.HYPERTUBE_SUPPORT.get();
+    Block hyperTubeBlock = ModBlocks.HYPERTUBE.get();
     double placeDistance = 20;
 
-    Bezier bezier = new Bezier(bezierHelpPosMultiplier);
+    Bezier bezier = new Bezier();
 
 
     private int intValue(boolean val){
@@ -84,10 +84,22 @@ public class HyperTubeItem extends Item {
         return isValidCurve;
 
     }
+    private void changeCurveType(ItemStack stack){
+        if(curveType.get(stack).equals("Curved")){
+            curveType.put(stack, "Overkill");
+        }
+        else if (curveType.get(stack).equals("Overkill")){
+            curveType.put(stack, "Straight");
+        }
+        else  {
+            curveType.put(stack, "Curved");
+        }
+        bezier.setCurve(curveType.get(stack));
+    }
 
     private void placeHypertubeSupport(Level level, BlockPos pos, Direction.Axis axis){
-        level.setBlock(pos, hyperTubeSupportBlock.get().defaultBlockState().setValue(BlockStateProperties.AXIS, axis),2 );
-        level.blockUpdated(pos,hyperTubeSupportBlock.get());
+        level.setBlock(pos, hyperTubeSupportBlock.defaultBlockState().setValue(BlockStateProperties.AXIS, axis),2 );
+        level.blockUpdated(pos,hyperTubeSupportBlock);
         level.setBlock(pos.below(1), Blocks.BRICK_WALL.defaultBlockState(),2 );
         level.blockUpdated(pos.below(1),Blocks.BRICK_WALL);
     }
@@ -155,12 +167,18 @@ public class HyperTubeItem extends Item {
 
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand) {
+        System.out.println("HyperTubeItem::use");
 
         if (level.isClientSide()) return InteractionResultHolder.fail(player.getItemInHand(usedHand));
         ItemStack stack = player.getItemInHand(usedHand);
 
         selectedBlock1.putIfAbsent(stack, false);
         curveType.putIfAbsent(stack, "Curved");
+
+        if(player.isShiftKeyDown()){
+            changeCurveType(stack);
+            return InteractionResultHolder.success(stack);
+        }
 
         Vec3 looking = player.getLookAngle();
         BlockPos blockpos = level.clip(new ClipContext(player.getEyePosition(), player.getEyePosition().add(looking.x * placeDistance, looking.y * placeDistance, looking.z * placeDistance), ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, player)).getBlockPos();
@@ -190,6 +208,15 @@ public class HyperTubeItem extends Item {
 
         else { // get second block pos
             if (level.getBlockState(blockpos).is(hyperTubeSupportBlock)){
+
+
+                //cancel placement by clicking on first support
+                if (blockpos.equals(block1Pos.get(stack))) {
+                    selectedBlock1.put(stack,false);
+                    return InteractionResultHolder.fail(player.getItemInHand(usedHand));
+                }
+
+
                 boolean result = calcBlockIfHyperTubeSupport(level,stack,blockpos,block2Pos,block2Axis,block2Direction);
                 if (!result) return InteractionResultHolder.fail(player.getItemInHand(usedHand));
 
@@ -229,7 +256,7 @@ public class HyperTubeItem extends Item {
 
         if(level.isClientSide()) return;
         if(entity instanceof Player player){
-            ItemStack selectedItem = player.getMainHandItem().getItem() == ModItems.HYPERTUBE.get()? player.getMainHandItem() : player.getOffhandItem();
+            ItemStack selectedItem = player.getMainHandItem().getItem() == ModItems.HYPERTUBEPLACER.get()? player.getMainHandItem() : player.getOffhandItem();
             if(selectedItem != stack) return;
 
             selectedBlock1.putIfAbsent(stack, false);

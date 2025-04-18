@@ -133,12 +133,14 @@ public class HypertubeSupport extends BaseEntityBlock {
                 int nextDirection = 0;
                 if(nextEntity instanceof HypertubeSupportBlockEntity nextHypertubeSupportBlockEntity) {
                     nextDirection = nextHypertubeSupportBlockEntity.getDirection(currentPos);
+                    Bezier bezier = new Bezier();
+                    bezier.setCurve(nextHypertubeSupportBlockEntity.getCurveType(nextDirection));
+                    hyperTubeEntity.addPath(
+                            Arrays.stream(bezier.calcBezierArray(currentPos,currentAxis,currentDirection,nextPos,nextAxis,nextDirection)).toList(),
+                            currentPos,nextPos);
+                    level.addFreshEntity(hyperTubeEntity);
+                    entity.startRiding(hyperTubeEntity);
                 }
-                hyperTubeEntity.addPath(
-                        Arrays.stream(new Bezier(0.5).calcBezierArray(currentPos,currentAxis,currentDirection,nextPos,nextAxis,nextDirection)).toList(),//todo : 0.5 needs to be a variable depending on target(+-)Type
-                        currentPos,nextPos);
-                level.addFreshEntity(hyperTubeEntity);
-                entity.startRiding(hyperTubeEntity);
             });
 
 
@@ -158,8 +160,10 @@ public class HypertubeSupport extends BaseEntityBlock {
             Direction.Axis nextAxis = level.getBlockState(nextPos).getValue(AXIS);
             if(nextEntity instanceof HypertubeSupportBlockEntity nextHypertubeSupportBlockEntity) {
                 int nextDirection = nextHypertubeSupportBlockEntity.getDirection(currentPos);
+                Bezier bezier = new Bezier();
+                bezier.setCurve(currentHypertubeSupportBlockEntity.getCurveType(currentDirection));
                 hyperTubeEntity.addPath(
-                        Arrays.stream(new Bezier(0.5).calcBezierArray(currentPos,currentAxis,currentDirection,nextPos,nextAxis,nextDirection)).toList(),//todo : 0.5 needs to be a variable depending on target(+-)Type
+                        Arrays.stream(bezier.calcBezierArray(currentPos,currentAxis,currentDirection,nextPos,nextAxis,nextDirection)).toList(),
                         currentPos, nextPos);
             }
             

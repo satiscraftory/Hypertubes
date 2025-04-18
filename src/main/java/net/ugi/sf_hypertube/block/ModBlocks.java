@@ -20,6 +20,10 @@ public class ModBlocks {
     public static final DeferredBlock<Block> HYPERTUBE_SUPPORT = registerBlock("hypertube_support",
             () -> new HypertubeSupport(BlockBehaviour.Properties.of().strength(2f).noLootTable().noOcclusion()));
 
+    public static final DeferredBlock<Block> HYPERTUBE= registerBlock("hypertube",
+            () -> new Block(BlockBehaviour.Properties.of().strength(2f).noLootTable().noOcclusion()));
+
+
 
 
     private static <T extends Block> DeferredBlock<T> registerBlock(String name, Supplier<T> block) {
