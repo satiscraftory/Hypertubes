@@ -256,7 +256,7 @@ public class HypertubeEntity extends Entity {
                         if(hypertubeSupport.isConnectedBothSides(this.level(), this.currentPos)){
                             hypertubeSupport.getNextPath(this.level(),this.previousPos,this.currentPos,this);
                         }else{
-                            //yeet player
+                            //continue path to inside hypertubesupport (currentpos) and yeet player
                         }
                     }
                 }

@@ -157,6 +157,16 @@ public class HypertubeSupport extends BaseEntityBlock {
             int currentDirection = -currentHypertubeSupportBlockEntity.getDirection(previousSupportPos);
             BlockPos nextPos = currentHypertubeSupportBlockEntity.getTargetPos(currentDirection);
             BlockEntity nextEntity = level.getBlockEntity(nextPos);
+            if(!(level.getBlockState(nextPos).getBlock() instanceof HypertubeSupport)){//extra anti crash
+                if(currentHypertubeSupportBlockEntity.getDirection(nextPos)==1){//todo maybe make this a function and call more often
+                    currentHypertubeSupportBlockEntity.targetPositive = null;
+                    currentHypertubeSupportBlockEntity.targetPositiveType = null;
+                }else{
+                    currentHypertubeSupportBlockEntity.targetNegative = null;
+                    currentHypertubeSupportBlockEntity.targetNegativeType = null;
+                }
+                return;
+            }
             Direction.Axis nextAxis = level.getBlockState(nextPos).getValue(AXIS);
             if(nextEntity instanceof HypertubeSupportBlockEntity nextHypertubeSupportBlockEntity) {
                 int nextDirection = nextHypertubeSupportBlockEntity.getDirection(currentPos);
