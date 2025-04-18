@@ -30,15 +30,19 @@ public class ModBlocks {
             DeferredRegister.createBlocks(SfHyperTube.MOD_ID);
 
     public static final DeferredBlock<Block> HYPERTUBE_SUPPORT = registerBlock("hypertube_support",
-            () -> new HypertubeSupport(BlockBehaviour.Properties.of().strength(2f).noLootTable().noOcclusion().noCollission()));
+            () -> new HypertubeSupport(
+                    BlockBehaviour.Properties.of().strength(2f).noLootTable().noOcclusion()));
 
     public static final DeferredBlock<Block> HYPERTUBE= registerBlock("hypertube",
             () ->   new TransparentBlock(
             BlockBehaviour.Properties.of()
-                .strength(2f).sound(SoundType.GLASS).noOcclusion().isSuffocating(ModBlocks::never).isViewBlocking(ModBlocks::never).noCollission()
-        ));
+                .strength(2f).sound(SoundType.GLASS).noOcclusion().isSuffocating(ModBlocks::never).isViewBlocking(ModBlocks::never).isValidSpawn(Blocks::never)
+            ));
 
-
+    public static final DeferredBlock<Block> HYPERTUBE_ENTRANCE = registerBlock("hypertube_entrance",
+            () -> new TransparentBlock(
+                    BlockBehaviour.Properties.of()
+            ));
 
 
     private static <T extends Block> DeferredBlock<T> registerBlock(String name, Supplier<T> block) {

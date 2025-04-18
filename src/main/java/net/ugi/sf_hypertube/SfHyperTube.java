@@ -7,8 +7,10 @@ import net.minecraft.client.renderer.entity.NoopRenderer;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.ugi.sf_hypertube.block.ModBlocks;
 import net.ugi.sf_hypertube.block.entity.ModBlockEntities;
+import net.ugi.sf_hypertube.block.entity.renderer.HypertubeSupportBlockEntityRenderer;
 import net.ugi.sf_hypertube.entity.ModEntities;
 import net.ugi.sf_hypertube.item.ModCreativeModeTabs;
 import net.ugi.sf_hypertube.item.ModItems;
@@ -87,6 +89,13 @@ public class SfHyperTube {
             EntityRenderers.register(ModEntities.HYPERTUBE_ENTITY.get(), NoopRenderer::new);
 
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.HYPERTUBE.get(), RenderType.translucent());
+
+
+        }
+
+        @SubscribeEvent
+        public static void registerBER(EntityRenderersEvent.RegisterRenderers event) {
+            event.registerBlockEntityRenderer(ModBlockEntities.HYPERTUBE_SUPPORT_BE.get(), HypertubeSupportBlockEntityRenderer::new);
         }
     }
 }

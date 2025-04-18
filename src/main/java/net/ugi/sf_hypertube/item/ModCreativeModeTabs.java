@@ -2,7 +2,6 @@ package net.ugi.sf_hypertube.item;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.IEventBus;
@@ -22,8 +21,9 @@ public class ModCreativeModeTabs {
                     .title(Component.translatable("creativetab.sf_hypertube.all"))
                     .displayItems((itemDisplayParameters, output) -> {
                         output.accept(ModBlocks.HYPERTUBE_SUPPORT);
+                        output.accept(ModBlocks.HYPERTUBE_ENTRANCE);
                         output.accept(ModBlocks.HYPERTUBE);
-                        output.accept(ModItems.HYPERTUBEPLACER);
+                        output.accept(ModItems.HYPERTUBE_PLACER);
                     }).build());
 
 

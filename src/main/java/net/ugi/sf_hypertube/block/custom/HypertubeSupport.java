@@ -3,6 +3,7 @@ package net.ugi.sf_hypertube.block.custom;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.references.Blocks;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -26,6 +27,8 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.ugi.sf_hypertube.block.ModBlocks;
 import net.ugi.sf_hypertube.block.entity.HypertubeSupportBlockEntity;
 import net.ugi.sf_hypertube.entity.HypertubeEntity;
 import net.ugi.sf_hypertube.entity.ModEntities;
@@ -167,7 +170,7 @@ public class HypertubeSupport extends BaseEntityBlock {
                 if(currentHypertubeSupportBlockEntity.getDirection(nextPos)==1){//todo maybe make this a function and call more often
                     currentHypertubeSupportBlockEntity.targetPositive = null;
                     currentHypertubeSupportBlockEntity.targetPositiveType = null;
-                }else{
+                }else if(currentHypertubeSupportBlockEntity.getDirection(nextPos)==-1){
                     currentHypertubeSupportBlockEntity.targetNegative = null;
                     currentHypertubeSupportBlockEntity.targetNegativeType = null;
                 }
@@ -209,7 +212,7 @@ public class HypertubeSupport extends BaseEntityBlock {
     }
 
     @Override
-    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
+    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {//todo remove connected tube blocks
         if(state.getBlock() != newState.getBlock()) {
             if(level.getBlockEntity(pos) instanceof HypertubeSupportBlockEntity hypertubeSupportBlockEntity){
                 hypertubeSupportBlockEntity.drops();
@@ -223,10 +226,8 @@ public class HypertubeSupport extends BaseEntityBlock {
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
                                               Player player, InteractionHand hand, BlockHitResult hitResult) {
         if(level.getBlockEntity(pos) instanceof HypertubeSupportBlockEntity hypertubeSupportBlockEntity) {
-            if(hypertubeSupportBlockEntity.inventory.getStackInSlot(0).isEmpty() && stack.is(Items.STICK)) {
+            if(hypertubeSupportBlockEntity.inventory.getStackInSlot(0).isEmpty() && stack.is(Items.PURPUR_PILLAR) || stack.is(ModBlocks.HYPERTUBE_ENTRANCE.asItem())) {
                 hypertubeSupportBlockEntity.inventory.insertItem(0, stack.copy(), false);
-                hypertubeSupportBlockEntity.targetPositive = player.getOnPos();//example on how to edit data
-                hypertubeSupportBlockEntity.targetNegative = player.getBlockPosBelowThatAffectsMyMovement();
                 stack.shrink(1);
                 level.playSound(player, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 1f, 2f);
                 return ItemInteractionResult.SUCCESS;

@@ -21,7 +21,7 @@ import java.util.WeakHashMap;
 
 
 public class HypertubeSupportBlockEntity extends BlockEntity {
-
+    private float rotation;//probalby not needed?
     public BlockPos targetPositive = null;
     public BlockPos targetNegative = null;
     public String targetPositiveType = null;
@@ -156,6 +156,11 @@ public class HypertubeSupportBlockEntity extends BlockEntity {
         for(Entity e : entitiesToRemove) {
             this.discardEntities.remove(e);
         }
+    }
+
+    public float getRenderingRotation() {
+        rotation=0;
+        return rotation;
     }
 
 }

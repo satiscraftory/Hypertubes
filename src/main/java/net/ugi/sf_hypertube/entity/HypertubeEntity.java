@@ -39,8 +39,7 @@ public class HypertubeEntity extends Entity {
     private double lerpZ;
     private double lerpYRot;
     private double lerpXRot;
-    private Vec3 targetDeltaMovement = Vec3.ZERO;
-    private boolean inTube;
+
     private List<BlockPos> path = new ArrayList<>();
     private BlockPos previousPos;
     private BlockPos currentPos;
@@ -162,7 +161,6 @@ public class HypertubeEntity extends Entity {
             if (passenger instanceof Animal && this.getPassengers().size() == 1) {
                 passenger.setYBodyRot(passenger.getVehicle().getYRot());
                 //passenger.setYHeadRot(passenger.getYHeadRot() + (float)i);
-
             }
         }
     }
