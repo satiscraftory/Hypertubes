@@ -65,6 +65,15 @@ public class HypertubeEntity extends Entity {
         return listTag;
     }
 
+    public void loadPath(ListTag listTag) {
+        for(int i = 0; i < listTag.size(); ++i) {
+            CompoundTag compoundtag = listTag.getCompound(i);
+            int[] arr  = compoundtag.getIntArray(String.valueOf(i));
+            this.path.add(new BlockPos(arr[0], arr[1], arr[2]));
+        }
+    }
+
+
     ///-----------data saving------
     @Override
     protected void addAdditionalSaveData(CompoundTag compound) {
@@ -100,6 +109,10 @@ public class HypertubeEntity extends Entity {
         }
         if(compound.contains("currentPathIndex")) {
             this.currentPathIndex = compound.getInt("currentPathIndex");
+        }
+        if(compound.contains("path")) {
+            ListTag listtag = compound.getList("path",10);
+            loadPath(listtag);
         }
 
     }
