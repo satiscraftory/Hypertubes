@@ -43,7 +43,7 @@ public class HypertubeEntity extends Entity {
     private List<BlockPos> path = new ArrayList<>();
     private BlockPos previousPos;
     private BlockPos currentPos;
-    private int speed = 10;
+    private int speed = 100;
     private int currentPathIndex = 0;
 
 
@@ -307,7 +307,7 @@ public class HypertubeEntity extends Entity {
                                     BlockPos blockPosVector = new BlockPos(0,0,0).relative(axis,-hypertubeSupportBlockEntity.getDirection(this.previousPos));
                                     Vec3 vector = new Vec3(blockPosVector.getX(),blockPosVector.getY(), blockPosVector.getZ()).scale(speed);
 
-                                    passenger.teleportTo(exitpos.getX(), exitpos.getY(), exitpos.getZ());
+                                    passenger.teleportTo(exitpos.getCenter().x, exitpos.getCenter().y, exitpos.getCenter().z);
 
                                     hypertubeSupportBlockEntity.addEntityToDiscard(passenger);
                                     passenger.setDeltaMovement(vector);
