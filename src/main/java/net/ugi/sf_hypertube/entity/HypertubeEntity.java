@@ -5,6 +5,7 @@ import com.mojang.datafixers.types.templates.CompoundList;
 import com.mojang.datafixers.types.templates.TypeTemplate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.tags.EntityTypeTags;
@@ -13,6 +14,7 @@ import net.minecraft.world.CompoundContainer;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.Vec3;
@@ -50,6 +52,19 @@ public class HypertubeEntity extends Entity {
 
     }
 
+    public ListTag savePath(ListTag listTag) {
+        for(int i = 0; i < this.path.size(); ++i) {
+            if (this.path.get(i) != null) {
+                CompoundTag compoundtag = new CompoundTag();
+                BlockPos blockpos = this.path.get(i);
+                compoundtag.putIntArray(String.valueOf(i), new int[] {blockpos.getX(), blockpos.getY(), blockpos.getZ()});
+                listTag.add(compoundtag);
+            }
+
+        }
+        return listTag;
+    }
+
     ///-----------data saving------
     @Override
     protected void addAdditionalSaveData(CompoundTag compound) {
@@ -61,6 +76,7 @@ public class HypertubeEntity extends Entity {
         }
         if(currentPathIndex > 0) {
             compound.putInt("current_path_index", currentPathIndex);
+            compound.put("Path", savePath(new ListTag()));
         }
 /*        if(!path.isEmpty()) {
             compound.put("path", );

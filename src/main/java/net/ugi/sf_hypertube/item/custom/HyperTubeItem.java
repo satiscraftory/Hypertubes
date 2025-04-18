@@ -91,6 +91,9 @@ public class HyperTubeItem extends Item {
         else if (curveType.get(stack).equals("Overkill")){
             curveType.put(stack, "Straight");
         }
+        else if (curveType.get(stack).equals("Straight")){
+            curveType.put(stack, "Minecraft");
+        }
         else  {
             curveType.put(stack, "Curved");
         }
@@ -167,7 +170,6 @@ public class HyperTubeItem extends Item {
 
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand) {
-        System.out.println("HyperTubeItem::use");
 
         if (level.isClientSide()) return InteractionResultHolder.fail(player.getItemInHand(usedHand));
         ItemStack stack = player.getItemInHand(usedHand);
