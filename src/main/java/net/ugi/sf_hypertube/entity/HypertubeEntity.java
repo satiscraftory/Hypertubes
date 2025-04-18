@@ -69,38 +69,37 @@ public class HypertubeEntity extends Entity {
     @Override
     protected void addAdditionalSaveData(CompoundTag compound) {
         if(previousPos != null) {
-            compound.putIntArray("previous_pos", new int[]{previousPos.getX(), previousPos.getY(), previousPos.getZ()});
+            compound.putIntArray("previousPos", new int[]{previousPos.getX(), previousPos.getY(), previousPos.getZ()});
         }
         if(currentPos != null) {
-            compound.putIntArray("current_pos", new int[]{currentPos.getX(), currentPos.getY(), currentPos.getZ()});
+            compound.putIntArray("currentPos", new int[]{currentPos.getX(), currentPos.getY(), currentPos.getZ()});
         }
         if(currentPathIndex > 0) {
-            compound.putInt("current_path_index", currentPathIndex);
-            compound.put("Path", savePath(new ListTag()));
+            compound.putInt("currentPathIndex", currentPathIndex);
         }
-/*        if(!path.isEmpty()) {
-            compound.put("path", );
-        }*/
+        if(!path.isEmpty()) {
+            compound.put("path", savePath(new ListTag()));
+        }
     }
 
     @Override
     protected void readAdditionalSaveData(CompoundTag compound) {
         previousPos = null;
         currentPos = null;
-        if(compound.contains("previous_pos")) {
-            int[] arr = compound.getIntArray("previous_pos");
+        if(compound.contains("previousPos")) {
+            int[] arr = compound.getIntArray("previousPos");
             if (arr.length == 3) {
                 previousPos = new BlockPos(arr[0], arr[1], arr[2]);
             }
         }
-        if(compound.contains("current_pos")) {
-            int[] arr = compound.getIntArray("current_pos");
+        if(compound.contains("currentPos")) {
+            int[] arr = compound.getIntArray("currentPos");
             if (arr.length == 3) {
                 currentPos = new BlockPos(arr[0], arr[1], arr[2]);
             }
         }
-        if(compound.contains("current_path_index")) {
-            this.currentPathIndex = compound.getInt("current_path_index");
+        if(compound.contains("currentPathIndex")) {
+            this.currentPathIndex = compound.getInt("currentPathIndex");
         }
 
     }

@@ -63,16 +63,16 @@ public class HypertubeSupportBlockEntity extends BlockEntity {
         super.saveAdditional(tag, registries);
         tag.put("inventory", inventory.serializeNBT(registries));
         if(targetPositive != null) {
-            tag.putIntArray("target_positive", List.of(targetPositive.getX(), targetPositive.getY(), targetPositive.getZ()));
+            tag.putIntArray("targetPositive", List.of(targetPositive.getX(), targetPositive.getY(), targetPositive.getZ()));
         }
         if(targetPositiveType != null) {
-            tag.putString("target_positive_type", targetPositiveType);
+            tag.putString("targetPositiveType", targetPositiveType);
         }
         if(targetNegative != null) {
-            tag.putIntArray("target_negative", List.of(targetNegative.getX(), targetNegative.getY(), targetNegative.getZ()));
+            tag.putIntArray("targetNegative", List.of(targetNegative.getX(), targetNegative.getY(), targetNegative.getZ()));
         }
         if(targetNegativeType != null) {
-            tag.putString("target_negative_type", targetNegativeType);
+            tag.putString("targetNegativeType", targetNegativeType);
         }
     }
 
@@ -86,23 +86,23 @@ public class HypertubeSupportBlockEntity extends BlockEntity {
         targetNegative = null;
         targetNegativeType = null;
 
-        if (tag.contains("target_positive")) {
-            int[] arr = tag.getIntArray("target_positive");
+        if (tag.contains("targetPositive")) {
+            int[] arr = tag.getIntArray("targetPositive");
             if (arr.length == 3) {
                 targetPositive = new BlockPos(arr[0], arr[1], arr[2]);
             }
         }
-        if(tag.contains("target_positive_type")) {
-            targetPositiveType = tag.getString("target_positive_type");
+        if(tag.contains("targetPositiveType")) {
+            targetPositiveType = tag.getString("targetPositiveType");
         }
-        if (tag.contains("target_negative")) {
-            int[] arr = tag.getIntArray("target_negative");
+        if (tag.contains("targetNegative")) {
+            int[] arr = tag.getIntArray("targetNegative");
             if (arr.length == 3) {
                 targetNegative = new BlockPos(arr[0], arr[1], arr[2]);
             }
         }
-        if(tag.contains("target_negative_type")) {
-            targetNegativeType = tag.getString("target_negative_type");
+        if(tag.contains("targetNegativeType")) {
+            targetNegativeType = tag.getString("targetNegativeType");
         }
     }
 
