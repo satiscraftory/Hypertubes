@@ -32,13 +32,17 @@ import net.ugi.sf_hypertube.entity.ModEntities;
 import net.ugi.sf_hypertube.util.Bezier;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.WeakHashMap;
 
 public class HypertubeSupport extends BaseEntityBlock {
     public static final VoxelShape SHAPE = Block.box(0, 0, 0, 16, 16, 16);
     public static final MapCodec<HypertubeSupport> CODEC = simpleCodec(HypertubeSupport::new);
     public static final EnumProperty<Direction.Axis> AXIS = BlockStateProperties.AXIS;
+
+    private final WeakHashMap<Entity, Integer> discardEntities  = new WeakHashMap<>();
 
     public HypertubeSupport(Properties properties) {
         super(properties);
@@ -96,6 +100,25 @@ public class HypertubeSupport extends BaseEntityBlock {
         return RenderShape.MODEL;
     }
 
+    public void addEntityToDiscard(Entity entity) {
+        this.discardEntities.remove(entity);
+        this.discardEntities.put(entity, 5);
+    }
+
+    private void removeEntitiesFromDiscard(List<Entity> entitiesInRange) {
+        List<Entity> entitiesToRemove = new ArrayList<>();
+        this.discardEntities.forEach( (e,i) -> {
+            this.discardEntities.put(e,i-1);
+            if(entitiesInRange.contains(e)) this.discardEntities.put(e,5);
+            if(i < 1) entitiesToRemove.add(e);
+
+
+        });
+        for(Entity e : entitiesToRemove) {
+            this.discardEntities.remove(e);
+        }
+    }
+
     @Override
     protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
         level.scheduleTick(new BlockPos(pos), this, 1);
@@ -113,33 +136,37 @@ public class HypertubeSupport extends BaseEntityBlock {
 
             if (checkpos == null) return;
             List<Entity> entities = level.getEntities(null, new AABB(checkpos.offset(1,2,1).getBottomCenter(), checkpos.offset(-1,0,-1).getBottomCenter()));
+            removeEntitiesFromDiscard(entities);
+            //System.out.println(this.discardEntities);
             if(entities.isEmpty()) return;
+
 
             BlockPos finalCheckpos = checkpos;
             entities.forEach(entity -> {
-                HypertubeEntity hyperTubeEntity = new HypertubeEntity(ModEntities.HYPERTUBE_ENTITY.get(), level);
-                hyperTubeEntity.setPos(pos.getX()+ 0.5,pos.getY(),pos.getZ() + 0.5);
-                //hyperTubeEntity.path
-                //level.addFreshEntity(hyperTubeEntity);
-
-                //entity.startRiding(hyperTubeEntity);
-                BlockPos currentPos = pos;
-                Direction.Axis currentAxis = level.getBlockState(currentPos).getValue(AXIS);
-                int dir = ((pos.getX() - finalCheckpos.getX()) + (pos.getY() - finalCheckpos.getY()) + (pos.getZ() - finalCheckpos.getZ()));
-                int currentDirection = (dir) > 0 ? 1 : -1;
-                BlockPos nextPos = hypertubeSupportBlockEntity.getTargetPos(currentDirection);
-                Direction.Axis nextAxis = level.getBlockState(nextPos).getValue(AXIS);
-                BlockEntity nextEntity = level.getBlockEntity(nextPos);
-                int nextDirection = 0;
-                if(nextEntity instanceof HypertubeSupportBlockEntity nextHypertubeSupportBlockEntity) {
-                    nextDirection = nextHypertubeSupportBlockEntity.getDirection(currentPos);
-                    Bezier bezier = new Bezier();
-                    bezier.setCurve(nextHypertubeSupportBlockEntity.getCurveType(nextDirection));
-                    hyperTubeEntity.addPath(
-                            Arrays.stream(bezier.calcBezierArray(currentPos,currentAxis,currentDirection,nextPos,nextAxis,nextDirection)).toList(),
-                            currentPos,nextPos);
-                    level.addFreshEntity(hyperTubeEntity);
-                    entity.startRiding(hyperTubeEntity);
+                if(!this.discardEntities.containsKey(entity) && !(entity instanceof HypertubeEntity)) {
+                    HypertubeEntity hyperTubeEntity = new HypertubeEntity(ModEntities.HYPERTUBE_ENTITY.get(), level);
+                    hyperTubeEntity.setPos(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
+                    //hyperTubeEntity.path
+                    //level.addFreshEntity(hyperTubeEntity);
+                    //entity.startRiding(hyperTubeEntity);
+                    BlockPos currentPos = pos;
+                    Direction.Axis currentAxis = level.getBlockState(currentPos).getValue(AXIS);
+                    int dir = ((pos.getX() - finalCheckpos.getX()) + (pos.getY() - finalCheckpos.getY()) + (pos.getZ() - finalCheckpos.getZ()));
+                    int currentDirection = (dir) > 0 ? 1 : -1;
+                    BlockPos nextPos = hypertubeSupportBlockEntity.getTargetPos(currentDirection);
+                    Direction.Axis nextAxis = level.getBlockState(nextPos).getValue(AXIS);
+                    BlockEntity nextEntity = level.getBlockEntity(nextPos);
+                    int nextDirection = 0;
+                    if (nextEntity instanceof HypertubeSupportBlockEntity nextHypertubeSupportBlockEntity) {
+                        nextDirection = nextHypertubeSupportBlockEntity.getDirection(currentPos);
+                        Bezier bezier = new Bezier();
+                        bezier.setCurve(nextHypertubeSupportBlockEntity.getCurveType(nextDirection));
+                        hyperTubeEntity.addPath(
+                                Arrays.stream(bezier.calcBezierArray(currentPos, currentAxis, currentDirection, nextPos, nextAxis, nextDirection)).toList(),
+                                currentPos, nextPos);
+                        level.addFreshEntity(hyperTubeEntity);
+                        entity.startRiding(hyperTubeEntity);
+                    }
                 }
             });
 
