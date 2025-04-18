@@ -1,10 +1,18 @@
 package net.ugi.sf_hypertube.block;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.TransparentBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.ugi.sf_hypertube.SfHyperTube;
@@ -14,6 +22,10 @@ import net.ugi.sf_hypertube.item.ModItems;
 import java.util.function.Supplier;
 
 public class ModBlocks {
+    private static boolean never(BlockState state, BlockGetter blockGetter, BlockPos pos) {
+        return false;
+    }
+
     public static final DeferredRegister.Blocks BLOCKS =
             DeferredRegister.createBlocks(SfHyperTube.MOD_ID);
 
@@ -21,7 +33,10 @@ public class ModBlocks {
             () -> new HypertubeSupport(BlockBehaviour.Properties.of().strength(2f).noLootTable().noOcclusion()));
 
     public static final DeferredBlock<Block> HYPERTUBE= registerBlock("hypertube",
-            () -> new Block(BlockBehaviour.Properties.of().strength(2f).noLootTable().noOcclusion()));
+            () ->   new TransparentBlock(
+            BlockBehaviour.Properties.of()
+                .strength(2f).sound(SoundType.GLASS).noOcclusion().isSuffocating(ModBlocks::never).isViewBlocking(ModBlocks::never)
+        ));
 
 
 

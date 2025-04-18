@@ -154,7 +154,6 @@ public class HypertubeEntity extends Entity {
             this.clampRotation(passenger);
             if (passenger instanceof Animal && this.getPassengers().size() == 1) {
                 passenger.setYBodyRot(passenger.getVehicle().getYRot());
-
                 //passenger.setYHeadRot(passenger.getYHeadRot() + (float)i);
 
             }
