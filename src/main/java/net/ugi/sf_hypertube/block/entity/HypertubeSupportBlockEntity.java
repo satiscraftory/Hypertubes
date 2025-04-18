@@ -26,6 +26,8 @@ public class HypertubeSupportBlockEntity extends BlockEntity {
     public BlockPos targetNegative = null;
     public String targetPositiveType = null;
     public String targetNegativeType = null;
+    public String positiveTypeInfo = null;
+    public String negativeTypeInfo = null;
 
     public final WeakHashMap<Entity, Integer> discardEntities  = new WeakHashMap<>();
 
@@ -78,6 +80,12 @@ public class HypertubeSupportBlockEntity extends BlockEntity {
         if(targetNegativeType != null) {
             tag.putString("targetNegativeType", targetNegativeType);
         }
+        if(positiveTypeInfo != null) {
+            tag.putString("positiveTypeInfo", positiveTypeInfo);
+        }
+        if(negativeTypeInfo != null) {
+            tag.putString("negativeTypeInfo", negativeTypeInfo);
+        }
     }
 
     @Override
@@ -89,6 +97,8 @@ public class HypertubeSupportBlockEntity extends BlockEntity {
         targetPositiveType = null;
         targetNegative = null;
         targetNegativeType = null;
+        positiveTypeInfo = null;
+        negativeTypeInfo = null;
 
         if (tag.contains("targetPositive")) {
             int[] arr = tag.getIntArray("targetPositive");
@@ -107,6 +117,12 @@ public class HypertubeSupportBlockEntity extends BlockEntity {
         }
         if(tag.contains("targetNegativeType")) {
             targetNegativeType = tag.getString("targetNegativeType");
+        }
+        if (tag.contains("positiveTypeInfo")) {
+            positiveTypeInfo = tag.getString("positiveTypeInfo");
+        }
+        if (tag.contains("negativeTypeInfo")) {
+            negativeTypeInfo = tag.getString("negativeTypeInfo");
         }
     }
 
