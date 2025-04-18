@@ -259,10 +259,13 @@ public class HypertubeEntity extends Entity {
                     if(block instanceof HypertubeSupport hypertubeSupport){
                         if(hypertubeSupport.isConnectedBothSides(this.level(), this.currentPos)){
                             hypertubeSupport.getNextPath(this.level(),this.previousPos,this.currentPos,this);
-//                            for (int i = currentPathIndex -1; i >=0 ; i--) {//cull path array
-//                                this.path.removeFirst();
-//                                currentPathIndex--;
-//                            }
+                            //cull path array
+                            for (int i = currentPathIndex -1; i >=0 && !this.path.isEmpty(); i--) {//cull path array
+                                this.path.removeFirst();
+                                currentPathIndex--;
+                            }
+                            currentPathIndex = 0;
+                            //--cull code
                         }else{
 
                             //TEST------
