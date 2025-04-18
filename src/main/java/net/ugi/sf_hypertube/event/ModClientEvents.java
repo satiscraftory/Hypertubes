@@ -2,6 +2,7 @@ package net.ugi.sf_hypertube.event;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.Camera;
+import net.minecraft.client.CameraType;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
@@ -17,17 +18,34 @@ import net.ugi.sf_hypertube.entity.HypertubeEntity;
 
 @EventBusSubscriber(modid = SfHyperTube.MOD_ID, bus = EventBusSubscriber.Bus.GAME, value =  Dist.CLIENT)
 public class ModClientEvents {
+    private static boolean forcedThirdPerson = false;
+    private static CameraType originalCameraType = CameraType.FIRST_PERSON;
+
     @SubscribeEvent
     public static void onClientTick(ClientTickEvent.Pre event) {
+        Minecraft mc = Minecraft.getInstance();
         Player player = Minecraft.getInstance().player;
-        if(player == null) return;
-        if(player.isCreative()) return;
+        if (player == null || mc.level == null)
+            return;
+
         //if(player.getVehicle() == null) return;//maybe not needed
         if (player.getVehicle() instanceof HypertubeEntity) {
+            if (!forcedThirdPerson) {
+                forcedThirdPerson = true;
+                originalCameraType = mc.options.getCameraType();
+                mc.options.setCameraType(CameraType.THIRD_PERSON_BACK);
+            }
+            if(player.isCreative()) return;
             InputConstants.Key key = Minecraft.getInstance().options.keyShift.getKey();
             KeyMapping.set(key, false);
 /*            player.setForcedPose(Pose.FALL_FLYING);
             player.setPose(Pose.FALL_FLYING);*/
+        }else {
+            // Reset camera if no longer riding
+            if (forcedThirdPerson) {
+                mc.options.setCameraType(originalCameraType);
+                forcedThirdPerson = false;
+            }
         }
     }
 }
