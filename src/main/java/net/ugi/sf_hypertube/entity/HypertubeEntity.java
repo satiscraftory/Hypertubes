@@ -44,7 +44,7 @@ public class HypertubeEntity extends Entity {
     private List<BlockPos> path = new ArrayList<>();
     private BlockPos previousPos;
     private BlockPos currentPos;
-    private int speed = 4;
+    private int speed = 10;
     private int currentPathIndex = 0;
 
 
@@ -261,10 +261,10 @@ public class HypertubeEntity extends Entity {
                     if(block instanceof HypertubeSupport hypertubeSupport){
                         if(hypertubeSupport.isConnectedBothSides(this.level(), this.currentPos)){
                             hypertubeSupport.getNextPath(this.level(),this.previousPos,this.currentPos,this);
-                            for (int i = currentPathIndex -1; i >=0 ; i--) {//cull path array
-                                this.path.removeFirst();
-                                currentPathIndex--;
-                            }
+//                            for (int i = currentPathIndex -1; i >=0 ; i--) {//cull path array
+//                                this.path.removeFirst();
+//                                currentPathIndex--;
+//                            }
                         }else{
 
                             //TEST------
@@ -297,7 +297,7 @@ public class HypertubeEntity extends Entity {
                                     this.setYRot(yaw);
                                 }
                                 if (this.getPassengers().size() != 0){
-                                    hypertubeSupport.addEntityToDiscard(this.getPassengers().get(0));
+                                    hypertubeSupportBlockEntity.addEntityToDiscard(this.getPassengers().get(0));
                                 }
                             }
                             else{
@@ -309,7 +309,9 @@ public class HypertubeEntity extends Entity {
                                     BlockPos blockPosVector = new BlockPos(0,0,0).relative(axis,-hypertubeSupportBlockEntity.getDirection(this.previousPos));
                                     Vec3 vector = new Vec3(blockPosVector.getX(),blockPosVector.getY(), blockPosVector.getZ()).scale(speed);
 
-                                    hypertubeSupport.addEntityToDiscard(passenger);
+                                    passenger.teleportTo(exitpos.getX(), exitpos.getY(), exitpos.getZ());
+
+                                    hypertubeSupportBlockEntity.addEntityToDiscard(passenger);
                                     passenger.setDeltaMovement(vector);
                                     passenger.hasImpulse = true;
 

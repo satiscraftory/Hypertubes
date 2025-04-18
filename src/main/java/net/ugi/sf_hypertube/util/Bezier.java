@@ -220,7 +220,7 @@ public class Bezier {
 
         }
 
-        int steps = (int)(1.5*Math.abs(b1Pos.getX() - b2Pos.getX()) + 1.5*Math.abs(b1Pos.getY() - b2Pos.getY()) + 1.5*Math.abs(b1Pos.getZ() - b2Pos.getZ()) + 10);
+        int steps = (int)Math.round((1.5*Math.abs(b1Pos.getX() - b2Pos.getX()) + 1.5*Math.abs(b1Pos.getY() - b2Pos.getY()) + 1.5*Math.abs(b1Pos.getZ() - b2Pos.getZ()) + 10)*2*bezierHelpPosMultiplier);
 
 
         BlockPos[] blockPosArray = new BlockPos[steps];

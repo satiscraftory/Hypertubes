@@ -30,6 +30,7 @@ import net.ugi.sf_hypertube.block.entity.HypertubeSupportBlockEntity;
 import net.ugi.sf_hypertube.entity.HypertubeEntity;
 import net.ugi.sf_hypertube.entity.ModEntities;
 import net.ugi.sf_hypertube.util.Bezier;
+import org.checkerframework.common.returnsreceiver.qual.This;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -41,8 +42,6 @@ public class HypertubeSupport extends BaseEntityBlock {
     public static final VoxelShape SHAPE = Block.box(0, 0, 0, 16, 16, 16);
     public static final MapCodec<HypertubeSupport> CODEC = simpleCodec(HypertubeSupport::new);
     public static final EnumProperty<Direction.Axis> AXIS = BlockStateProperties.AXIS;
-
-    private final WeakHashMap<Entity, Integer> discardEntities  = new WeakHashMap<>();
 
     public HypertubeSupport(Properties properties) {
         super(properties);
@@ -100,25 +99,6 @@ public class HypertubeSupport extends BaseEntityBlock {
         return RenderShape.MODEL;
     }
 
-    public void addEntityToDiscard(Entity entity) {
-        this.discardEntities.remove(entity);
-        this.discardEntities.put(entity, 5);
-    }
-
-    private void removeEntitiesFromDiscard(List<Entity> entitiesInRange) {
-        List<Entity> entitiesToRemove = new ArrayList<>();
-        this.discardEntities.forEach( (e,i) -> {
-            this.discardEntities.put(e,i-1);
-            if(entitiesInRange.contains(e)) this.discardEntities.put(e,5);
-            if(i < 1) entitiesToRemove.add(e);
-
-
-        });
-        for(Entity e : entitiesToRemove) {
-            this.discardEntities.remove(e);
-        }
-    }
-
     @Override
     protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
         level.scheduleTick(new BlockPos(pos), this, 1);
@@ -136,14 +116,13 @@ public class HypertubeSupport extends BaseEntityBlock {
 
             if (checkpos == null) return;
             List<Entity> entities = level.getEntities(null, new AABB(checkpos.offset(1,2,1).getBottomCenter(), checkpos.offset(-1,0,-1).getBottomCenter()));
-            removeEntitiesFromDiscard(entities);
-            //System.out.println(this.discardEntities);
+            hypertubeSupportBlockEntity.removeEntitiesFromDiscard(entities);
             if(entities.isEmpty()) return;
 
 
             BlockPos finalCheckpos = checkpos;
             entities.forEach(entity -> {
-                if(!this.discardEntities.containsKey(entity) && !(entity instanceof HypertubeEntity)) {
+                if(!hypertubeSupportBlockEntity.discardEntities.containsKey(entity) && !(entity instanceof HypertubeEntity)) {
                     HypertubeEntity hyperTubeEntity = new HypertubeEntity(ModEntities.HYPERTUBE_ENTITY.get(), level);
                     hyperTubeEntity.setPos(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
                     //hyperTubeEntity.path

@@ -15,8 +15,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.items.ItemStackHandler;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
-
+import java.util.WeakHashMap;
 
 
 public class HypertubeSupportBlockEntity extends BlockEntity {
@@ -25,6 +26,9 @@ public class HypertubeSupportBlockEntity extends BlockEntity {
     public BlockPos targetNegative = null;
     public String targetPositiveType = null;
     public String targetNegativeType = null;
+
+    public final WeakHashMap<Entity, Integer> discardEntities  = new WeakHashMap<>();
+
     public final ItemStackHandler inventory = new ItemStackHandler(1) {
         @Override
         protected int getStackLimit(int slot, ItemStack stack) {
@@ -133,6 +137,25 @@ public class HypertubeSupportBlockEntity extends BlockEntity {
         if(direction==1) return targetPositive;
         if(direction==-1) return targetNegative;
         return null;
+    }
+
+    public void addEntityToDiscard(Entity entity) {
+        this.discardEntities.remove(entity);
+        this.discardEntities.put(entity, 5);
+    }
+
+    public void removeEntitiesFromDiscard(List<Entity> entitiesInRange) {
+        List<Entity> entitiesToRemove = new ArrayList<>();
+        this.discardEntities.forEach( (e,i) -> {
+            this.discardEntities.put(e,i-1);
+            if(entitiesInRange.contains(e)) this.discardEntities.put(e,5);
+            if(i < 1) entitiesToRemove.add(e);
+
+
+        });
+        for(Entity e : entitiesToRemove) {
+            this.discardEntities.remove(e);
+        }
     }
 
 }
