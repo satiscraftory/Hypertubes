@@ -1,24 +1,16 @@
 package net.ugi.sf_hypertube.entity;
 
-import com.google.common.collect.ImmutableList;
-import com.mojang.datafixers.types.templates.CompoundList;
-import com.mojang.datafixers.types.templates.TypeTemplate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
-import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.util.Mth;
-import net.minecraft.world.CompoundContainer;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -27,7 +19,6 @@ import net.ugi.sf_hypertube.block.custom.HypertubeSupport;
 import net.ugi.sf_hypertube.block.entity.HypertubeSupportBlockEntity;
 import net.ugi.sf_hypertube.network.UncappedMotionPayload;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -127,12 +118,6 @@ public class HypertubeEntity extends Entity {
     }
 
     @Override
-    public boolean startRiding(Entity vehicle, boolean force) {
-        boolean bool = super.startRiding(vehicle, force);
-        return bool;
-    }
-
-    @Override
     public void removePassenger(Entity passenger) {
         if(hasExactlyOnePlayerPassenger()) {
             Player playerEntity = (Player) passenger;
@@ -143,7 +128,6 @@ public class HypertubeEntity extends Entity {
 
         }
     }
-
     protected void clampRotation(Entity entityToUpdate) {
         entityToUpdate.setYBodyRot(this.getYRot());
         float f = Mth.wrapDegrees(entityToUpdate.getYRot() - this.getYRot());
@@ -184,10 +168,10 @@ public class HypertubeEntity extends Entity {
         }
     }
 
-    public void addPath(List<BlockPos> path, BlockPos previousPos, BlockPos currentPos) {
+    public void addPath(List<BlockPos> path, BlockPos currentPos, BlockPos nextPos) {
         this.path.addAll(path);
-        this.previousPos = previousPos;
-        this.currentPos = currentPos;
+        this.previousPos = currentPos;
+        this.currentPos = nextPos;
     }
 
     // ─── Copy of Boat#lerpTo ───────────────────────────────────────────────────
@@ -231,12 +215,12 @@ public class HypertubeEntity extends Entity {
 
         // Server‑only motion
         if (!this.level().isClientSide /*&& this.hasExactlyOnePlayerPassenger()*/) {
-
-            if(!(this.ticks >= this.moveEveryXTicks-1)) {
+            if(!(this.ticks >= this.moveEveryXTicks-1)) {//ticks 0 movevery1 ->
                 this.ticks++;
                 return;
             }
             this.ticks = 0;
+
             // Path handling (ensure path & index are valid)
             if (path != null && currentPathIndex >= 0 && currentPathIndex < path.size()) {
                 Vec3 target    = Vec3.atCenterOf(path.get(currentPathIndex));
@@ -267,74 +251,58 @@ public class HypertubeEntity extends Entity {
 
                     if(block instanceof HypertubeSupport hypertubeSupport){
                         if(hypertubeSupport.isConnectedBothSides(this.level(), this.currentPos)){
-                            hypertubeSupport.getNextPath(this.level(),this.previousPos,this.currentPos,this);
+
+                            this.addPath(hypertubeSupport.getNextPath(this.level(),this.previousPos,this.currentPos), this.currentPos, hypertubeSupport.getNextTargetPos(this.level(), previousPos, currentPos));
                             //cull path array
                             for (int i = currentPathIndex -1; i >=0 && !this.path.isEmpty(); i--) {//cull path array
                                 this.path.removeFirst();
-                                currentPathIndex--;
+                                currentPathIndex--;//needed?
                             }
                             currentPathIndex = 0;
-                            //--cull code
-                        }else{
-
-                            //TEST------
+                        }   else{
+                            //start exit process
+                            if(!this.level().getBlockState(this.currentPos).hasProperty(AXIS))return;//anti crash
                             Direction.Axis axis = this.level().getBlockState(this.currentPos).getValue(AXIS);
+                            if(this.level().getBlockEntity(this.currentPos)== null)return;//anti crash
                             BlockEntity blockEntity = this.level().getBlockEntity(this.currentPos);
-                            if(blockEntity instanceof HypertubeSupportBlockEntity hypertubeSupportBlockEntity){
-                            BlockPos exitpos = this.currentPos.relative(axis,-hypertubeSupportBlockEntity.getDirection(this.previousPos));
-                            if(!this.position().equals(exitpos.getCenter())) {
 
+                            if(blockEntity instanceof HypertubeSupportBlockEntity hypertubeSupportBlockEntity) {
+                                BlockPos exitpos = this.currentPos.relative(axis, -hypertubeSupportBlockEntity.getDirection(this.previousPos));
+                                if (!this.position().equals(exitpos.getCenter())) {
+                                    //move player to the end of the tube
 
-                                Vec3 target = Vec3.atCenterOf(exitpos);
-                                Vec3 current = this.position();
-                                Vec3 diff = target.subtract(current);
-                                double dist = diff.length();
+                                    Vec3 target = Vec3.atCenterOf(exitpos);
+                                    Vec3 current = this.position();
+                                    Vec3 diff = target.subtract(current);
+                                    double dist = diff.length();
 
-                                if (dist < (float)speed/moveEveryXTicks) {
-                                    // snap to block center and advance
-                                    this.setPos(target.x, target.y, target.z);
-                                    //this.setDeltaMovement(Vec3.ZERO);
-                                } else {
-                                    // move a small step toward the target
-                                    Vec3 step = diff.normalize().scale(speed);
-                                    this.setDeltaMovement(step);
-                                    this.move(MoverType.SELF, step);
-                                }
-
-                                // rotate smoothly
-                                if (dist > 1e-3) {
-                                    float yaw = (float) (Math.toDegrees(Math.atan2(diff.z, diff.x)) - 90.0);
-                                    this.setYRot(yaw);
-                                }
-                                if (this.getPassengers().size() != 0){
-                                    hypertubeSupportBlockEntity.addEntityToDiscard(this.getPassengers().get(0));
-                                }
-                            }
-                            else{
-                                if (this.getPassengers().size() != 0){
-                                    Entity passenger = this.getPassengers().get(0);
-                                    passenger.stopRiding();
-                                    this.discard();
-
-                                    BlockPos blockPosVector = new BlockPos(0,0,0).relative(axis,-hypertubeSupportBlockEntity.getDirection(this.previousPos));
-                                    Vec3 vector = new Vec3(blockPosVector.getX(),blockPosVector.getY(), blockPosVector.getZ()).scale((float)speed/moveEveryXTicks);
-
-                                    passenger.teleportTo(exitpos.getCenter().x, exitpos.getCenter().y, exitpos.getCenter().z);
-
-                                    hypertubeSupportBlockEntity.addEntityToDiscard(passenger);
-                                    passenger.setDeltaMovement(vector);//maybe we need to somehow call this on the client too
-                                    passenger.hasImpulse = true;
-                                    if (passenger instanceof ServerPlayer serverPlayer) {
-                                        //serverPlayer.connection.send(new ClientboundSetEntityMotionPacket(passenger));
-                                        serverPlayer.connection.send(new UncappedMotionPayload(passenger.getId(),vector.x, vector.y, vector.z));
+                                    if (dist < (float) speed / moveEveryXTicks) {
+                                        // snap to block center and advance
+                                        this.setPos(target.x, target.y, target.z);
+                                        //this.setDeltaMovement(Vec3.ZERO);
+                                    } else {
+                                        // move a small step toward the target
+                                        Vec3 step = diff.normalize().scale(speed);
+                                        this.setDeltaMovement(step);
+                                        this.move(MoverType.SELF, step);
                                     }
+
+                                    // rotate smoothly
+                                    if (dist > 1e-3) {
+                                        float yaw = (float) (Math.toDegrees(Math.atan2(diff.z, diff.x)) - 90.0);
+                                        this.setYRot(yaw);
+                                    }
+                                    if (!this.getPassengers().isEmpty()) {
+                                        hypertubeSupportBlockEntity.addEntityToDiscard(this.getPassengers().get(0));
+                                    }
+                                } else {
+                                    //launch player or entity
+                                    this.tryLaunchEntity(exitpos, hypertubeSupportBlockEntity, axis);
                                 }
+                                //TEST-------
 
+                                //continue path to inside hypertubesupport (currentpos) and yeet player
                             }
-                            //TEST-------
-
-                            //continue path to inside hypertubesupport (currentpos) and yeet player
-                        }
                         }
                     }
                 }
@@ -345,35 +313,6 @@ public class HypertubeEntity extends Entity {
                 this.setDeltaMovement(Vec3.ZERO);
             }
         }
-/*        this.checkBelowWorld();
-        if (this.level().isClientSide) {
-            if (this.lerpSteps > 0) {
-                this.lerpPositionAndRotationStep(this.lerpSteps, this.lerpX, this.lerpY, this.lerpZ, this.lerpYRot, this.lerpXRot);
-                this.lerpSteps--;
-            } else {
-                this.reapplyPosition();
-                this.setRot(this.getYRot(), this.getXRot());
-            }
-        } else {
-            this.applyGravity();
-            int i = Mth.floor(this.getX());
-            int j = Mth.floor(this.getY());
-            int k = Mth.floor(this.getZ());
-            if (this.level().getBlockState(new BlockPos(i, j - 1, k)).is(BlockTags.RAILS)) {
-                j--;
-            }
-
-            BlockPos blockpos = new BlockPos(i, j, k);
-            BlockState blockstate = this.level().getBlockState(blockpos);
-            this.inTube = BaseRailBlock.isRail(blockstate);
-            if (this.inTube) {
-                this.moveAlongTrack(blockpos, blockstate);
-
-                this.setRot(this.getYRot(), this.getXRot());
-
-                this.firstTick = false;
-            }
-        }*/
     }
 
     public void setSpeed(float s){
@@ -381,11 +320,33 @@ public class HypertubeEntity extends Entity {
         f = f == 0 ? 1 : f;
         int multiplier = (int)Math.round(1.0/f);
         this.moveEveryXTicks = multiplier;
+        System.out.println("moveeveryxticks"+moveEveryXTicks);
         this.speed = (int)(s*multiplier);
     }
 
     public float getSpeed(){
         return (float)this.speed/(float)this.moveEveryXTicks;
+    }
+
+    public void tryLaunchEntity(BlockPos exitPos, HypertubeSupportBlockEntity hypertubeSupportBlockEntity,  Direction.Axis axis){
+        if (!this.getPassengers().isEmpty()){
+            Entity passenger = this.getPassengers().get(0);
+            passenger.stopRiding();
+            this.discard();
+
+            BlockPos blockPosVector = new BlockPos(0,0,0).relative(axis,-hypertubeSupportBlockEntity.getDirection(this.previousPos));
+            Vec3 vector = new Vec3(blockPosVector.getX(),blockPosVector.getY(), blockPosVector.getZ()).scale((float)speed/moveEveryXTicks);
+
+            passenger.teleportTo(exitPos.getCenter().x, exitPos.getCenter().y, exitPos.getCenter().z);
+
+            hypertubeSupportBlockEntity.addEntityToDiscard(passenger);
+            passenger.setDeltaMovement(vector);//maybe we need to somehow call this on the client too
+            passenger.hasImpulse = true;
+            if (passenger instanceof ServerPlayer serverPlayer) {
+                //serverPlayer.connection.send(new ClientboundSetEntityMotionPacket(passenger));
+                serverPlayer.connection.send(new UncappedMotionPayload(passenger.getId(),vector.x, vector.y, vector.z));
+            }
+        }
     }
 
 
