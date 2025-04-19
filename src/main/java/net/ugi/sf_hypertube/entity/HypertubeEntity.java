@@ -43,7 +43,9 @@ public class HypertubeEntity extends Entity {
     private List<BlockPos> path = new ArrayList<>();
     private BlockPos previousPos;
     private BlockPos currentPos;
+    private int ticks = 0;
     private int speed = 1;
+    private int moveEveryXTicks = 1 ;
     private int currentPathIndex = 0;
 
 
@@ -228,6 +230,12 @@ public class HypertubeEntity extends Entity {
 
         // Server‑only motion
         if (!this.level().isClientSide /*&& this.hasExactlyOnePlayerPassenger()*/) {
+
+            if(!(this.ticks >= this.moveEveryXTicks-1)) {
+                this.ticks++;
+                return;
+            }
+            this.ticks = 0;
             // Path handling (ensure path & index are valid)
             if (path != null && currentPathIndex >= 0 && currentPathIndex < path.size()) {
                 Vec3 target    = Vec3.atCenterOf(path.get(currentPathIndex));
@@ -235,14 +243,14 @@ public class HypertubeEntity extends Entity {
                 Vec3 diff      = target.subtract(current);
                 double dist    = diff.length();
 
-                if (dist < speed) {
+                if (dist < (float)speed/moveEveryXTicks) {
                     // snap to block center and advance
                     this.setPos(target.x, target.y, target.z);
                     currentPathIndex+= speed;
                     //this.setDeltaMovement(Vec3.ZERO);
                 } else {
                     // move a small step toward the target
-                    Vec3 step = diff.normalize().scale(speed);
+                    Vec3 step = diff.normalize().scale((float)speed/moveEveryXTicks);
                     this.setDeltaMovement(step);
                     this.move(MoverType.SELF, step);
                 }
@@ -281,7 +289,7 @@ public class HypertubeEntity extends Entity {
                                 Vec3 diff = target.subtract(current);
                                 double dist = diff.length();
 
-                                if (dist < speed) {
+                                if (dist < (float)speed/moveEveryXTicks) {
                                     // snap to block center and advance
                                     this.setPos(target.x, target.y, target.z);
                                     //this.setDeltaMovement(Vec3.ZERO);
@@ -308,7 +316,7 @@ public class HypertubeEntity extends Entity {
                                     this.discard();
 
                                     BlockPos blockPosVector = new BlockPos(0,0,0).relative(axis,-hypertubeSupportBlockEntity.getDirection(this.previousPos));
-                                    Vec3 vector = new Vec3(blockPosVector.getX(),blockPosVector.getY(), blockPosVector.getZ()).scale(speed);
+                                    Vec3 vector = new Vec3(blockPosVector.getX(),blockPosVector.getY(), blockPosVector.getZ()).scale((float)speed/moveEveryXTicks);
 
                                     passenger.teleportTo(exitpos.getCenter().x, exitpos.getCenter().y, exitpos.getCenter().z);
 
@@ -365,6 +373,19 @@ public class HypertubeEntity extends Entity {
                 this.firstTick = false;
             }
         }*/
+    }
+
+    public void setSpeed(float s){
+        System.out.println(s);
+        float f = (s- (int)s);
+        f = f == 0 ? 1 : f;
+        int multiplier = (int)Math.round(1.0/f);
+        this.moveEveryXTicks = multiplier;
+        this.speed = (int)(s*multiplier);
+    }
+
+    public float getSpeed(){
+        return (float)this.speed/(float)this.moveEveryXTicks;
     }
 
 
