@@ -132,10 +132,17 @@ public class HypertubeSupport extends BaseEntityBlock {
                     //level.addFreshEntity(hyperTubeEntity);
                     //entity.startRiding(hyperTubeEntity);
                     BlockPos currentPos = pos;
+                    /*
+                    crash fix for: Cannot get property EnumProperty{name=axis, clazz=class net.minecraft.core.Direction$Axis, values=[x, y, z]} as it does not exist in Block{minecraft:air}
+                    when entering 2 hypertubes
+                    */
+                    if(!level.getBlockState(currentPos).getProperties().contains(AXIS)) return;
+
                     Direction.Axis currentAxis = level.getBlockState(currentPos).getValue(AXIS);
                     int dir = ((pos.getX() - finalCheckpos.getX()) + (pos.getY() - finalCheckpos.getY()) + (pos.getZ() - finalCheckpos.getZ()));
                     int currentDirection = (dir) > 0 ? 1 : -1;
                     BlockPos nextPos = hypertubeSupportBlockEntity.getTargetPos(currentDirection);
+                    if(!level.getBlockState(nextPos).getProperties().contains(AXIS)) return; //crashfix part 2
                     Direction.Axis nextAxis = level.getBlockState(nextPos).getValue(AXIS);
                     BlockEntity nextEntity = level.getBlockEntity(nextPos);
                     int nextDirection = 0;
