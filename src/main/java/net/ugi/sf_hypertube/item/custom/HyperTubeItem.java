@@ -283,8 +283,8 @@ public class HyperTubeItem extends Item {
 
                 boolean isValidCurve = checkValidCurve(level,blockPosArray);
                 Vector3f color = isValidCurve ?new Vector3f(0,255,255) : new Vector3f(255,0,0);
-
-                player.displayClientMessage(Component.literal(  player.getInventory().countItem(Items.GLASS) + "/" +String.valueOf(blockPosArray.length-2)), true);
+                String text = String.format("%-10s %4d/%-3d", this.curveType.get(stack), player.getInventory().countItem(Items.GLASS), blockPosArray.length-2);
+                player.displayClientMessage(Component.literal(  text), true);
 
                 for (int i = 0; i < blockPosArray.length; i++) {
                     for(int j = 0; j < level.players().size(); ++j) {
