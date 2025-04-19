@@ -158,7 +158,7 @@ public class HypertubeSupport extends BaseEntityBlock {
                                 Arrays.stream(bezier.calcBezierArray(currentPos, currentAxis, currentDirection, extraData1, nextPos, nextAxis, nextDirection, extraData2)).toList(),
                                 currentPos, nextPos);
                         level.addFreshEntity(hyperTubeEntity);
-                        hyperTubeEntity.setSpeed(0.2f);
+                        hyperTubeEntity.setSpeed(10f);
                         entity.startRiding(hyperTubeEntity);
                     }
                 }

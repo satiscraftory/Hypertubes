@@ -25,6 +25,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.Vec3;
 import net.ugi.sf_hypertube.block.custom.HypertubeSupport;
 import net.ugi.sf_hypertube.block.entity.HypertubeSupportBlockEntity;
+import net.ugi.sf_hypertube.network.UncappedMotionPayload;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -323,9 +324,9 @@ public class HypertubeEntity extends Entity {
                                     hypertubeSupportBlockEntity.addEntityToDiscard(passenger);
                                     passenger.setDeltaMovement(vector);//maybe we need to somehow call this on the client too
                                     passenger.hasImpulse = true;
-
                                     if (passenger instanceof ServerPlayer serverPlayer) {
-                                        serverPlayer.connection.send(new ClientboundSetEntityMotionPacket(passenger));
+                                        //serverPlayer.connection.send(new ClientboundSetEntityMotionPacket(passenger));
+                                        serverPlayer.connection.send(new UncappedMotionPayload(passenger.getId(),vector.x, vector.y, vector.z));
                                     }
                                 }
 
@@ -391,7 +392,7 @@ public class HypertubeEntity extends Entity {
 
     @Override
     public boolean shouldRiderSit() {
-        return true;
+        return false;
     }
 
     @Override
