@@ -6,6 +6,7 @@ import net.minecraft.core.particles.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
@@ -59,13 +60,18 @@ public class HyperTubeItem extends Item {
         return val ? 1 : 0;
     }
 
-    private boolean checkValidCurve(Level level, BlockPos[] blockPosArray){
+    private boolean checkValidCurve(Level level, BlockPos[] blockPosArray,Player player){
         boolean isValidCurve = true;
         for (int i = 0; i < blockPosArray.length; i++) {
             if(!(level.getBlockState(blockPosArray[i]).isAir() || level.getBlockState(blockPosArray[i]).is(ModBlocks.HYPERTUBE_SUPPORT))){
                 isValidCurve = false;
             }
         }
+        if(player.isCreative()) return isValidCurve;
+        if (blockPosArray.length-2 > getResourcesCount(player)){
+            isValidCurve = false;
+        }
+        if (blockPosArray.length-2 > 128) isValidCurve = false;
         return isValidCurve;
 
     }
@@ -158,6 +164,42 @@ public class HyperTubeItem extends Item {
 
 
 
+
+
+    private int getResourcesCount(Player player){
+        int resource1 = player.getInventory().countItem(Items.GLASS_PANE);
+        int resource2 = player.getInventory().countItem(Items.GOLD_NUGGET);
+        return Math.min(resource1, resource2);
+
+    }
+
+    public static void removeItems(Player player, Item itemToRemove, int amount) {
+        Container inventory = player.getInventory(); // player's inventory
+        int remaining = amount;
+
+        for (int i = 0; i < inventory.getContainerSize(); i++) {
+            ItemStack stack = inventory.getItem(i);
+
+            if (!stack.isEmpty() && stack.getItem() == itemToRemove) {
+                int stackCount = stack.getCount();
+
+                if (stackCount <= remaining) {
+                    inventory.setItem(i, ItemStack.EMPTY); // remove whole stack
+                    remaining -= stackCount;
+                } else {
+                    stack.shrink(remaining); // remove part of the stack
+                    remaining = 0;
+                }
+
+                if (remaining <= 0) {
+                    break;
+                }
+            }
+        }
+    }
+
+
+
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand) {
 
@@ -227,7 +269,7 @@ public class HyperTubeItem extends Item {
 
             BlockPos[] blockPosArray = bezier.calcBezierArray(block1Pos.get(stack),block1Axis.get(stack),block1Direction.get(stack), extraData1.get(stack), block2Pos.get(stack),block2Axis.get(stack),block2Direction.get(stack), extraData2.get(stack));
 
-            boolean isValidCurve = checkValidCurve(level,blockPosArray);
+            boolean isValidCurve = checkValidCurve(level,blockPosArray,player);
             if (!isValidCurve) return InteractionResultHolder.pass(player.getItemInHand(usedHand));
 
             for (int i = 0; i < blockPosArray.length; i++) {
@@ -235,6 +277,11 @@ public class HyperTubeItem extends Item {
                 level.setBlock(blockPosArray[i], hyperTubeBlock.defaultBlockState(),2 );
                 level.blockUpdated(blockPosArray[i],hyperTubeBlock);
             }
+            if(!player.isShiftKeyDown()){
+                removeItems(player, Items.GLASS_PANE,blockPosArray.length-2);
+                removeItems(player, Items.GOLD_NUGGET,blockPosArray.length-2);
+            }
+
             placeHypertubeSupport(level,block2Pos.get(stack),block2Axis.get(stack));
 
             modifyData(level,block1Pos.get(stack),bezier.getBlock1Direction(),block2Pos.get(stack), curveType.get(stack),extraData1.get(stack));
@@ -281,9 +328,13 @@ public class HyperTubeItem extends Item {
                 BlockPos[] blockPosArray = bezier.calcBezierArray(block1Pos.get(stack),block1Axis.get(stack),block1Direction.get(stack), extraData1.get(stack), block2Pos.get(stack),block2Axis.get(stack),block2Direction.get(stack), extraData2.get(stack));
 
 
-                boolean isValidCurve = checkValidCurve(level,blockPosArray);
+                boolean isValidCurve = checkValidCurve(level,blockPosArray,player);
                 Vector3f color = isValidCurve ?new Vector3f(0,255,255) : new Vector3f(255,0,0);
-                String text = String.format("%-10s %4d/%-3d", this.curveType.get(stack), player.getInventory().countItem(Items.GLASS), blockPosArray.length-2);
+                int availableResourcesCount = getResourcesCount(player);
+                String text = String.format("Type: %-10s    Length: %4d / 128    Resource: %4d/%-4d", this.curveType.get(stack), blockPosArray.length-2,availableResourcesCount, blockPosArray.length-2);
+                if (player.isCreative()){
+                    text = String.format("Type: %-10s    Length: %4d / ∞    Resource: ∞ /%-4d", this.curveType.get(stack), blockPosArray.length-2, blockPosArray.length-2);
+                }
                 player.displayClientMessage(Component.literal(  text), true);
 
                 for (int i = 0; i < blockPosArray.length; i++) {

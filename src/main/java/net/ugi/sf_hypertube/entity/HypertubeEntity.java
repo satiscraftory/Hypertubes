@@ -377,7 +377,6 @@ public class HypertubeEntity extends Entity {
     }
 
     public void setSpeed(float s){
-        System.out.println(s);
         float f = (s- (int)s);
         f = f == 0 ? 1 : f;
         int multiplier = (int)Math.round(1.0/f);
