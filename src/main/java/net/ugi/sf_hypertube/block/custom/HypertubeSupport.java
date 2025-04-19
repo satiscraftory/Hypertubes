@@ -143,8 +143,12 @@ public class HypertubeSupport extends BaseEntityBlock {
                         nextDirection = nextHypertubeSupportBlockEntity.getDirection(currentPos);
                         Bezier bezier = new Bezier();
                         bezier.setCurve(nextHypertubeSupportBlockEntity.getCurveType(nextDirection));
+
+                        String extraData1 =hypertubeSupportBlockEntity.getExtraInfo(nextDirection);
+                        String extraData2 =nextHypertubeSupportBlockEntity.getExtraInfo(nextDirection);
+
                         hyperTubeEntity.addPath(
-                                Arrays.stream(bezier.calcBezierArray(currentPos, currentAxis, currentDirection, nextPos, nextAxis, nextDirection)).toList(),
+                                Arrays.stream(bezier.calcBezierArray(currentPos, currentAxis, currentDirection, extraData1, nextPos, nextAxis, nextDirection, extraData2)).toList(),
                                 currentPos, nextPos);
                         level.addFreshEntity(hyperTubeEntity);
                         entity.startRiding(hyperTubeEntity);
@@ -181,8 +185,12 @@ public class HypertubeSupport extends BaseEntityBlock {
                 int nextDirection = nextHypertubeSupportBlockEntity.getDirection(currentPos);
                 Bezier bezier = new Bezier();
                 bezier.setCurve(currentHypertubeSupportBlockEntity.getCurveType(currentDirection));
+
+                String extraData1 =currentHypertubeSupportBlockEntity.getExtraInfo(nextDirection);
+                String extraData2 =nextHypertubeSupportBlockEntity.getExtraInfo(nextDirection);
+
                 hyperTubeEntity.addPath(
-                        Arrays.stream(bezier.calcBezierArray(currentPos,currentAxis,currentDirection,nextPos,nextAxis,nextDirection)).toList(),
+                        Arrays.stream(bezier.calcBezierArray(currentPos,currentAxis,currentDirection,extraData1,nextPos,nextAxis,nextDirection,extraData2)).toList(),
                         currentPos, nextPos);
             }
             

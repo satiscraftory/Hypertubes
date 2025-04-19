@@ -8,8 +8,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.ugi.sf_hypertube.block.ModBlocks;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 
 public class Bezier {
 
@@ -73,7 +72,24 @@ public class Bezier {
 
     }
 
-    private BlockPos[] calcMinecraftCurve(BlockPos b1Pos, Direction.Axis b1Axis, int b1Direction, BlockPos b2Pos, Direction.Axis b2Axis, int b2Direction){
+    private BlockPos[] calcMinecraftCurve(BlockPos b1Pos, Direction.Axis b1Axis, int b1Direction, String b1ExtraData, BlockPos b2Pos, Direction.Axis b2Axis, int b2Direction, String b2ExtraData){
+        if(b2ExtraData == "isFirst" && b1ExtraData != "isFirst"){
+            BlockPos tempPos = b2Pos;
+            Direction.Axis tempAxis = b2Axis;
+            int tempDirection = b2Direction;
+
+            b2Pos = b1Pos;
+            b2Axis = b1Axis;
+            b2Direction = b1Direction;
+
+            b1Pos = tempPos;
+            b1Axis = tempAxis;
+            b1Direction = tempDirection;
+
+
+        }
+
+
         if (b1Direction == 0) {
             if (b1Axis == Direction.Axis.X) {
                 b1Direction = (b2Pos.getX() - b1Pos.getX());
@@ -87,7 +103,6 @@ public class Bezier {
             if (b1Direction == 0) b1Direction = 1;
             b1Direction = b1Direction / Math.abs(b1Direction);
         }
-        else
 
         if (b2Direction == 0) {
             if (b2Axis == Direction.Axis.X) {
@@ -102,6 +117,9 @@ public class Bezier {
             if (b2Direction == 0) b2Direction = 1;
             b2Direction = -b2Direction / Math.abs(b2Direction);
         }
+
+        this.block1UsedDirection = b1Direction;
+        this.block2UsedDirection = b2Direction;
 
 
         BlockPos pos0 = b1Pos;
@@ -118,9 +136,9 @@ public class Bezier {
         BlockPos pos = pos1;
         int i = 0;
 
-        //axis1 ( first half)
+        //axis1
         Direction.Axis nextAxis = b1Axis;
-        int nextDelta = (b2Pos.get(nextAxis) - b1Pos.get(nextAxis));
+        int nextDelta = (pos2.get(nextAxis) - pos1.get(nextAxis));
         int nextDirection = nextDelta != 0 ? nextDelta / Math.abs(nextDelta) : 0;
 
         for(int j = 0; j < Math.abs(nextDelta); j++){
@@ -132,7 +150,7 @@ public class Bezier {
 
         //axis2
         nextAxis = getNextAxis(nextAxis);
-        nextDelta = (b2Pos.get(nextAxis) - b1Pos.get(nextAxis));
+        nextDelta = (pos2.get(nextAxis) - pos1.get(nextAxis));
         nextDirection = nextDelta != 0 ? nextDelta / Math.abs(nextDelta) : 0;
 
         for(int j = 0; j < Math.abs(nextDelta); j++){
@@ -144,24 +162,31 @@ public class Bezier {
 
         //axis3
         nextAxis = getNextAxis(nextAxis);
-        nextDelta = (b2Pos.get(nextAxis) - b1Pos.get(nextAxis));
+        nextDelta = (pos2.get(nextAxis) - pos1.get(nextAxis));
         nextDirection = nextDelta != 0 ? nextDelta / Math.abs(nextDelta) : 0;
 
-        for(int j = 0; j < Math.abs(nextDelta); j++){
+        for(int j = 0; j < Math.abs(nextDelta)+1; j++){
             blockPosArray [i] = pos;
             pos = pos.relative(nextAxis,nextDirection);
             i++;
 
         }
 
+        if(b2ExtraData == "isFirst" && b1ExtraData != "isFirst"){
+            for (int j = 0; j <blockPosArray.length / 2; j++) {
+                BlockPos t = blockPosArray[j];
+                blockPosArray[j] = blockPosArray[blockPosArray.length - 1 - j];
+                blockPosArray[blockPosArray.length - 1 - j] = t;
+            }
+        }
 
         return checkDuplicate(blockPosArray);
 
     }
 
-    public BlockPos[] calcBezierArray(BlockPos b1Pos, Direction.Axis b1Axis, int b1Direction, BlockPos b2Pos, Direction.Axis b2Axis, int b2Direction) {
+    public BlockPos[] calcBezierArray(BlockPos b1Pos, Direction.Axis b1Axis, int b1Direction, String b1ExtraData, BlockPos b2Pos, Direction.Axis b2Axis, int b2Direction, String b2ExtraData) {
         if (this.curveType.equals("Minecraft")) {
-            return calcMinecraftCurve(b1Pos, b1Axis, b1Direction, b2Pos, b2Axis, b2Direction);
+            return calcMinecraftCurve(b1Pos, b1Axis, b1Direction, b1ExtraData,b2Pos, b2Axis, b2Direction,b2ExtraData);
         }
         BlockPos pos0 = b1Pos;
         BlockPos pos1 = null;

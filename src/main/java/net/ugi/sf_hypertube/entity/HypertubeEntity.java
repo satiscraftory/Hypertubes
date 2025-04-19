@@ -43,7 +43,7 @@ public class HypertubeEntity extends Entity {
     private List<BlockPos> path = new ArrayList<>();
     private BlockPos previousPos;
     private BlockPos currentPos;
-    private int speed = 100;
+    private int speed = 1;
     private int currentPathIndex = 0;
 
 

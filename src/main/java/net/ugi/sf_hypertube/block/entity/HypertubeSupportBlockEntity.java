@@ -155,6 +155,12 @@ public class HypertubeSupportBlockEntity extends BlockEntity {
         return null;
     }
 
+    public String getExtraInfo(Integer direction){
+        if(direction==1) return positiveTypeInfo;
+        if(direction==-1) return negativeTypeInfo;
+        return null;
+    }
+
     public void addEntityToDiscard(Entity entity) {
         this.discardEntities.remove(entity);
         this.discardEntities.put(entity, 5);
