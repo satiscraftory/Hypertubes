@@ -321,7 +321,7 @@ public class HypertubeEntity extends Entity {
                                     passenger.teleportTo(exitpos.getCenter().x, exitpos.getCenter().y, exitpos.getCenter().z);
 
                                     hypertubeSupportBlockEntity.addEntityToDiscard(passenger);
-                                    passenger.setDeltaMovement(vector);
+                                    passenger.setDeltaMovement(vector);//maybe we need to somehow call this on the client too
                                     passenger.hasImpulse = true;
 
                                     if (passenger instanceof ServerPlayer serverPlayer) {

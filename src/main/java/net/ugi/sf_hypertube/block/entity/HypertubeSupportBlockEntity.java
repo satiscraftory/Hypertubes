@@ -22,7 +22,7 @@ import java.util.WeakHashMap;
 
 public class HypertubeSupportBlockEntity extends BlockEntity {
     private float rotation;//probalby not needed?
-    public BlockPos targetPositive = null;
+    public BlockPos targetPositive = null;//todo do we need to make this private and use get and set?
     public BlockPos targetNegative = null;
     public String targetPositiveType = null;
     public String targetNegativeType = null;
