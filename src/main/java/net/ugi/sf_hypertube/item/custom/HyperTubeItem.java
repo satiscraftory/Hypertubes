@@ -47,6 +47,8 @@ public class HyperTubeItem extends Item {
     private final WeakHashMap<ItemStack, String> extraData2  = new WeakHashMap<>();
     private final WeakHashMap<ItemStack, String> curveType  = new WeakHashMap<>();
 
+    private int maxTubeLength = 128;
+
 
     double bezierHelpPosMultiplier =0.5;//default 0.5
     Block hyperTubeSupportBlock = ModBlocks.HYPERTUBE_SUPPORT.get();
@@ -71,7 +73,7 @@ public class HyperTubeItem extends Item {
         if (blockPosArray.length-2 > getResourcesCount(player)){
             isValidCurve = false;
         }
-        if (blockPosArray.length-2 > 128) isValidCurve = false;
+        if (blockPosArray.length-2 > this.maxTubeLength) isValidCurve = false;
         return isValidCurve;
 
     }
@@ -196,6 +198,23 @@ public class HyperTubeItem extends Item {
                 }
             }
         }
+    }
+
+    private void makeUI(Player player, ItemStack stack, int tubeLength){
+        int availableResourcesCount = getResourcesCount(player);
+        String errorColor = "§c";
+        String validColor = "§b";
+        String curveTypeColor = "§6";
+
+        String lengthColor = tubeLength > this.maxTubeLength ? errorColor : validColor;
+        String resourceColor = availableResourcesCount < tubeLength? errorColor : validColor;
+
+
+        String text = String.format("%2sType: %-10s    %2sLength: %4d / %-4d    %2sResource: %4d / %-4d", curveTypeColor, this.curveType.get(stack), lengthColor, tubeLength,this.maxTubeLength,resourceColor,availableResourcesCount, tubeLength);
+        if (player.isCreative()){
+            text = String.format("%2sType: %-10s    %2sLength: %4d / ∞    %2sResource: ∞ / %-4d", curveTypeColor, this.curveType.get(stack), validColor, tubeLength, validColor, tubeLength);
+        }
+        player.displayClientMessage(Component.literal(  text), true);
     }
 
 
@@ -330,12 +349,8 @@ public class HyperTubeItem extends Item {
 
                 boolean isValidCurve = checkValidCurve(level,blockPosArray,player);
                 Vector3f color = isValidCurve ?new Vector3f(0,255,255) : new Vector3f(255,0,0);
-                int availableResourcesCount = getResourcesCount(player);
-                String text = String.format("Type: %-10s    Length: %4d / 128    Resource: %4d/%-4d", this.curveType.get(stack), blockPosArray.length-2,availableResourcesCount, blockPosArray.length-2);
-                if (player.isCreative()){
-                    text = String.format("Type: %-10s    Length: %4d / ∞    Resource: ∞ /%-4d", this.curveType.get(stack), blockPosArray.length-2, blockPosArray.length-2);
-                }
-                player.displayClientMessage(Component.literal(  text), true);
+
+                makeUI(player,stack,blockPosArray.length-2);
 
                 for (int i = 0; i < blockPosArray.length; i++) {
                     for(int j = 0; j < level.players().size(); ++j) {
