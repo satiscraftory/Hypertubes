@@ -31,6 +31,7 @@ import net.ugi.sf_hypertube.block.entity.HypertubeSupportBlockEntity;
 import net.ugi.sf_hypertube.entity.HypertubeEntity;
 import net.ugi.sf_hypertube.entity.ModEntities;
 import net.ugi.sf_hypertube.hypertube.Calc.HyperTubeCalcCore;
+import net.ugi.sf_hypertube.hypertube.Curves.CurveTypes;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -199,46 +200,6 @@ public class HypertubeSupport extends BaseEntityBlock {
         return null;
     }
 
-    public List<BlockPos> getPathBetween(Level level, BlockPos supportPos1, BlockPos supportPos2) {
-        Direction.Axis axis1 = level.getBlockState(supportPos1).getValue(AXIS);
-        Direction.Axis axis2 = level.getBlockState(supportPos2).getValue(AXIS);
-        return getPathBetween(level, supportPos1, axis1, supportPos2, axis2);
-    }
-
-    public List<BlockPos> getPathBetween(Level level, BlockPos supportPos1, Direction.Axis axis1, BlockPos supportPos2, Direction.Axis axis2) {
-        BlockEntity blockEntity1 = level.getBlockEntity(supportPos1);
-        BlockEntity blockEntity2 = level.getBlockEntity(supportPos2);
-        int direction1 = 0;
-        int direction2 = 0;
-
-        if(blockEntity1 instanceof HypertubeSupportBlockEntity hypertubeSupportBlockEntity1) {
-            direction1 = -hypertubeSupportBlockEntity1.getDirection(supportPos1);
-
-/*            if(!(level.getBlockState(supportPos2).getBlock() instanceof HypertubeSupport)){//extra anti-crash
-                if(hypertubeSupportBlockEntity1.getDirection(supportPos2)==1){//todo maybe make this a function and call more often
-                    hypertubeSupportBlockEntity1.targetPositive = null;
-                    hypertubeSupportBlockEntity1.targetPositiveType = null;
-                }else if(hypertubeSupportBlockEntity1.getDirection(supportPos2)==-1){
-                    hypertubeSupportBlockEntity1.targetNegative = null;
-                    hypertubeSupportBlockEntity1.targetNegativeType = null;
-                }
-                return null;
-            }*/
-        }else {
-            return null;
-        }
-        if(blockEntity2 instanceof HypertubeSupportBlockEntity hypertubeSupportBlockEntity2) {
-            direction2 = hypertubeSupportBlockEntity2.getDirection(supportPos1);
-        }else{
-            return null;
-        }
-        String extraData1 =hypertubeSupportBlockEntity1.getExtraInfo(direction1);
-        String extraData2 =hypertubeSupportBlockEntity2.getExtraInfo(direction2);
-
-        HyperTubeCalcCore curveCore = new HyperTubeCalcCore(supportPos1, axis1, direction1, extraData1, supportPos2, axis2, direction2, extraData2);
-
-        return List.of(curveCore.getHyperTubeArray(hypertubeSupportBlockEntity1.getCurveType(direction1)));
-    }
 
     public BlockPos getNextTargetPos(Level level, BlockPos previousPos, BlockPos currentPos) {
         BlockEntity currentEntity = level.getBlockEntity(currentPos);
@@ -276,10 +237,12 @@ public class HypertubeSupport extends BaseEntityBlock {
             if(level.getBlockEntity(pos) instanceof HypertubeSupportBlockEntity hypertubeSupportBlockEntity){
                 hypertubeSupportBlockEntity.drops();
 /*                if(hypertubeSupportBlockEntity.targetPositive != null){//experintal remove connected tube blocks
-                    RemovePath(level, getPathBetween(level,  pos, state.getValue(AXIS),   hypertubeSupportBlockEntity.targetPositive, level.getBlockState(hypertubeSupportBlockEntity.targetPositive).getValue(AXIS)));
+                    List<BlockPos> path = getPathBetween(level, pos, state.getValue(AXIS), hypertubeSupportBlockEntity.targetNegative, level.getBlockState(hypertubeSupportBlockEntity.targetNegative).getValue(AXIS), hypertubeSupportBlockEntity);
+                    RemovePath(level, path);
                 }
                 if(hypertubeSupportBlockEntity.targetNegative != null){
-                    RemovePath(level, getPathBetween(level, pos, state.getValue(AXIS), hypertubeSupportBlockEntity.targetNegative, level.getBlockState(hypertubeSupportBlockEntity.targetPositive).getValue(AXIS)));
+                    List<BlockPos> path = getPathBetween(level, pos, state.getValue(AXIS), hypertubeSupportBlockEntity.targetNegative, level.getBlockState(hypertubeSupportBlockEntity.targetNegative).getValue(AXIS), hypertubeSupportBlockEntity);
+                    RemovePath(level, path);
                 }*/
                 level.updateNeighbourForOutputSignal(pos, this);
             }

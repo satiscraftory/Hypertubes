@@ -356,7 +356,7 @@ public class HypertubeEntity extends Entity {
 
     @Override
     public boolean shouldRiderSit() {
-        return false;
+        return true;
     }
 
     @Override

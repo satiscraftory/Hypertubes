@@ -2,10 +2,15 @@ package net.ugi.sf_hypertube.hypertube.Calc;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.level.Level;
+import net.ugi.sf_hypertube.block.entity.HypertubeSupportBlockEntity;
 import net.ugi.sf_hypertube.hypertube.Curves.CurveTypes;
 
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
+
+import static net.minecraft.world.level.block.state.properties.BlockStateProperties.AXIS;
 
 public class HyperTubeCalcCore {
     public final BlockPos block1Pos;
@@ -78,7 +83,24 @@ public class HyperTubeCalcCore {
         return checkDuplicate(blockArray);
     }
 
+    public HyperTubeCalcCore createCalcCoreFromPos(Level level, BlockPos supportPos1, BlockPos supportPos2) {
+        Direction.Axis axis1 = level.getBlockState(supportPos1).getValue(AXIS);
+        Direction.Axis axis2 = level.getBlockState(supportPos2).getValue(AXIS);
+        return createCalcCoreFromPosAndAxis(level, supportPos1, axis1, supportPos2, axis2);
+    }
 
+    public HyperTubeCalcCore createCalcCoreFromPosAndAxis(Level level, BlockPos supportPos1, Direction.Axis axis1, BlockPos supportPos2, Direction.Axis axis2) {
+        HypertubeSupportBlockEntity hypertubeSupportBlockEntity1 = (HypertubeSupportBlockEntity) level.getBlockEntity(supportPos1);
+        HypertubeSupportBlockEntity hypertubeSupportBlockEntity2 = (HypertubeSupportBlockEntity) level.getBlockEntity(supportPos2);
+
+        if(hypertubeSupportBlockEntity1==null || hypertubeSupportBlockEntity2==null)return null;
+        int direction1 = -hypertubeSupportBlockEntity1.getDirection(supportPos1);
+        int direction2 = hypertubeSupportBlockEntity2.getDirection(supportPos1);
+        String extraData1 =hypertubeSupportBlockEntity1.getExtraInfo(direction1);
+        String extraData2 =hypertubeSupportBlockEntity2.getExtraInfo(direction2);
+        HyperTubeCalcCore curveCore = new HyperTubeCalcCore(supportPos1, axis1, direction1, extraData1, supportPos2, axis2, direction2, extraData2);
+        return curveCore;
+    }
 
 
 
