@@ -3,11 +3,11 @@ package net.ugi.sf_hypertube.hypertube.Curves;
 public class CurveTypes {
 
     public enum Curves {
-        CURVED("Curved"),
-        OVERKILL("Overkill"),
-        STRAIGHT("Straight"),
-        MINECRAFT("Minecraft"),
-        HELIX("Helix"),;
+        CURVED("curved"),
+        OVERKILL("overkill"),
+        STRAIGHT("straight"),
+        MINECRAFT("minecraft");
+        //HELIX("helix");
 
         private final String label;
 
