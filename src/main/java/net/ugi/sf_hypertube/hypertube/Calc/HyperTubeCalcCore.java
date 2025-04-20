@@ -68,9 +68,9 @@ public class HyperTubeCalcCore {
             case MINECRAFT -> {
                 blockArray = minecraftCurve.getCurve();
             }
-            case HELIX -> {
-
-            }
+//            case HELIX -> {
+//
+//            }
 
 
         }

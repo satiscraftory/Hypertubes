@@ -25,6 +25,7 @@ import net.ugi.sf_hypertube.block.ModBlocks;
 import net.ugi.sf_hypertube.block.entity.HypertubeSupportBlockEntity;
 import net.ugi.sf_hypertube.hypertube.Calc.HyperTubeCalcCore;
 import net.ugi.sf_hypertube.hypertube.Curves.CurveTypes;
+import net.ugi.sf_hypertube.hypertube.UI.HyperTubePlacerUI;
 import net.ugi.sf_hypertube.item.ModItems;
 import org.joml.Vector3f;
 
@@ -151,7 +152,7 @@ public class HyperTubeItem extends Item {
 
 
 
-    private int getResourcesCount(Player player){
+    public int getResourcesCount(Player player){
         int resource1 = player.getInventory().countItem(Items.GLASS_PANE);
         int resource2 = player.getInventory().countItem(Items.GOLD_NUGGET);
         return Math.min(resource1, resource2);
@@ -182,24 +183,6 @@ public class HyperTubeItem extends Item {
             }
         }
     }
-
-    private void makeUI(Player player, ItemStack stack, int tubeLength){
-        int availableResourcesCount = getResourcesCount(player);
-        String errorColor = "§c";
-        String validColor = "§b";
-        String curveTypeColor = "§6";
-
-        String lengthColor = tubeLength > this.maxTubeLength ? errorColor : validColor;
-        String resourceColor = availableResourcesCount < tubeLength? errorColor : validColor;
-
-
-        String text = String.format("%2sType: %-10s    %2sLength: %4d / %-4d    %2sResource: %4d / %-4d", curveTypeColor, this.curveType.get(stack), lengthColor, tubeLength,this.maxTubeLength,resourceColor,availableResourcesCount, tubeLength);
-        if (player.isCreative()){
-            text = String.format("%2sType: %-10s    %2sLength: %4d / ∞    %2sResource: ∞ / %-4d", curveTypeColor, this.curveType.get(stack), validColor, tubeLength, validColor, tubeLength);
-        }
-        player.displayClientMessage(Component.literal(  text), true);
-    }
-
 
 
     @Override
@@ -306,7 +289,8 @@ public class HyperTubeItem extends Item {
             ItemStack selectedItem = player.getMainHandItem().getItem() == ModItems.HYPERTUBE_PLACER.get()? player.getMainHandItem() : player.getOffhandItem();
             if(selectedItem != stack) return;
 
-            selectedBlock1.putIfAbsent(stack, false);
+            this.selectedBlock1.putIfAbsent(stack, false);
+            this.curveType.putIfAbsent(stack, CurveTypes.Curves.CURVED);
 
             Vec3 looking = entity.getLookAngle();
             if(selectedBlock1.get(stack)) {
@@ -335,7 +319,8 @@ public class HyperTubeItem extends Item {
                 boolean isValidCurve = checkValidCurve(level,blockPosArray,player);
                 Vector3f color = isValidCurve ?new Vector3f(0,255,255) : new Vector3f(255,0,0);
 
-                makeUI(player,stack,blockPosArray.length-2);
+                HyperTubePlacerUI hyperTubePlacerUI = new HyperTubePlacerUI();
+                hyperTubePlacerUI.makeUI(player,stack,blockPosArray.length-2, this.maxTubeLength, this.curveType.get(stack));
 
                 for (int i = 0; i < blockPosArray.length; i++) {
                     for(int j = 0; j < level.players().size(); ++j) {
