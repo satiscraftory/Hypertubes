@@ -1,13 +1,11 @@
-package net.ugi.sf_hypertube.hypertube.Calc;
+package net.ugi.sf_hypertube.hypertube.Curves;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
 import net.ugi.sf_hypertube.block.entity.HypertubeSupportBlockEntity;
-import net.ugi.sf_hypertube.hypertube.Curves.CurveTypes;
 
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
 import static net.minecraft.world.level.block.state.properties.BlockStateProperties.AXIS;
@@ -37,6 +35,7 @@ public class HyperTubeCalcCore {
         this.block2ExtraData = b2ExtraData;
 
     }
+
 
     public void setUsedDirections(int dir1, int dir2){
         this.block1UsedDirection = dir1;

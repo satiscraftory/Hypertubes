@@ -1,4 +1,4 @@
-package net.ugi.sf_hypertube.hypertube.Calc;
+package net.ugi.sf_hypertube.hypertube.Curves;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;

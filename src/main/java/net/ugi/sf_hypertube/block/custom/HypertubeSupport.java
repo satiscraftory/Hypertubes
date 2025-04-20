@@ -30,8 +30,7 @@ import net.ugi.sf_hypertube.block.ModBlocks;
 import net.ugi.sf_hypertube.block.entity.HypertubeSupportBlockEntity;
 import net.ugi.sf_hypertube.entity.HypertubeEntity;
 import net.ugi.sf_hypertube.entity.ModEntities;
-import net.ugi.sf_hypertube.hypertube.Calc.HyperTubeCalcCore;
-import net.ugi.sf_hypertube.hypertube.Curves.CurveTypes;
+import net.ugi.sf_hypertube.hypertube.Curves.HyperTubeCalcCore;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -123,7 +122,7 @@ public class HypertubeSupport extends BaseEntityBlock {
             entities.forEach(entity -> {
                 if(!hypertubeSupportBlockEntity.discardEntities.containsKey(entity) && !(entity instanceof HypertubeEntity)) {
                     HypertubeEntity hyperTubeEntity = new HypertubeEntity(ModEntities.HYPERTUBE_ENTITY.get(), level);
-                    hyperTubeEntity.setPos(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
+                    hyperTubeEntity.setPos(pos.getX() + 0.5, pos.getY()+0.5, pos.getZ() + 0.5);
                     //hyperTubeEntity.path
                     //level.addFreshEntity(hyperTubeEntity);
                     //entity.startRiding(hyperTubeEntity);
@@ -155,6 +154,7 @@ public class HypertubeSupport extends BaseEntityBlock {
                                 currentPos, nextPos);
                         level.addFreshEntity(hyperTubeEntity);
                         hyperTubeEntity.setSpeed(20f);
+                        hypertubeSupportBlockEntity.addEntityToDiscard(entity);
                         entity.startRiding(hyperTubeEntity);
                     }
                 }
