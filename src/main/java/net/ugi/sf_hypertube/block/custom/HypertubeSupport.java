@@ -30,7 +30,7 @@ import net.ugi.sf_hypertube.block.ModBlocks;
 import net.ugi.sf_hypertube.block.entity.HypertubeSupportBlockEntity;
 import net.ugi.sf_hypertube.entity.HypertubeEntity;
 import net.ugi.sf_hypertube.entity.ModEntities;
-import net.ugi.sf_hypertube.util.Bezier;
+import net.ugi.sf_hypertube.hypertube.Calc.HyperTubeCalcCore;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -143,14 +143,14 @@ public class HypertubeSupport extends BaseEntityBlock {
                     int nextDirection = 0;
                     if (nextEntity instanceof HypertubeSupportBlockEntity nextHypertubeSupportBlockEntity) {
                         nextDirection = nextHypertubeSupportBlockEntity.getDirection(currentPos);
-                        Bezier bezier = new Bezier();
-                        bezier.setCurve(nextHypertubeSupportBlockEntity.getCurveType(nextDirection));
 
-                        String extraData1 =hypertubeSupportBlockEntity.getExtraInfo(nextDirection);
+                        String extraData1 =hypertubeSupportBlockEntity.getExtraInfo(currentDirection);
                         String extraData2 =nextHypertubeSupportBlockEntity.getExtraInfo(nextDirection);
 
+                        HyperTubeCalcCore curveCore = new HyperTubeCalcCore(currentPos, currentAxis, currentDirection, extraData1, nextPos, nextAxis, nextDirection, extraData2);
+
                         hyperTubeEntity.addPath(
-                                Arrays.stream(bezier.calcBezierArray(currentPos, currentAxis, currentDirection, extraData1, nextPos, nextAxis, nextDirection, extraData2)).toList(),
+                                Arrays.stream(curveCore.getHyperTubeArray(hypertubeSupportBlockEntity.getCurveType(currentDirection))).toList(),
                                 currentPos, nextPos);
                         level.addFreshEntity(hyperTubeEntity);
                         hyperTubeEntity.setSpeed(20f);
@@ -186,14 +186,14 @@ public class HypertubeSupport extends BaseEntityBlock {
             Direction.Axis nextAxis = level.getBlockState(nextPos).getValue(AXIS);
             if(nextEntity instanceof HypertubeSupportBlockEntity nextHypertubeSupportBlockEntity) {
                 int nextDirection = nextHypertubeSupportBlockEntity.getDirection(currentSupportPos);
-                Bezier bezier = new Bezier();
-                bezier.setCurve(currentHypertubeSupportBlockEntity.getCurveType(currentDirection));
 
                 String extraData1 =currentHypertubeSupportBlockEntity.getExtraInfo(currentDirection);
                 String extraData2 =nextHypertubeSupportBlockEntity.getExtraInfo(nextDirection);
 
+                HyperTubeCalcCore curveCore = new HyperTubeCalcCore(currentSupportPos, currentAxis, currentDirection, extraData1, nextPos, nextAxis, nextDirection, extraData2);
 
-                return List.of(bezier.calcBezierArray(currentSupportPos, currentAxis, currentDirection, extraData1, nextPos, nextAxis, nextDirection, extraData2));
+
+                return List.of(curveCore.getHyperTubeArray(currentHypertubeSupportBlockEntity.getCurveType(currentDirection)));
             }
         }
         return null;
@@ -234,9 +234,10 @@ public class HypertubeSupport extends BaseEntityBlock {
         }
         String extraData1 =hypertubeSupportBlockEntity1.getExtraInfo(direction1);
         String extraData2 =hypertubeSupportBlockEntity2.getExtraInfo(direction2);
-        Bezier bezier = new Bezier();
-        bezier.setCurve(hypertubeSupportBlockEntity1.getCurveType(-hypertubeSupportBlockEntity1.getDirection(supportPos2)));
-        return List.of(bezier.calcBezierArray(supportPos1, axis1, direction1, extraData1, supportPos2, axis2, direction2, extraData2));
+
+        HyperTubeCalcCore curveCore = new HyperTubeCalcCore(supportPos1, axis1, direction1, extraData1, supportPos2, axis2, direction2, extraData2);
+
+        return List.of(curveCore.getHyperTubeArray(hypertubeSupportBlockEntity1.getCurveType(direction1)));
     }
 
     public BlockPos getNextTargetPos(Level level, BlockPos previousPos, BlockPos currentPos) {

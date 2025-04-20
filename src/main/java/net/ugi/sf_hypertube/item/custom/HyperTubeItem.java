@@ -23,8 +23,9 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.Vec3;
 import net.ugi.sf_hypertube.block.ModBlocks;
 import net.ugi.sf_hypertube.block.entity.HypertubeSupportBlockEntity;
+import net.ugi.sf_hypertube.hypertube.Calc.HyperTubeCalcCore;
+import net.ugi.sf_hypertube.hypertube.Curves.CurveTypes;
 import net.ugi.sf_hypertube.item.ModItems;
-import net.ugi.sf_hypertube.util.Bezier;
 import org.joml.Vector3f;
 
 import java.util.*;
@@ -45,7 +46,7 @@ public class HyperTubeItem extends Item {
     private final WeakHashMap<ItemStack, Direction.Axis> block2Axis = new WeakHashMap<>();
     private final WeakHashMap<ItemStack, Integer> block2Direction  = new WeakHashMap<>();
     private final WeakHashMap<ItemStack, String> extraData2  = new WeakHashMap<>();
-    private final WeakHashMap<ItemStack, String> curveType  = new WeakHashMap<>();
+    private final WeakHashMap<ItemStack, CurveTypes.Curves> curveType  = new WeakHashMap<>();
 
     private int maxTubeLength = 128;
 
@@ -54,8 +55,6 @@ public class HyperTubeItem extends Item {
     Block hyperTubeSupportBlock = ModBlocks.HYPERTUBE_SUPPORT.get();
     Block hyperTubeBlock = ModBlocks.HYPERTUBE.get();
     double placeDistance = 20;
-
-    Bezier bezier = new Bezier();
 
 
     private int intValue(boolean val){
@@ -77,22 +76,6 @@ public class HyperTubeItem extends Item {
         return isValidCurve;
 
     }
-    private void changeCurveType(ItemStack stack){
-        if(curveType.get(stack).equals("Curved")){
-            curveType.put(stack, "Overkill");
-        }
-        else if (curveType.get(stack).equals("Overkill")){
-            curveType.put(stack, "Straight");
-        }
-        else if (curveType.get(stack).equals("Straight")){
-            curveType.put(stack, "Minecraft");
-            extraData1.put(stack, "isFirst");
-        }
-        else  {
-            curveType.put(stack, "Curved");
-        }
-        bezier.setCurve(curveType.get(stack));
-    }
 
     private void placeHypertubeSupport(Level level, BlockPos pos, Direction.Axis axis){
         level.setBlock(pos, hyperTubeSupportBlock.defaultBlockState().setValue(BlockStateProperties.AXIS, axis),2 );
@@ -101,7 +84,7 @@ public class HyperTubeItem extends Item {
         level.blockUpdated(pos.below(1),Blocks.BRICK_WALL);
     }
 
-    private void modifyData(Level level, BlockPos pos, int dir,BlockPos targetPos, String curveType, String extraData){
+    private void modifyData(Level level, BlockPos pos, int dir,BlockPos targetPos, CurveTypes.Curves curveType, String extraData){
         BlockEntity blockEntity = level.getBlockEntity(pos);
         if (blockEntity instanceof HypertubeSupportBlockEntity hypertubeSupportBlockEntity){
             if(dir == 1){
@@ -226,13 +209,13 @@ public class HyperTubeItem extends Item {
         ItemStack stack = player.getItemInHand(usedHand);
 
         selectedBlock1.putIfAbsent(stack, false);
-        curveType.putIfAbsent(stack, "Curved");
+        curveType.putIfAbsent(stack, CurveTypes.Curves.CURVED);
 
         extraData1.putIfAbsent(stack,null);
         extraData2.putIfAbsent(stack,null);
 
         if(player.isShiftKeyDown()){
-            changeCurveType(stack);
+            this.curveType.put(stack, CurveTypes.cycle(this.curveType.get(stack)));
             return InteractionResultHolder.success(stack);
         }
 
@@ -285,8 +268,8 @@ public class HyperTubeItem extends Item {
                 if (!result) return InteractionResultHolder.fail(player.getItemInHand(usedHand));
             }
 
-
-            BlockPos[] blockPosArray = bezier.calcBezierArray(block1Pos.get(stack),block1Axis.get(stack),block1Direction.get(stack), extraData1.get(stack), block2Pos.get(stack),block2Axis.get(stack),block2Direction.get(stack), extraData2.get(stack));
+            HyperTubeCalcCore curveCore = new HyperTubeCalcCore(block1Pos.get(stack),block1Axis.get(stack),block1Direction.get(stack), extraData1.get(stack), block2Pos.get(stack),block2Axis.get(stack),block2Direction.get(stack), extraData2.get(stack));
+            BlockPos[] blockPosArray = curveCore.getHyperTubeArray(this.curveType.get(stack));
 
             boolean isValidCurve = checkValidCurve(level,blockPosArray,player);
             if (!isValidCurve) return InteractionResultHolder.pass(player.getItemInHand(usedHand));
@@ -303,10 +286,12 @@ public class HyperTubeItem extends Item {
 
             placeHypertubeSupport(level,block2Pos.get(stack),block2Axis.get(stack));
 
-            modifyData(level,block1Pos.get(stack),bezier.getBlock1Direction(),block2Pos.get(stack), curveType.get(stack),extraData1.get(stack));
-            modifyData(level,block2Pos.get(stack),bezier.getBlock2Direction(),block1Pos.get(stack), curveType.get(stack),extraData2.get(stack));
+            modifyData(level,block1Pos.get(stack),curveCore.block1UsedDirection,block2Pos.get(stack), curveType.get(stack),extraData1.get(stack));
+            modifyData(level,block2Pos.get(stack),curveCore.block2UsedDirection,block1Pos.get(stack), curveType.get(stack),extraData2.get(stack));
 
             selectedBlock1.put(stack,false);
+            System.out.println(CurveTypes.Curves.CURVED);
+            System.out.println(CurveTypes.cycle(CurveTypes.Curves.CURVED));
         }
 
         return super.use(level, player, usedHand);
@@ -344,8 +329,8 @@ public class HyperTubeItem extends Item {
                     }
                 }
 
-                BlockPos[] blockPosArray = bezier.calcBezierArray(block1Pos.get(stack),block1Axis.get(stack),block1Direction.get(stack), extraData1.get(stack), block2Pos.get(stack),block2Axis.get(stack),block2Direction.get(stack), extraData2.get(stack));
-
+                HyperTubeCalcCore curveCore = new HyperTubeCalcCore(block1Pos.get(stack),block1Axis.get(stack),block1Direction.get(stack), extraData1.get(stack), block2Pos.get(stack),block2Axis.get(stack),block2Direction.get(stack), extraData2.get(stack));
+                BlockPos[] blockPosArray = curveCore.getHyperTubeArray(this.curveType.get(stack));
 
                 boolean isValidCurve = checkValidCurve(level,blockPosArray,player);
                 Vector3f color = isValidCurve ?new Vector3f(0,255,255) : new Vector3f(255,0,0);

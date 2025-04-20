@@ -13,6 +13,7 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.Vec3;
 import net.ugi.sf_hypertube.block.custom.HypertubeSupport;
@@ -228,9 +229,12 @@ public class HypertubeEntity extends Entity {
                 Vec3 diff      = target.subtract(current);
                 double dist    = diff.length();
 
+
                 if (dist < (float)speed/moveEveryXTicks) {
                     // snap to block center and advance
                     this.setPos(target.x, target.y, target.z);
+                    this.teleportTo(target.x, target.y, target.z);
+                    this.
                     currentPathIndex+= speed;
                     //this.setDeltaMovement(Vec3.ZERO);
                 } else {

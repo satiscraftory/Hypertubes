@@ -13,6 +13,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.items.ItemStackHandler;
+import net.ugi.sf_hypertube.hypertube.Curves.CurveTypes;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -24,8 +25,8 @@ public class HypertubeSupportBlockEntity extends BlockEntity {
     private float rotation;//probalby not needed?
     public BlockPos targetPositive = null;//todo do we need to make this private and use get and set?
     public BlockPos targetNegative = null;
-    public String targetPositiveType = null;
-    public String targetNegativeType = null;
+    public CurveTypes.Curves targetPositiveType = null;
+    public CurveTypes.Curves targetNegativeType = null;
     public String positiveTypeInfo = null;
     public String negativeTypeInfo = null;
 
@@ -72,13 +73,13 @@ public class HypertubeSupportBlockEntity extends BlockEntity {
             tag.putIntArray("targetPositive", List.of(targetPositive.getX(), targetPositive.getY(), targetPositive.getZ()));
         }
         if(targetPositiveType != null) {
-            tag.putString("targetPositiveType", targetPositiveType);
+            tag.putString("targetPositiveType", targetPositiveType.getLabel());
         }
         if(targetNegative != null) {
             tag.putIntArray("targetNegative", List.of(targetNegative.getX(), targetNegative.getY(), targetNegative.getZ()));
         }
         if(targetNegativeType != null) {
-            tag.putString("targetNegativeType", targetNegativeType);
+            tag.putString("targetNegativeType", targetNegativeType.getLabel());
         }
         if(positiveTypeInfo != null) {
             tag.putString("positiveTypeInfo", positiveTypeInfo);
@@ -107,7 +108,7 @@ public class HypertubeSupportBlockEntity extends BlockEntity {
             }
         }
         if(tag.contains("targetPositiveType")) {
-            targetPositiveType = tag.getString("targetPositiveType");
+            targetPositiveType = CurveTypes.Curves.get(tag.getString("targetPositiveType"));
         }
         if (tag.contains("targetNegative")) {
             int[] arr = tag.getIntArray("targetNegative");
@@ -116,7 +117,7 @@ public class HypertubeSupportBlockEntity extends BlockEntity {
             }
         }
         if(tag.contains("targetNegativeType")) {
-            targetNegativeType = tag.getString("targetNegativeType");
+            targetNegativeType = CurveTypes.Curves.get(tag.getString("targetNegativeType"));
         }
         if (tag.contains("positiveTypeInfo")) {
             positiveTypeInfo = tag.getString("positiveTypeInfo");
@@ -143,7 +144,7 @@ public class HypertubeSupportBlockEntity extends BlockEntity {
         return 0;
     }
 
-    public String getCurveType(int direction){
+    public CurveTypes.Curves getCurveType(int direction){
         if(direction==1) return targetPositiveType;
         if(direction==-1) return targetNegativeType;
         return null;
