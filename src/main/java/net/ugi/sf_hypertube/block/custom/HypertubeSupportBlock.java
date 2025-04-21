@@ -151,11 +151,16 @@ public class HypertubeSupportBlock extends BaseEntityBlock {
                         HyperTubeCalcCore curveCore = new HyperTubeCalcCore();
                         curveCore.setData(currentPos, currentAxis, currentDirection, extraData1, nextPos, nextAxis, nextDirection, extraData2);
 
+                        BlockPos[] pathArray = curveCore.getHyperTubeArray(hypertubeSupportBlockEntity.getCurveType(currentDirection));
+                        if(pathArray == null){//maybe fix extra crashes
+                            hyperTubeEntity.discard();
+                            return;
+                        };
                         hyperTubeEntity.addPath(
-                                Arrays.stream(curveCore.getHyperTubeArray(hypertubeSupportBlockEntity.getCurveType(currentDirection))).toList(),
+                                Arrays.stream(pathArray).toList(),
                                 currentPos, nextPos);
                         level.addFreshEntity(hyperTubeEntity);
-                        hyperTubeEntity.setSpeed(20f);
+                        hyperTubeEntity.setSpeed(4f);
                         hypertubeSupportBlockEntity.addEntityToDiscard(entity);
                         entity.startRiding(hyperTubeEntity);
                         if (entity instanceof ServerPlayer serverPlayer) {

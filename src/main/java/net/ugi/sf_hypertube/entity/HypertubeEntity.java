@@ -229,11 +229,11 @@ public class HypertubeEntity extends Entity {
                 double dist    = diff.length();
 
 
-                if (dist < (float)speed/moveEveryXTicks) {
+                if (dist <= (float)speed/moveEveryXTicks) {
                     // snap to block center and advance
                     this.setPos(target.x, target.y, target.z);
                     this.teleportTo(target.x, target.y, target.z);
-                    this.
+
                     currentPathIndex+= speed;
                     //this.setDeltaMovement(Vec3.ZERO);
                 } else {
@@ -318,12 +318,12 @@ public class HypertubeEntity extends Entity {
         }
     }
 
-    public void setSpeed(float s){
-        float f = (s- (int)s);
+    public void setSpeed(float speed){
+        float f = (speed- (int)speed);
         f = f == 0 ? 1 : f;
         int multiplier = (int)Math.round(1.0/f);
         this.moveEveryXTicks = multiplier;
-        this.speed = (int)(s*multiplier);
+        this.speed = (int)(speed*multiplier);
     }
 
     public float getSpeed(){

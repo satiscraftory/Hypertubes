@@ -22,7 +22,6 @@ import java.util.WeakHashMap;
 
 
 public class HypertubeSupportBlockEntity extends BlockEntity {
-    private float rotation;//probalby not needed?
     public BlockPos targetPositive = null;//todo do we need to make this private and use get and set?
     public BlockPos targetNegative = null;
     public CurveTypes.Curves targetPositiveType = null;
@@ -196,7 +195,7 @@ public class HypertubeSupportBlockEntity extends BlockEntity {
     }
 
     public float getRenderingRotation() {
-        rotation=0;
+        float rotation = 0;
         return rotation;
     }
 

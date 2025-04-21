@@ -73,13 +73,13 @@ public class HyperTubePlacerItem extends Item {
                 hypertubeSupportBlockEntity.targetPositive = targetPos;
                 hypertubeSupportBlockEntity.targetPositiveType = curveType;
                 hypertubeSupportBlockEntity.positiveTypeInfo = extraData;
-
+                hypertubeSupportBlockEntity.setChanged();
             }
             if(dir == -1){
                 hypertubeSupportBlockEntity.targetNegative = targetPos;
                 hypertubeSupportBlockEntity.targetNegativeType = curveType;
                 hypertubeSupportBlockEntity.negativeTypeInfo = extraData;
-
+                hypertubeSupportBlockEntity.setChanged();
             }
 
         }
