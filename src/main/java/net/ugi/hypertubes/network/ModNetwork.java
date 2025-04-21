@@ -1,11 +1,12 @@
 package net.ugi.hypertubes.network;
 
+import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
-@EventBusSubscriber(modid = "hypertubes", bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = "hypertubes", bus = EventBusSubscriber.Bus.MOD ,value =  Dist.CLIENT)
 public class ModNetwork {
     @SubscribeEvent
     public static void onRegisterPayloads(RegisterPayloadHandlersEvent event) {

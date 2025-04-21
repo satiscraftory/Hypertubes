@@ -6,13 +6,14 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import net.ugi.hypertubes.HyperTubes;
 import net.ugi.hypertubes.block.ModBlocks;
 
 import java.util.function.Supplier;
 
 public class ModCreativeModeTabs {
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TAB =
-            DeferredRegister.create(Registries.CREATIVE_MODE_TAB, net.ugi.hypertubes.HyperTubes.MOD_ID);
+            DeferredRegister.create(Registries.CREATIVE_MODE_TAB, HyperTubes.MOD_ID);
 
 
     public static final Supplier<CreativeModeTab> hypertubes = CREATIVE_MODE_TAB.register("hypertubes_tab",
