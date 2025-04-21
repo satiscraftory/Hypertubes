@@ -26,7 +26,7 @@ public class HypertubeSupportBlockEntity extends BlockEntity {
     public BlockPos targetPositive = null;//todo do we need to make this private and use get and set?
     public BlockPos targetNegative = null;
     public CurveTypes.Curves targetPositiveType = null;
-    public CurveTypes.Curves targetNegativeType = null;
+        public CurveTypes.Curves targetNegativeType = null;
     public String positiveTypeInfo = null;
     public String negativeTypeInfo = null;
 

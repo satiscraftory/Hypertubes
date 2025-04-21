@@ -83,6 +83,7 @@ public class HyperTubeCalcCore {
         BezierCurve bezierCurve = new BezierCurve(this);
         MinecraftCurve minecraftCurve = new MinecraftCurve(this);
 
+        if(curvetype==null) return null;
         BlockPos[] blockArray = new BlockPos[0];
         switch(curvetype){
             case CURVED -> {
