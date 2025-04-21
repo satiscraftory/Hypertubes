@@ -4,6 +4,7 @@ import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
@@ -31,6 +32,7 @@ import net.ugi.sf_hypertube.block.entity.HypertubeSupportBlockEntity;
 import net.ugi.sf_hypertube.entity.HypertubeEntity;
 import net.ugi.sf_hypertube.entity.ModEntities;
 import net.ugi.sf_hypertube.hypertube.Curves.HyperTubeCalcCore;
+import net.ugi.sf_hypertube.network.UncappedMotionPayload;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -156,6 +158,9 @@ public class HypertubeSupport extends BaseEntityBlock {
                         hyperTubeEntity.setSpeed(20f);
                         hypertubeSupportBlockEntity.addEntityToDiscard(entity);
                         entity.startRiding(hyperTubeEntity);
+                        if (entity instanceof ServerPlayer serverPlayer) {
+                            serverPlayer.startFallFlying();
+                        }
                     }
                 }
             });

@@ -349,6 +349,7 @@ public class HypertubeEntity extends Entity {
             if (passenger instanceof ServerPlayer serverPlayer) {
                 //serverPlayer.connection.send(new ClientboundSetEntityMotionPacket(passenger));
                 serverPlayer.connection.send(new UncappedMotionPayload(passenger.getId(),vector.x, vector.y, vector.z));
+                serverPlayer.startFallFlying();
             }
         }
     }
