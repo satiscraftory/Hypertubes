@@ -149,7 +149,8 @@ public class HypertubeSupport extends BaseEntityBlock {
                         String extraData1 =hypertubeSupportBlockEntity.getExtraInfo(currentDirection);
                         String extraData2 =nextHypertubeSupportBlockEntity.getExtraInfo(nextDirection);
 
-                        HyperTubeCalcCore curveCore = new HyperTubeCalcCore(currentPos, currentAxis, currentDirection, extraData1, nextPos, nextAxis, nextDirection, extraData2);
+                        HyperTubeCalcCore curveCore = new HyperTubeCalcCore();
+                        curveCore.setData(currentPos, currentAxis, currentDirection, extraData1, nextPos, nextAxis, nextDirection, extraData2);
 
                         hyperTubeEntity.addPath(
                                 Arrays.stream(curveCore.getHyperTubeArray(hypertubeSupportBlockEntity.getCurveType(currentDirection))).toList(),
@@ -196,7 +197,8 @@ public class HypertubeSupport extends BaseEntityBlock {
                 String extraData1 =currentHypertubeSupportBlockEntity.getExtraInfo(currentDirection);
                 String extraData2 =nextHypertubeSupportBlockEntity.getExtraInfo(nextDirection);
 
-                HyperTubeCalcCore curveCore = new HyperTubeCalcCore(currentSupportPos, currentAxis, currentDirection, extraData1, nextPos, nextAxis, nextDirection, extraData2);
+                HyperTubeCalcCore curveCore = new HyperTubeCalcCore();
+                curveCore.setData(currentSupportPos, currentAxis, currentDirection, extraData1, nextPos, nextAxis, nextDirection, extraData2);
 
 
                 return List.of(curveCore.getHyperTubeArray(currentHypertubeSupportBlockEntity.getCurveType(currentDirection)));

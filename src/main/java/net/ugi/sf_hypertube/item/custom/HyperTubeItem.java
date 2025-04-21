@@ -250,7 +250,8 @@ public class HyperTubeItem extends Item {
                 if (!result) return InteractionResultHolder.fail(player.getItemInHand(usedHand));
             }
 
-            HyperTubeCalcCore curveCore = new HyperTubeCalcCore(block1Pos.get(stack),block1Axis.get(stack),block1Direction.get(stack), extraData1.get(stack), block2Pos.get(stack),block2Axis.get(stack),block2Direction.get(stack), extraData2.get(stack));
+            HyperTubeCalcCore curveCore = new HyperTubeCalcCore();
+            curveCore.setData(block1Pos.get(stack),block1Axis.get(stack),block1Direction.get(stack), extraData1.get(stack), block2Pos.get(stack),block2Axis.get(stack),block2Direction.get(stack), extraData2.get(stack));
             BlockPos[] blockPosArray = curveCore.getHyperTubeArray(this.curveType.get(stack));
 
             boolean isValidCurve = checkValidCurve(level,blockPosArray,player);
@@ -311,8 +312,8 @@ public class HyperTubeItem extends Item {
                         if (!result) return;
                     }
                 }
-
-                HyperTubeCalcCore curveCore = new HyperTubeCalcCore(block1Pos.get(stack),block1Axis.get(stack),block1Direction.get(stack), extraData1.get(stack), block2Pos.get(stack),block2Axis.get(stack),block2Direction.get(stack), extraData2.get(stack));
+                HyperTubeCalcCore curveCore = new HyperTubeCalcCore();
+                curveCore.setData(block1Pos.get(stack),block1Axis.get(stack),block1Direction.get(stack), extraData1.get(stack), block2Pos.get(stack),block2Axis.get(stack),block2Direction.get(stack), extraData2.get(stack));
                 BlockPos[] blockPosArray = curveCore.getHyperTubeArray(this.curveType.get(stack));
 
                 boolean isValidCurve = checkValidCurve(level,blockPosArray,player);
