@@ -27,7 +27,7 @@ public class HyperTubePlacerUI {
                 availableResourcesCount < tubeLength ? errorColor : validColor;
 
         Component text = Component.literal("Type: ").withStyle(curveTypeColor)
-                .append(Component.translatable("sf_hypertube.curvetype." + curvetype.getLabel()).withStyle(curveTypeColor))
+                .append(Component.translatable("sf_hypertube.curvetype." + curvetype.toString()).withStyle(curveTypeColor))
                 .append(Component.literal("    " + "Length: " + tubeLength + " / " + (player.isCreative() ? "∞" : maxTubeLength)).withStyle(lengthColor))
                 .append(Component.literal("    "  + "Resource: " + (player.isCreative() ? "∞" : availableResourcesCount) + " / " + tubeLength).withStyle(resourceColor));
 

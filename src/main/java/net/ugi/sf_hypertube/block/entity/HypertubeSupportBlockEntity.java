@@ -73,13 +73,13 @@ public class HypertubeSupportBlockEntity extends BlockEntity {
             tag.putIntArray("targetPositive", List.of(targetPositive.getX(), targetPositive.getY(), targetPositive.getZ()));
         }
         if(targetPositiveType != null) {
-            tag.putString("targetPositiveType", targetPositiveType.getLabel());
+            tag.putString("targetPositiveType", targetPositiveType.toString());
         }
         if(targetNegative != null) {
             tag.putIntArray("targetNegative", List.of(targetNegative.getX(), targetNegative.getY(), targetNegative.getZ()));
         }
         if(targetNegativeType != null) {
-            tag.putString("targetNegativeType", targetNegativeType.getLabel());
+            tag.putString("targetNegativeType", targetNegativeType.toString());
         }
         if(positiveTypeInfo != null) {
             tag.putString("positiveTypeInfo", positiveTypeInfo);

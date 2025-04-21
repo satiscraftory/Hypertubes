@@ -9,19 +9,19 @@ public class CurveTypes {
         MINECRAFT("minecraft");
         //HELIX("helix");
 
-        private final String label;
+        private final String name;
 
-        Curves(String label) {
-            this.label = label;
+        Curves(String name) {
+            this.name = name;
         }
 
-        public String getLabel() {
-            return label;
+        public String toString() {
+            return this.name;
         }
 
-        public static Curves get(String label) {
+        public static Curves get(String name) {
             for (Curves curve : Curves.values()) {
-                return curve.label.equals(label) ? curve : null;
+                return curve.name.equals(name) ? curve : null;
             }
             return null;
         }
