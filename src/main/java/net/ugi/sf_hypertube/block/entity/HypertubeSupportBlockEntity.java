@@ -138,9 +138,9 @@ public class HypertubeSupportBlockEntity extends BlockEntity {
         return saveWithoutMetadata(pRegistries);
     }
 
-    public int getDirection(BlockPos previousBlockPos){
-        if(targetPositive !=null &&  targetPositive.equals(previousBlockPos)) return 1;
-        if(targetNegative !=null &&  targetNegative.equals(previousBlockPos)) return -1;
+    public int getDirection(BlockPos targetPos){
+        if(this.targetPositive !=null &&  this.targetPositive.equals(targetPos)) return 1;
+        if(this.targetNegative !=null &&  this.targetNegative.equals(targetPos)) return -1;
         return 0;
     }
 
@@ -178,6 +178,20 @@ public class HypertubeSupportBlockEntity extends BlockEntity {
         });
         for(Entity e : entitiesToRemove) {
             this.discardEntities.remove(e);
+        }
+    }
+
+    public void removeTarget(BlockPos targetPos) {
+        int direction = this.getDirection(targetPos);
+        if(direction == 1){
+            this.targetPositive = null;
+            this.targetPositiveType = null;
+            this.positiveTypeInfo = null;
+        }
+        if(direction == -1){
+            this.targetNegative = null;
+            this.targetNegativeType = null;
+            this.negativeTypeInfo = null;
         }
     }
 
