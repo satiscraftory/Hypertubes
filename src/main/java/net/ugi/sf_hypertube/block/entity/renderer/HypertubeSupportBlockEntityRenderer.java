@@ -30,7 +30,11 @@ public class HypertubeSupportBlockEntityRenderer implements BlockEntityRenderer<
         poseStack.pushPose();
         poseStack.translate(0.5f, 0.5f, 0.5f);
         poseStack.scale(2.2f, 2.2f, 2.2f);
-        poseStack.mulPose(Axis.YP.rotationDegrees(hypertubeSupportBlockEntity.getRenderingRotation()));
+        float rotation = hypertubeSupportBlockEntity.getRenderingRotation();
+        if(rotation!=-1){
+            poseStack.mulPose(Axis.YP.rotationDegrees(rotation));
+            poseStack.mulPose(Axis.XP.rotationDegrees(90));
+        }
 
         itemRenderer.renderStatic(stack, ItemDisplayContext.FIXED, getLightLevel(hypertubeSupportBlockEntity.getLevel(),
                 hypertubeSupportBlockEntity.getBlockPos()), OverlayTexture.NO_OVERLAY, poseStack, bufferSource, hypertubeSupportBlockEntity.getLevel(), 1);

@@ -3,6 +3,8 @@ package net.ugi.sf_hypertube.block.custom;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -105,6 +107,7 @@ public class HypertubeSupportBlock extends BaseEntityBlock {
         BlockEntity blockEntity = level.getBlockEntity(pos);
         Direction.Axis axis = state.getValue(BlockStateProperties.AXIS);
         if (blockEntity instanceof HypertubeSupportBlockEntity hypertubeSupportBlockEntity ) {
+            if(!hypertubeSupportBlockEntity.isEntrance()) return;
             BlockPos checkpos = null;
             if (hypertubeSupportBlockEntity.targetNegative != null && hypertubeSupportBlockEntity.targetPositive == null) {
                 checkpos  = pos.relative(axis, 2);
@@ -112,12 +115,10 @@ public class HypertubeSupportBlock extends BaseEntityBlock {
             if (hypertubeSupportBlockEntity.targetNegative == null && hypertubeSupportBlockEntity.targetPositive != null) {
                 checkpos = pos.relative(axis, -2);
             }
-
             if (checkpos == null) return;
             List<Entity> entities = level.getEntities(null, new AABB(checkpos.offset(1,2,1).getBottomCenter(), checkpos.offset(-1,0,-1).getBottomCenter()));
             hypertubeSupportBlockEntity.removeEntitiesFromDiscard(entities);
             if(entities.isEmpty()) return;
-
 
             BlockPos finalCheckpos = checkpos;
             entities.forEach(entity -> {
@@ -160,7 +161,7 @@ public class HypertubeSupportBlock extends BaseEntityBlock {
                                 Arrays.stream(pathArray).toList(),
                                 currentPos, nextPos);
                         level.addFreshEntity(hyperTubeEntity);
-                        hyperTubeEntity.setSpeed(4f);
+                        hyperTubeEntity.setSpeed(1f);
                         hypertubeSupportBlockEntity.addEntityToDiscard(entity);
                         entity.startRiding(hyperTubeEntity);
                         if (entity instanceof ServerPlayer serverPlayer) {
@@ -253,7 +254,7 @@ public class HypertubeSupportBlock extends BaseEntityBlock {
                     hyperTubeCalc.setDataFromPosAndAxis(level, pos, state.getValue(AXIS), hypertubeSupportBlockEntity1.targetPositive, level.getBlockState(hypertubeSupportBlockEntity1.targetPositive).getValue(AXIS));
                     List<BlockPos> path = new java.util.ArrayList<>(List.of(hyperTubeCalc.getHyperTubeArray(hypertubeSupportBlockEntity1.targetPositiveType)));
                     path.remove(hypertubeSupportBlockEntity1.targetPositive);
-                    RemovePath(level, path);
+                    RemovePath(level, path, state);
                     hypertubeSupportBlockEntity2.removeTarget(pos);
                 }
                 if(hypertubeSupportBlockEntity1.targetNegative != null){
@@ -262,7 +263,7 @@ public class HypertubeSupportBlock extends BaseEntityBlock {
                     hyperTubeCalc.setDataFromPosAndAxis(level, pos, state.getValue(AXIS), hypertubeSupportBlockEntity1.targetNegative, level.getBlockState(hypertubeSupportBlockEntity1.targetNegative).getValue(AXIS));
                     List<BlockPos> path = new java.util.ArrayList<>(List.of((hyperTubeCalc.getHyperTubeArray(hypertubeSupportBlockEntity1.targetNegativeType))));
                     path.remove(hypertubeSupportBlockEntity1.targetNegative);
-                    RemovePath(level, path);
+                    RemovePath(level, path, state);
                     hypertubeSupportBlockEntity2.removeTarget(pos);
                 }
                 level.updateNeighbourForOutputSignal(pos, this);
@@ -271,9 +272,10 @@ public class HypertubeSupportBlock extends BaseEntityBlock {
         super.onRemove(state, level, pos, newState, movedByPiston);
     }
 
-    protected void RemovePath(Level level, List<BlockPos> path){
-        path.forEach( blockPos ->
-                level.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 2)
+    protected void RemovePath(Level level, List<BlockPos> path, BlockState oldState) {
+        path.forEach( blockPos ->{
+                    level.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 2);
+                }
                 );
     }
 
@@ -281,22 +283,25 @@ public class HypertubeSupportBlock extends BaseEntityBlock {
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
                                               Player player, InteractionHand hand, BlockHitResult hitResult) {
         if(level.getBlockEntity(pos) instanceof HypertubeSupportBlockEntity hypertubeSupportBlockEntity) {
-            if(hypertubeSupportBlockEntity.inventory.getStackInSlot(0).isEmpty() && stack.is(Items.PURPUR_PILLAR) || stack.is(ModBlocks.HYPERTUBE_ENTRANCE.asItem())) {
+            if(hypertubeSupportBlockEntity.inventory.getStackInSlot(0).isEmpty() && stack.is(ModBlocks.HYPERTUBE_BOOSTER.asItem()) || stack.is(ModBlocks.HYPERTUBE_ENTRANCE.asItem())) {
                 hypertubeSupportBlockEntity.inventory.insertItem(0, stack.copy(), false);
-                stack.shrink(1);
+                if(!player.isCreative()) {
+                    stack.shrink(1);
+                }
                 level.playSound(player, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 1f, 2f);
                 return ItemInteractionResult.SUCCESS;
             } else if(stack.isEmpty()) {
-                ItemStack stackOnPedestal = hypertubeSupportBlockEntity.inventory.extractItem(0, 1, false);
-                if (stackOnPedestal.isEmpty()) return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
-                player.setItemInHand(InteractionHand.MAIN_HAND, stackOnPedestal);
+                ItemStack stackOnSupport = hypertubeSupportBlockEntity.inventory.extractItem(0, 1, false);
+                if (stackOnSupport.isEmpty()) return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+                if(!player.isCreative() || !player.getInventory().contains(stackOnSupport)){
+                    player.setItemInHand(InteractionHand.MAIN_HAND, stackOnSupport);
+                }
                 hypertubeSupportBlockEntity.clearContents();
                 level.playSound(player, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 1f, 1f);
                 return ItemInteractionResult.SUCCESS;
             }
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
-
         return ItemInteractionResult.SUCCESS;
     }
 }

@@ -1,6 +1,7 @@
 package net.ugi.sf_hypertube.block.entity;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
@@ -12,7 +13,9 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.neoforged.neoforge.items.ItemStackHandler;
+import net.ugi.sf_hypertube.block.ModBlocks;
 import net.ugi.sf_hypertube.hypertube.Curves.CurveTypes;
 
 import javax.annotation.Nullable;
@@ -195,8 +198,21 @@ public class HypertubeSupportBlockEntity extends BlockEntity {
     }
 
     public float getRenderingRotation() {
-        float rotation = 0;
-        return rotation;
+        BlockState state = this.level.getBlockState(this.getBlockPos());
+        if(!state.hasProperty(BlockStateProperties.AXIS)) return -1;
+        Direction.Axis axis = this.level.getBlockState(this.getBlockPos()).getValue(BlockStateProperties.AXIS);
+        //int direction = this.getDirection(this.getBlockPos());
+        if(axis == Direction.Axis.Z) return 0;
+        if(axis == Direction.Axis.X) return 90;
+        return -1;//sets y axis
+    }
+
+    public boolean isEntrance(){
+        return this.inventory.getStackInSlot(0).is(ModBlocks.HYPERTUBE_ENTRANCE.asItem());
+    }
+
+    public boolean isBooster(){//todo replace with a float or int once we add a different booster
+        return this.inventory.getStackInSlot(0).is(ModBlocks.HYPERTUBE_BOOSTER.asItem());
     }
 
 }

@@ -42,6 +42,11 @@ public class ModBlocks {
                     BlockBehaviour.Properties.of()
             ));
 
+    public static final DeferredBlock<Block> HYPERTUBE_BOOSTER = registerBlock("hypertube_booster",
+            () -> new TransparentBlock(
+                    BlockBehaviour.Properties.of()
+            ));
+
 
     private static <T extends Block> DeferredBlock<T> registerBlock(String name, Supplier<T> block) {
         DeferredBlock<T> toReturn = BLOCKS.register(name, block);

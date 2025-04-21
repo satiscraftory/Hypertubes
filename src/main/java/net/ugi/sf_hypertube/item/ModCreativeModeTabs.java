@@ -22,6 +22,7 @@ public class ModCreativeModeTabs {
                     .displayItems((itemDisplayParameters, output) -> {
                         output.accept(ModBlocks.HYPERTUBE_SUPPORT);
                         output.accept(ModBlocks.HYPERTUBE_ENTRANCE);
+                        output.accept(ModBlocks.HYPERTUBE_BOOSTER);
                         output.accept(ModBlocks.HYPERTUBE);
                         output.accept(ModItems.HYPERTUBE_PLACER);
                     }).build());

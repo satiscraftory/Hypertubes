@@ -254,6 +254,10 @@ public class HypertubeEntity extends Entity {
 
                     if(block instanceof HypertubeSupportBlock hypertubeSupportBlock){
                         if(hypertubeSupportBlock.isConnectedBothSides(this.level(), this.currentPos)){
+                            HypertubeSupportBlockEntity hypertubeSupportBlockEntity = (HypertubeSupportBlockEntity)this.level().getBlockEntity(this.currentPos);
+                            if(hypertubeSupportBlockEntity.isBooster()){
+                                this.setSpeed(this.getSpeed()+1);
+                            }
 
                             this.addPath(hypertubeSupportBlock.getNextPath(this.level(),this.previousPos,this.currentPos), this.currentPos, hypertubeSupportBlock.getNextTargetPos(this.level(), previousPos, currentPos));
                             //cull path array
@@ -270,11 +274,11 @@ public class HypertubeEntity extends Entity {
                             BlockEntity blockEntity = this.level().getBlockEntity(this.currentPos);
 
                             if(blockEntity instanceof HypertubeSupportBlockEntity hypertubeSupportBlockEntity) {
-                                BlockPos exitpos = this.currentPos.relative(axis, -hypertubeSupportBlockEntity.getDirection(this.previousPos));
-                                if (!this.position().equals(exitpos.getCenter())) {
+                                BlockPos exitPos = this.currentPos.relative(axis, -hypertubeSupportBlockEntity.getDirection(this.previousPos));
+                                if (!this.position().equals(exitPos.getCenter())) {
                                     //move player to the end of the tube
 
-                                    Vec3 target = Vec3.atCenterOf(exitpos);
+                                    Vec3 target = Vec3.atCenterOf(exitPos);
                                     Vec3 current = this.position();
                                     Vec3 diff = target.subtract(current);
                                     double dist = diff.length();
@@ -300,7 +304,7 @@ public class HypertubeEntity extends Entity {
                                     }
                                 } else {
                                     //launch player or entity
-                                    this.tryLaunchEntity(exitpos, hypertubeSupportBlockEntity, axis);
+                                    this.tryLaunchEntity(exitPos, hypertubeSupportBlockEntity, axis);
                                 }
                                 //TEST-------
 
