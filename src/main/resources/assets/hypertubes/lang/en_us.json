@@ -1,0 +1,11 @@
+{
+  "itemGroup.hypertubes": "Example Mod Tab",
+  "block.hypertubes.hypertube": "Hypertube",
+  "item.hypertubes.hypertube_placer": "Hypertube Placer",
+
+  "hypertubes.curvetype.curved": "Curved",
+  "hypertubes.curvetype.overkill": "Overkill",
+  "hypertubes.curvetype.straight": "Straight",
+  "hypertubes.curvetype.minecraft": "Minecraft",
+  "hypertubes.curvetype.helix": "Helix"
+}

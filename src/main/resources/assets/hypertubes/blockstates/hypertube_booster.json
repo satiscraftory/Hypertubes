@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "hypertubes:block/hypertube_booster"
+    }
+  }
+}
