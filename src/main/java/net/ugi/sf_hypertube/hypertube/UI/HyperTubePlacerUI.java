@@ -5,13 +5,14 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.ugi.sf_hypertube.hypertube.Curves.CurveTypes;
+import net.ugi.sf_hypertube.hypertube.HyperTubeUtil;
 import net.ugi.sf_hypertube.item.custom.HyperTubePlacerItem;
 
 public class HyperTubePlacerUI {
 
     public void makeUI(Player player, ItemStack stack, int tubeLength, int maxTubeLength, CurveTypes.Curves curvetype) {
         HyperTubePlacerItem hyperTubePlacerItem = (HyperTubePlacerItem) stack.getItem();
-        int availableResourcesCount = hyperTubePlacerItem.getResourcesCount(player);
+        int availableResourcesCount = HyperTubeUtil.getResourcesCount(player);
 
         ChatFormatting errorColor = ChatFormatting.RED;
         ChatFormatting validColor = ChatFormatting.DARK_AQUA;

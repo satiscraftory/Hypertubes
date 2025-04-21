@@ -25,6 +25,7 @@ import net.ugi.sf_hypertube.block.entity.HypertubeSupportBlockEntity;
 import net.ugi.sf_hypertube.hypertube.Curves.HyperTubeCalcCore;
 import net.ugi.sf_hypertube.hypertube.Curves.CurveTypes;
 import net.ugi.sf_hypertube.hypertube.UI.HyperTubePlacerUI;
+import net.ugi.sf_hypertube.hypertube.HyperTubeUtil;
 import net.ugi.sf_hypertube.item.ModItems;
 import org.joml.Vector3f;
 
@@ -55,27 +56,8 @@ public class HyperTubePlacerItem extends Item {
     Block hyperTubeSupportBlock = ModBlocks.HYPERTUBE_SUPPORT.get();
     Block hyperTubeBlock = ModBlocks.HYPERTUBE.get();
     double placeDistance = 20;
-
-
-    private int intValue(boolean val){
-        return val ? 1 : 0;
-    }
-
-    private boolean checkValidCurve(Level level, BlockPos[] blockPosArray,Player player){
-        boolean isValidCurve = true;
-        for (int i = 0; i < blockPosArray.length; i++) {
-            if(!(level.getBlockState(blockPosArray[i]).isAir() || level.getBlockState(blockPosArray[i]).is(ModBlocks.HYPERTUBE_SUPPORT))){
-                isValidCurve = false;
-            }
-        }
-        if(player.isCreative()) return isValidCurve;
-        if (blockPosArray.length-2 > getResourcesCount(player)){
-            isValidCurve = false;
-        }
-        if (blockPosArray.length-2 > this.maxTubeLength) isValidCurve = false;
-        return isValidCurve;
-
-    }
+    
+    
 
     private void placeHypertubeSupport(Level level, BlockPos pos, Direction.Axis axis){
         level.setBlock(pos, hyperTubeSupportBlock.defaultBlockState().setValue(BlockStateProperties.AXIS, axis),2 );
@@ -118,7 +100,8 @@ public class HyperTubePlacerItem extends Item {
 
 
             if (dir1IsHyperTube && dir2IsHyperTube) return false; // no connection possible to this tube
-            blockDirectionMap.put(stack,intValue(dir2IsHyperTube) - intValue(dir1IsHyperTube)); // gives the direction the tubes need to be , if 0 => code chooses later ( both available)
+
+            blockDirectionMap.put(stack,HyperTubeUtil.intValue(dir2IsHyperTube) - HyperTubeUtil.intValue(dir1IsHyperTube)); // gives the direction the tubes need to be , if 0 => code chooses later ( both available)
         }
         return true;
     }
@@ -145,17 +128,6 @@ public class HyperTubePlacerItem extends Item {
 
     private  boolean calcBlockIfAir(Level level, ItemStack stack, BlockPos blockpos, Player player, WeakHashMap<ItemStack, BlockPos> blockPosMap, WeakHashMap<ItemStack, Direction.Axis> blockAxisMap, WeakHashMap<ItemStack, Integer> blockDirectionMap){
         return calcBlockIfBlock(level,stack,blockpos.below(2),player, blockPosMap, blockAxisMap, blockDirectionMap);
-    }
-
-
-
-
-
-    public int getResourcesCount(Player player){
-        int resource1 = player.getInventory().countItem(Items.GLASS_PANE);
-        int resource2 = player.getInventory().countItem(Items.GOLD_NUGGET);
-        return Math.min(resource1, resource2);
-
     }
 
     public static void removeItems(Player player, Item itemToRemove, int amount) {
@@ -254,7 +226,7 @@ public class HyperTubePlacerItem extends Item {
             curveCore.setData(block1Pos.get(stack),block1Axis.get(stack),block1Direction.get(stack), extraData1.get(stack), block2Pos.get(stack),block2Axis.get(stack),block2Direction.get(stack), extraData2.get(stack));
             BlockPos[] blockPosArray = curveCore.getHyperTubeArray(this.curveType.get(stack));
 
-            boolean isValidCurve = checkValidCurve(level,blockPosArray,player);
+            boolean isValidCurve = HyperTubeUtil.checkValidCurve(level,blockPosArray,player,this.maxTubeLength);
             if (!isValidCurve) return InteractionResultHolder.pass(player.getItemInHand(usedHand));
 
             for (int i = 0; i < blockPosArray.length; i++) {
@@ -314,7 +286,7 @@ public class HyperTubePlacerItem extends Item {
                 curveCore.setData(block1Pos.get(stack),block1Axis.get(stack),block1Direction.get(stack), extraData1.get(stack), block2Pos.get(stack),block2Axis.get(stack),block2Direction.get(stack), extraData2.get(stack));
                 BlockPos[] blockPosArray = curveCore.getHyperTubeArray(this.curveType.get(stack));
 
-                boolean isValidCurve = checkValidCurve(level,blockPosArray,player);
+                boolean isValidCurve = HyperTubeUtil.checkValidCurve(level,blockPosArray,player,this.maxTubeLength);
                 Vector3f color = isValidCurve ?new Vector3f(0,255,255) : new Vector3f(255,0,0);
 
                 HyperTubePlacerUI hyperTubePlacerUI = new HyperTubePlacerUI();
