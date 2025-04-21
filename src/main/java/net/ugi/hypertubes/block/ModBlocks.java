@@ -36,16 +36,6 @@ public class ModBlocks {
                 .strength(2f).sound(SoundType.GLASS).noOcclusion().isSuffocating(ModBlocks::never).isViewBlocking(ModBlocks::never).isValidSpawn(Blocks::never)
             ));
 
-    public static final DeferredBlock<Block> HYPERTUBE_ENTRANCE = registerBlock("hypertube_entrance",
-            () -> new TransparentBlock(
-                    BlockBehaviour.Properties.of()
-            ));
-
-    public static final DeferredBlock<Block> HYPERTUBE_BOOSTER = registerBlock("hypertube_booster",
-            () -> new TransparentBlock(
-                    BlockBehaviour.Properties.of()
-            ));
-
 
     private static <T extends Block> DeferredBlock<T> registerBlock(String name, Supplier<T> block) {
         DeferredBlock<T> toReturn = BLOCKS.register(name, block);

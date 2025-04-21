@@ -20,8 +20,8 @@ public class ModCreativeModeTabs {
                     .title(Component.translatable("creativetab.hypertubes.all"))
                     .displayItems((itemDisplayParameters, output) -> {
                         output.accept(ModBlocks.HYPERTUBE_SUPPORT);
-                        output.accept(ModBlocks.HYPERTUBE_ENTRANCE);
-                        output.accept(ModBlocks.HYPERTUBE_BOOSTER);
+                        output.accept(ModItems.HYPERTUBE_ENTRANCE);
+                        output.accept(ModItems.HYPERTUBE_BOOSTER);
                         output.accept(ModBlocks.HYPERTUBE);
                         output.accept(ModItems.HYPERTUBE_PLACER);
                     }).build());

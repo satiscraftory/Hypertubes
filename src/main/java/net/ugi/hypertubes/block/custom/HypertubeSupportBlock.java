@@ -34,6 +34,7 @@ import net.ugi.hypertubes.block.entity.HypertubeSupportBlockEntity;
 import net.ugi.hypertubes.entity.HypertubeEntity;
 import net.ugi.hypertubes.entity.ModEntities;
 import net.ugi.hypertubes.hypertube.Curves.HyperTubeCalcCore;
+import net.ugi.hypertubes.item.ModItems;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -283,7 +284,7 @@ public class HypertubeSupportBlock extends BaseEntityBlock {
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
                                               Player player, InteractionHand hand, BlockHitResult hitResult) {
         if(level.getBlockEntity(pos) instanceof HypertubeSupportBlockEntity hypertubeSupportBlockEntity) {
-            if(hypertubeSupportBlockEntity.inventory.getStackInSlot(0).isEmpty() && stack.is(ModBlocks.HYPERTUBE_BOOSTER.asItem()) || stack.is(ModBlocks.HYPERTUBE_ENTRANCE.asItem())) {
+            if(hypertubeSupportBlockEntity.inventory.getStackInSlot(0).isEmpty() && stack.is(ModItems.HYPERTUBE_BOOSTER) || stack.is(ModItems.HYPERTUBE_ENTRANCE)) {
                 hypertubeSupportBlockEntity.inventory.insertItem(0, stack.copy(), false);
                 if(!player.isCreative()) {
                     stack.shrink(1);

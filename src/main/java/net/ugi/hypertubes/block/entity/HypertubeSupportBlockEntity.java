@@ -17,6 +17,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.neoforged.neoforge.items.ItemStackHandler;
 import net.ugi.hypertubes.block.ModBlocks;
 import net.ugi.hypertubes.hypertube.Curves.CurveTypes;
+import net.ugi.hypertubes.item.ModItems;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -208,11 +209,11 @@ public class HypertubeSupportBlockEntity extends BlockEntity {
     }
 
     public boolean isEntrance(){
-        return this.inventory.getStackInSlot(0).is(ModBlocks.HYPERTUBE_ENTRANCE.asItem());
+        return this.inventory.getStackInSlot(0).is(ModItems.HYPERTUBE_ENTRANCE);
     }
 
     public boolean isBooster(){//todo replace with a float or int once we add a different booster
-        return this.inventory.getStackInSlot(0).is(ModBlocks.HYPERTUBE_BOOSTER.asItem());
+        return this.inventory.getStackInSlot(0).is(ModItems.HYPERTUBE_BOOSTER);
     }
 
 }

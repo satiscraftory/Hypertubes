@@ -1,7 +1,11 @@
 package net.ugi.hypertubes.item;
 
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.TransparentBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.ugi.hypertubes.item.custom.HyperTubePlacerItem;
@@ -13,6 +17,15 @@ public class ModItems {
             () -> new HyperTubePlacerItem(new Item.Properties()));
 
 
+    public static final DeferredItem<Item> HYPERTUBE_ENTRANCE = ITEMS.register("hypertube_entrance",
+            () -> new Item(
+                    new Item.Properties()
+            ));
+
+    public static final DeferredItem<Item> HYPERTUBE_BOOSTER = ITEMS.register("hypertube_booster",
+            () -> new Item(
+                    new Item.Properties()
+            ));
 /*
     public static final DeferredItem<Item> CHISEL = ITEMS.register("chisel",
             () -> new ChiselItem(new Item.Properties().durability(32)));
