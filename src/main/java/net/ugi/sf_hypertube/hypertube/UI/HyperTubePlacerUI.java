@@ -18,8 +18,13 @@ public class HyperTubePlacerUI {
         ChatFormatting curveTypeColor = ChatFormatting.GOLD;
 
 
-        ChatFormatting lengthColor = tubeLength > maxTubeLength ? errorColor : validColor;
-        ChatFormatting resourceColor = availableResourcesCount < tubeLength ? errorColor : validColor;
+        ChatFormatting lengthColor = player.isCreative() ?
+                validColor :
+                tubeLength > maxTubeLength ? errorColor : validColor;
+
+        ChatFormatting resourceColor = player.isCreative() ?
+                validColor :
+                availableResourcesCount < tubeLength ? errorColor : validColor;
 
         Component text = Component.literal("Type: ").withStyle(curveTypeColor)
                 .append(Component.translatable("sf_hypertube.curvetype." + curvetype.getLabel()).withStyle(curveTypeColor))
