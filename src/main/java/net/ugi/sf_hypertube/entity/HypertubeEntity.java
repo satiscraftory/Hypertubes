@@ -257,7 +257,7 @@ public class HypertubeEntity extends Entity {
                         if(hypertubeSupportBlock.isConnectedBothSides(this.level(), this.currentPos)){
                             HypertubeSupportBlockEntity hypertubeSupportBlockEntity = (HypertubeSupportBlockEntity)this.level().getBlockEntity(this.currentPos);
                             if(hypertubeSupportBlockEntity.isBooster()){
-                                this.setSpeed(this.getSpeed()*1.2f);
+                                this.setSpeed(this.getSpeed()+1);
                             }
 
                             this.addPath(hypertubeSupportBlock.getNextPath(this.level(),this.previousPos,this.currentPos), this.currentPos, hypertubeSupportBlock.getNextTargetPos(this.level(), previousPos, currentPos));
@@ -331,7 +331,7 @@ public class HypertubeEntity extends Entity {
         int multiplier = (int)Math.round(1.0/f);
         this.moveEveryXTicks = multiplier;
         this.speed = (int)(speed*multiplier);
-        System.out.println("speed: "+speed + "this.speed: " + this.speed + "this.moveverticuikslf: "+ this.moveEveryXTicks);
+        System.out.println(" speed: "+speed + " this.speed: " + this.speed + " this.moveverticuikslf: "+ this.moveEveryXTicks);
     }
 
     public float getSpeed(){
