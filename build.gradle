@@ -187,3 +187,9 @@ idea {
         downloadJavadoc = true
     }
 }
+
+tasks.named('jar', Jar).configure {
+    archiveBaseName.set(project.findProperty("mod_id")?.toString() ?: "mod")
+    archiveVersion.set("${project.findProperty("mod_version") ?: "0.0.1"}+${project.findProperty("minecraft_version") ?: "1.0.0"}")
+    archiveClassifier.set("") // Remove "-plain" if present
+}
