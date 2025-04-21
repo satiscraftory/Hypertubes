@@ -13,10 +13,9 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.Vec3;
-import net.ugi.sf_hypertube.block.custom.HypertubeSupport;
+import net.ugi.sf_hypertube.block.custom.HypertubeSupportBlock;
 import net.ugi.sf_hypertube.block.entity.HypertubeSupportBlockEntity;
 import net.ugi.sf_hypertube.network.UncappedMotionPayload;
 
@@ -253,10 +252,10 @@ public class HypertubeEntity extends Entity {
                 if ( path != null){
                     Block block = this.level().getBlockState(this.currentPos).getBlock();
 
-                    if(block instanceof HypertubeSupport hypertubeSupport){
-                        if(hypertubeSupport.isConnectedBothSides(this.level(), this.currentPos)){
+                    if(block instanceof HypertubeSupportBlock hypertubeSupportBlock){
+                        if(hypertubeSupportBlock.isConnectedBothSides(this.level(), this.currentPos)){
 
-                            this.addPath(hypertubeSupport.getNextPath(this.level(),this.previousPos,this.currentPos), this.currentPos, hypertubeSupport.getNextTargetPos(this.level(), previousPos, currentPos));
+                            this.addPath(hypertubeSupportBlock.getNextPath(this.level(),this.previousPos,this.currentPos), this.currentPos, hypertubeSupportBlock.getNextTargetPos(this.level(), previousPos, currentPos));
                             //cull path array
                             for (int i = currentPathIndex -1; i >=0 && !this.path.isEmpty(); i--) {//cull path array
                                 this.path.removeFirst();
@@ -324,7 +323,6 @@ public class HypertubeEntity extends Entity {
         f = f == 0 ? 1 : f;
         int multiplier = (int)Math.round(1.0/f);
         this.moveEveryXTicks = multiplier;
-        System.out.println("moveeveryxticks"+moveEveryXTicks);
         this.speed = (int)(s*multiplier);
     }
 

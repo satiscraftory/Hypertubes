@@ -32,18 +32,17 @@ import net.ugi.sf_hypertube.block.entity.HypertubeSupportBlockEntity;
 import net.ugi.sf_hypertube.entity.HypertubeEntity;
 import net.ugi.sf_hypertube.entity.ModEntities;
 import net.ugi.sf_hypertube.hypertube.Curves.HyperTubeCalcCore;
-import net.ugi.sf_hypertube.network.UncappedMotionPayload;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class HypertubeSupport extends BaseEntityBlock {
+public class HypertubeSupportBlock extends BaseEntityBlock {
     public static final VoxelShape SHAPE = Block.box(0, 0, 0, 16, 16, 16);
-    public static final MapCodec<HypertubeSupport> CODEC = simpleCodec(HypertubeSupport::new);
+    public static final MapCodec<HypertubeSupportBlock> CODEC = simpleCodec(HypertubeSupportBlock::new);
     public static final EnumProperty<Direction.Axis> AXIS = BlockStateProperties.AXIS;
 
-    public HypertubeSupport(Properties properties) {
+    public HypertubeSupportBlock(Properties properties) {
         super(properties);
     }
 
@@ -180,7 +179,7 @@ public class HypertubeSupport extends BaseEntityBlock {
             int currentDirection = -currentHypertubeSupportBlockEntity.getDirection(previousSupportPos);
             BlockPos nextPos = currentHypertubeSupportBlockEntity.getTargetPos(currentDirection);
             BlockEntity nextEntity = level.getBlockEntity(nextPos);
-            if(!(level.getBlockState(nextPos).getBlock() instanceof HypertubeSupport)){//extra anti crash
+            if(!(level.getBlockState(nextPos).getBlock() instanceof HypertubeSupportBlock)){//extra anti crash
                 if(currentHypertubeSupportBlockEntity.getDirection(nextPos)==1){//todo maybe make this a function and call more often
                     currentHypertubeSupportBlockEntity.targetPositive = null;
                     currentHypertubeSupportBlockEntity.targetPositiveType = null;

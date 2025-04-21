@@ -1,7 +1,6 @@
 package net.ugi.sf_hypertube.block;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.BlockGetter;
@@ -12,11 +11,10 @@ import net.minecraft.world.level.block.TransparentBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.ugi.sf_hypertube.SfHyperTube;
-import net.ugi.sf_hypertube.block.custom.HypertubeSupport;
+import net.ugi.sf_hypertube.block.custom.HypertubeSupportBlock;
 import net.ugi.sf_hypertube.item.ModItems;
 
 import java.util.function.Supplier;
@@ -30,7 +28,7 @@ public class ModBlocks {
             DeferredRegister.createBlocks(SfHyperTube.MOD_ID);
 
     public static final DeferredBlock<Block> HYPERTUBE_SUPPORT = registerBlock("hypertube_support",
-            () -> new HypertubeSupport(
+            () -> new HypertubeSupportBlock(
                     BlockBehaviour.Properties.of().strength(2f).noLootTable().noOcclusion()));
 
     public static final DeferredBlock<Block> HYPERTUBE= registerBlock("hypertube",

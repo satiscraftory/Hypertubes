@@ -60,8 +60,6 @@ public class HyperTubeCalcCore {
 
 
 
-
-
     public void setUsedDirections(int dir1, int dir2){
         this.block1UsedDirection = dir1;
         this.block2UsedDirection = dir2;
@@ -85,7 +83,7 @@ public class HyperTubeCalcCore {
 
         if(curvetype==null) return null;
         BlockPos[] blockArray = new BlockPos[0];
-        switch(curvetype){
+        switch(curvetype) {
             case CURVED -> {
                 blockArray = bezierCurve.getCurve(0.5);
             }
@@ -102,11 +100,7 @@ public class HyperTubeCalcCore {
 //
 //            }
 
-
         }
-
         return checkDuplicate(blockArray);
     }
-
-
 }

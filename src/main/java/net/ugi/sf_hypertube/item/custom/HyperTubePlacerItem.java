@@ -31,8 +31,8 @@ import org.joml.Vector3f;
 import java.util.*;
 
 
-public class HyperTubeItem extends Item {
-    public HyperTubeItem(Properties properties) {
+public class HyperTubePlacerItem extends Item {
+    public HyperTubePlacerItem(Properties properties) {
         super(properties);
     }
 
@@ -273,8 +273,6 @@ public class HyperTubeItem extends Item {
             modifyData(level,block2Pos.get(stack),curveCore.block2UsedDirection,block1Pos.get(stack), curveType.get(stack),extraData2.get(stack));
 
             selectedBlock1.put(stack,false);
-            System.out.println(CurveTypes.Curves.CURVED);
-            System.out.println(CurveTypes.cycle(CurveTypes.Curves.CURVED));
         }
 
         return super.use(level, player, usedHand);

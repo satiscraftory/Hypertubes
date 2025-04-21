@@ -5,13 +5,13 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.ugi.sf_hypertube.SfHyperTube;
-import net.ugi.sf_hypertube.item.custom.HyperTubeItem;
+import net.ugi.sf_hypertube.item.custom.HyperTubePlacerItem;
 
 public class ModItems {
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(SfHyperTube.MOD_ID);
 
     public static final DeferredItem<Item> HYPERTUBE_PLACER = ITEMS.register("hypertube_placer",
-            () -> new HyperTubeItem(new Item.Properties()));
+            () -> new HyperTubePlacerItem(new Item.Properties()));
 
 
 /*
