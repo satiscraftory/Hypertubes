@@ -21,7 +21,9 @@ public class CurveTypes {
 
         public static Curves get(String name) {
             for (Curves curve : Curves.values()) {
-                return curve.name.equals(name) ? curve : null;
+                if (curve.name.equals(name)){
+                    return curve;
+                }
             }
             return null;
         }
