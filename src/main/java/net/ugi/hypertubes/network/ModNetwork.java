@@ -10,7 +10,7 @@ import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 /**
  * Registers all payloads on the client side only.
  */
-@EventBusSubscriber(modid = "hypertubes", bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+@EventBusSubscriber(modid = "hypertubes", bus = EventBusSubscriber.Bus.MOD)
 public class ModNetwork {
     @SubscribeEvent
     public static void onRegisterPayloads(RegisterPayloadHandlersEvent event) {
