@@ -142,8 +142,8 @@ public class HypertubeEntity extends Entity {
         super.positionRider(passenger, callback);
         if (!passenger.getType().is(EntityTypeTags.CAN_TURN_IN_BOATS)) {
             //passenger.setYRot(passenger.getVehicle().getYRot());
-            //passenger.setYHeadRot(passenger.getYHeadRot() + this.deltaRotation);
-            //passenger.setPose(Pose.FALL_FLYING);
+            //passenger.setYHeadRot(passenger.getYHeadRot() );
+            passenger.setPose(Pose.FALL_FLYING);
             this.clampRotation(passenger);
             if (passenger instanceof Animal && this.getPassengers().size() == 1) {
                 passenger.setYBodyRot(passenger.getVehicle().getYRot());
@@ -210,6 +210,7 @@ public class HypertubeEntity extends Entity {
     // ─── DO NOT TOUCH AT ANY COST ──────────────────────
     @Override
     public void tick() {//DO NOT TOUCH AT ANY COST
+
         super.tick();
         tickLerp();  // always run first
 
@@ -266,6 +267,8 @@ public class HypertubeEntity extends Entity {
                                 currentPathIndex--;//needed?
                             }
                             currentPathIndex = 0;
+
+                            tick();
                         }   else{
                             //start exit process
                             if(!this.level().getBlockState(this.currentPos).hasProperty(AXIS))return;//anti crash
@@ -283,7 +286,7 @@ public class HypertubeEntity extends Entity {
                                     Vec3 diff = target.subtract(current);
                                     double dist = diff.length();
 
-                                    if (dist < (float) speed / moveEveryXTicks) {
+                                    if (dist <= (float) speed / moveEveryXTicks) {
                                         // snap to block center and advance
                                         this.setPos(target.x, target.y, target.z);
                                         //this.setDeltaMovement(Vec3.ZERO);
@@ -361,6 +364,7 @@ public class HypertubeEntity extends Entity {
     public boolean shouldRiderSit() {
         return true;
     }
+
 
     @Override
     public boolean canRiderInteract() {

@@ -51,8 +51,6 @@ public class HyperTubePlacerItem extends Item {
 
     private int maxTubeLength = 128;
 
-
-    double bezierHelpPosMultiplier =0.5;//default 0.5
     Block hyperTubeSupportBlock = ModBlocks.HYPERTUBE_SUPPORT.get();
     Block hyperTubeBlock = ModBlocks.HYPERTUBE.get();
     double placeDistance = 20;

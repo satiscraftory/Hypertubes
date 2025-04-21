@@ -161,7 +161,7 @@ public class HypertubeSupportBlock extends BaseEntityBlock {
                                 Arrays.stream(pathArray).toList(),
                                 currentPos, nextPos);
                         level.addFreshEntity(hyperTubeEntity);
-                        hyperTubeEntity.setSpeed(1f);
+                        hyperTubeEntity.setSpeed(4f);
                         hypertubeSupportBlockEntity.addEntityToDiscard(entity);
                         entity.startRiding(hyperTubeEntity);
                         if (entity instanceof ServerPlayer serverPlayer) {
