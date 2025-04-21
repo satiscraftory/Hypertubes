@@ -241,16 +241,26 @@ public class HypertubeSupport extends BaseEntityBlock {
     @Override
     protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {//todo remove connected tube blocks
         if(state.getBlock() != newState.getBlock()) {
-            if(level.getBlockEntity(pos) instanceof HypertubeSupportBlockEntity hypertubeSupportBlockEntity){
-                hypertubeSupportBlockEntity.drops();
-/*                if(hypertubeSupportBlockEntity.targetPositive != null){//experintal remove connected tube blocks
-                    List<BlockPos> path = getPathBetween(level, pos, state.getValue(AXIS), hypertubeSupportBlockEntity.targetNegative, level.getBlockState(hypertubeSupportBlockEntity.targetNegative).getValue(AXIS), hypertubeSupportBlockEntity);
+            if(level.getBlockEntity(pos) instanceof HypertubeSupportBlockEntity hypertubeSupportBlockEntity1){
+                hypertubeSupportBlockEntity1.drops();
+                if(hypertubeSupportBlockEntity1.targetPositive != null){//experintal remove connected tube blocks
+                    HypertubeSupportBlockEntity hypertubeSupportBlockEntity2 = (HypertubeSupportBlockEntity)level.getBlockEntity(hypertubeSupportBlockEntity1.targetPositive);
+                    HyperTubeCalcCore hyperTubeCalc = new HyperTubeCalcCore();
+                    hyperTubeCalc.setDataFromPosAndAxis(level, pos, state.getValue(AXIS), hypertubeSupportBlockEntity1.targetPositive, level.getBlockState(hypertubeSupportBlockEntity1.targetPositive).getValue(AXIS));
+                    List<BlockPos> path = new java.util.ArrayList<>(List.of(hyperTubeCalc.getHyperTubeArray(hypertubeSupportBlockEntity1.targetPositiveType)));
+                    path.remove(hypertubeSupportBlockEntity1.targetPositive);
                     RemovePath(level, path);
+                    hypertubeSupportBlockEntity2.removeTarget(pos);
                 }
-                if(hypertubeSupportBlockEntity.targetNegative != null){
-                    List<BlockPos> path = getPathBetween(level, pos, state.getValue(AXIS), hypertubeSupportBlockEntity.targetNegative, level.getBlockState(hypertubeSupportBlockEntity.targetNegative).getValue(AXIS), hypertubeSupportBlockEntity);
+                if(hypertubeSupportBlockEntity1.targetNegative != null){
+                    HypertubeSupportBlockEntity hypertubeSupportBlockEntity2 = (HypertubeSupportBlockEntity)level.getBlockEntity(hypertubeSupportBlockEntity1.targetNegative);
+                    HyperTubeCalcCore hyperTubeCalc = new HyperTubeCalcCore();
+                    hyperTubeCalc.setDataFromPosAndAxis(level, pos, state.getValue(AXIS), hypertubeSupportBlockEntity1.targetNegative, level.getBlockState(hypertubeSupportBlockEntity1.targetNegative).getValue(AXIS));
+                    List<BlockPos> path = new java.util.ArrayList<>(List.of((hyperTubeCalc.getHyperTubeArray(hypertubeSupportBlockEntity1.targetNegativeType))));
+                    path.remove(hypertubeSupportBlockEntity1.targetNegative);
                     RemovePath(level, path);
-                }*/
+                    hypertubeSupportBlockEntity2.removeTarget(pos);
+                }
                 level.updateNeighbourForOutputSignal(pos, this);
             }
         }
