@@ -252,52 +252,64 @@ public class HyperTubePlacerItem extends Item {
     public void inventoryTick(ItemStack stack, Level level, Entity entity, int slotId, boolean isSelected) {
         super.inventoryTick(stack, level, entity, slotId, isSelected);
 
-        if(level.isClientSide()) return;
-        if(entity instanceof Player player){
-            ItemStack selectedItem = player.getMainHandItem().getItem() == ModItems.HYPERTUBE_PLACER.get()? player.getMainHandItem() : player.getOffhandItem();
-            if(selectedItem != stack) return;
+        int tubelength = 0;
+        boolean isValidCurve = false;
 
-            this.selectedBlock1.putIfAbsent(stack, false);
-            this.curveType.putIfAbsent(stack, CurveTypes.Curves.CURVED);
+        if(!level.isClientSide()) {
+            if(entity instanceof Player player){
+                ItemStack selectedItem = player.getMainHandItem().getItem() == ModItems.HYPERTUBE_PLACER.get()? player.getMainHandItem() : player.getOffhandItem();
+                if(selectedItem != stack) return;
 
-            Vec3 looking = entity.getLookAngle();
-            if(selectedBlock1.get(stack)) {
-                BlockPos blockpos = level.clip(new ClipContext(entity.getEyePosition(), entity.getEyePosition().add(looking.x * placeDistance, looking.y * placeDistance, looking.z * placeDistance), ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, entity)).getBlockPos();
+                this.selectedBlock1.putIfAbsent(stack, false);
+                this.curveType.putIfAbsent(stack, CurveTypes.Curves.CURVED);
 
-                if (level.getBlockState(blockpos).is(hyperTubeSupportBlock)){ // if clicking on hypertyubeSupportBlock
+                Vec3 looking = entity.getLookAngle();
+                if(selectedBlock1.get(stack)) {
+                    BlockPos blockpos = level.clip(new ClipContext(entity.getEyePosition(), entity.getEyePosition().add(looking.x * placeDistance, looking.y * placeDistance, looking.z * placeDistance), ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, entity)).getBlockPos();
 
-                    boolean result = calcBlockIfHyperTubeSupport(level,stack,blockpos,block2Pos,block2Axis,block2Direction);
-                    if (!result) return;
-                }
-                else {
+                    if (level.getBlockState(blockpos).is(hyperTubeSupportBlock)){ // if clicking on hypertyubeSupportBlock
 
-                    if (!level.getBlockState(blockpos).isAir() && level.getBlockState(blockpos.above(1)).isAir() && level.getBlockState(blockpos.above(2)).isAir()) {
-                        boolean result = calcBlockIfBlock(level,stack,blockpos,player,block2Pos,block2Axis,block2Direction);
+                        boolean result = calcBlockIfHyperTubeSupport(level,stack,blockpos,block2Pos,block2Axis,block2Direction);
                         if (!result) return;
                     }
                     else {
-                        boolean result = calcBlockIfAir(level,stack,blockpos,player,block2Pos,block2Axis,block2Direction);
-                        if (!result) return;
+
+                        if (!level.getBlockState(blockpos).isAir() && level.getBlockState(blockpos.above(1)).isAir() && level.getBlockState(blockpos.above(2)).isAir()) {
+                            boolean result = calcBlockIfBlock(level,stack,blockpos,player,block2Pos,block2Axis,block2Direction);
+                            if (!result) return;
+                        }
+                        else {
+                            boolean result = calcBlockIfAir(level,stack,blockpos,player,block2Pos,block2Axis,block2Direction);
+                            if (!result) return;
+                        }
                     }
-                }
-                HyperTubeCalcCore curveCore = new HyperTubeCalcCore();
-                curveCore.setData(block1Pos.get(stack),block1Axis.get(stack),block1Direction.get(stack), extraData1.get(stack), block2Pos.get(stack),block2Axis.get(stack),block2Direction.get(stack), extraData2.get(stack));
-                BlockPos[] blockPosArray = curveCore.getHyperTubeArray(this.curveType.get(stack));
+                    HyperTubeCalcCore curveCore = new HyperTubeCalcCore();
+                    curveCore.setData(block1Pos.get(stack),block1Axis.get(stack),block1Direction.get(stack), extraData1.get(stack), block2Pos.get(stack),block2Axis.get(stack),block2Direction.get(stack), extraData2.get(stack));
+                    BlockPos[] blockPosArray = curveCore.getHyperTubeArray(this.curveType.get(stack));
 
-                boolean isValidCurve = HyperTubeUtil.checkValidCurve(level,blockPosArray,player,this.maxTubeLength);
-                Vector3f color = isValidCurve ?new Vector3f(0,255,255) : new Vector3f(255,0,0);
+                    isValidCurve = HyperTubeUtil.checkValidCurve(level,blockPosArray,player,this.maxTubeLength);
+                    Vector3f color = isValidCurve ?new Vector3f(0,255,255) : new Vector3f(255,0,0);
 
-                HyperTubePlacerUI hyperTubePlacerUI = new HyperTubePlacerUI();
-                hyperTubePlacerUI.makeUI(player,stack,blockPosArray.length-2, this.maxTubeLength, this.curveType.get(stack), isValidCurve);
+                    HyperTubePlacerUI hyperTubePlacerUI = new HyperTubePlacerUI();
+                    hyperTubePlacerUI.makeUI(player,stack,blockPosArray.length-2, this.maxTubeLength, this.curveType.get(stack), isValidCurve);
 
-                for (int i = 0; i < blockPosArray.length; i++) {
-                    for(int j = 0; j < level.players().size(); ++j) {
-                        ServerPlayer serverplayer = (ServerPlayer)level.players().get(j);
-                        ((ServerLevel) level).sendParticles(serverplayer, new DustParticleOptions(color,1), true,
-                            blockPosArray[i].getX()+0.5,blockPosArray[i].getY()+0.5,blockPosArray[i].getZ()+0.5, 1, 0.2, 0.2, 0.2,1);
+                    tubelength = blockPosArray.length-2;
+
+                    for (int i = 0; i < blockPosArray.length; i++) {
+                        for(int j = 0; j < level.players().size(); ++j) {
+                            ServerPlayer serverplayer = (ServerPlayer)level.players().get(j);
+                            ((ServerLevel) level).sendParticles(serverplayer, new DustParticleOptions(color,1), true,
+                                blockPosArray[i].getX()+0.5,blockPosArray[i].getY()+0.5,blockPosArray[i].getZ()+0.5, 1, 0.2, 0.2, 0.2,1);
+                        }
                     }
                 }
             }
         }
+        else{
+            if(entity instanceof Player player){
+                HyperTubePlacerUI hyperTubePlacerUI = new HyperTubePlacerUI();
+                hyperTubePlacerUI.makeUI(player,stack,tubelength, this.maxTubeLength, this.curveType.get(stack), isValidCurve);
+        }
     }
+}
 }
