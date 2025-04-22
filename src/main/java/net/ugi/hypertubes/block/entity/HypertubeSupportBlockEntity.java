@@ -15,7 +15,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.neoforged.neoforge.items.ItemStackHandler;
-import net.ugi.hypertubes.block.ModBlocks;
 import net.ugi.hypertubes.hypertube.Curves.CurveTypes;
 import net.ugi.hypertubes.item.ModItems;
 
@@ -33,7 +32,7 @@ public class HypertubeSupportBlockEntity extends BlockEntity {
     public String positiveTypeInfo = null;
     public String negativeTypeInfo = null;
 
-    public final WeakHashMap<Entity, Integer> discardEntities  = new WeakHashMap<>();
+    public final WeakHashMap<Entity, Integer> ignoredEntities = new WeakHashMap<>();
 
     public final ItemStackHandler inventory = new ItemStackHandler(1) {
         @Override
@@ -165,22 +164,22 @@ public class HypertubeSupportBlockEntity extends BlockEntity {
         return null;
     }
 
-    public void addEntityToDiscard(Entity entity) {
-        this.discardEntities.remove(entity);
-        this.discardEntities.put(entity, 5);
+    public void addEntityToIgnore(Entity entity) {
+        this.ignoredEntities.remove(entity);
+        this.ignoredEntities.put(entity, 5);
     }
 
-    public void removeEntitiesFromDiscard(List<Entity> entitiesInRange) {
+    public void removeEntitiesFromIgnore(List<Entity> entitiesInRange) {
         List<Entity> entitiesToRemove = new ArrayList<>();
-        this.discardEntities.forEach( (e,i) -> {
-            this.discardEntities.put(e,i-1);
-            if(entitiesInRange.contains(e)) this.discardEntities.put(e,5);
+        this.ignoredEntities.forEach( (e, i) -> {
+            this.ignoredEntities.put(e,i-1);
+            if(entitiesInRange.contains(e)) this.ignoredEntities.put(e,5);
             if(i < 1) entitiesToRemove.add(e);
 
 
         });
         for(Entity e : entitiesToRemove) {
-            this.discardEntities.remove(e);
+            this.ignoredEntities.remove(e);
         }
     }
 

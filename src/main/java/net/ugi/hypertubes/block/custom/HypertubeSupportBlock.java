@@ -3,10 +3,7 @@ package net.ugi.hypertubes.block.custom;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
@@ -15,7 +12,6 @@ import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -29,13 +25,13 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.ugi.hypertubes.block.ModBlocks;
 import net.ugi.hypertubes.block.entity.HypertubeSupportBlockEntity;
 import net.ugi.hypertubes.entity.HypertubeEntity;
 import net.ugi.hypertubes.entity.ModEntities;
 import net.ugi.hypertubes.hypertube.Curves.HyperTubeCalcCore;
 import net.ugi.hypertubes.item.ModItems;
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.system.MathUtil;
 
 import java.util.Arrays;
 import java.util.List;
@@ -118,65 +114,67 @@ public class HypertubeSupportBlock extends BaseEntityBlock {
             }
             if (checkpos == null) return;
             List<Entity> entities = level.getEntities(null, new AABB(checkpos.offset(1,2,1).getBottomCenter(), checkpos.offset(-1,0,-1).getBottomCenter()));
-            hypertubeSupportBlockEntity.removeEntitiesFromDiscard(entities);
+            hypertubeSupportBlockEntity.removeEntitiesFromIgnore(entities);
             if(entities.isEmpty()) return;
 
             BlockPos finalCheckpos = checkpos;
-            entities.forEach(entity -> {
-                if(!hypertubeSupportBlockEntity.discardEntities.containsKey(entity) && !(entity instanceof HypertubeEntity)) {
-                    HypertubeEntity hyperTubeEntity = new HypertubeEntity(ModEntities.HYPERTUBE_ENTITY.get(), level);
-                    hyperTubeEntity.setPos(pos.getX() + 0.5, pos.getY()+0.5, pos.getZ() + 0.5);
-                    //hyperTubeEntity.path
-                    //level.addFreshEntity(hyperTubeEntity);
-                    //entity.startRiding(hyperTubeEntity);
-                    BlockPos currentPos = pos;
-                    /*
-                    crash fix for: Cannot get property EnumProperty{name=axis, clazz=class net.minecraft.core.Direction$Axis, values=[x, y, z]} as it does not exist in Block{minecraft:air}
-                    when entering 2 hypertubes
-                    */
-                    if(!level.getBlockState(currentPos).getProperties().contains(AXIS)) return;
 
-                    Direction.Axis currentAxis = level.getBlockState(currentPos).getValue(AXIS);
-                    int dir = ((pos.getX() - finalCheckpos.getX()) + (pos.getY() - finalCheckpos.getY()) + (pos.getZ() - finalCheckpos.getZ()));
-                    int currentDirection = (dir) > 0 ? 1 : -1;
-                    BlockPos nextPos = hypertubeSupportBlockEntity.getTargetPos(currentDirection);
-                    if(!level.getBlockState(nextPos).getProperties().contains(AXIS)) return; //crashfix part 2
-                    Direction.Axis nextAxis = level.getBlockState(nextPos).getValue(AXIS);
-                    BlockEntity nextEntity = level.getBlockEntity(nextPos);
-                    int nextDirection = 0;
-                    if (nextEntity instanceof HypertubeSupportBlockEntity nextHypertubeSupportBlockEntity) {
-                        nextDirection = nextHypertubeSupportBlockEntity.getDirection(currentPos);
-
-                        String extraData1 =hypertubeSupportBlockEntity.getExtraInfo(currentDirection);
-                        String extraData2 =nextHypertubeSupportBlockEntity.getExtraInfo(nextDirection);
-
-                        HyperTubeCalcCore curveCore = new HyperTubeCalcCore();
-                        curveCore.setData(currentPos, currentAxis, currentDirection, extraData1, nextPos, nextAxis, nextDirection, extraData2);
-
-                        BlockPos[] pathArray = curveCore.getHyperTubeArray(hypertubeSupportBlockEntity.getCurveType(currentDirection));
-                        if(pathArray == null){//maybe fix extra crashes
-                            hyperTubeEntity.discard();
-                            return;
-                        };
-                        hyperTubeEntity.addPath(
-                                Arrays.stream(pathArray).toList(),
-                                currentPos, nextPos);
-                        level.addFreshEntity(hyperTubeEntity);
-                        hyperTubeEntity.setSpeed(1f);
-                        hypertubeSupportBlockEntity.addEntityToDiscard(entity);
-                        entity.startRiding(hyperTubeEntity);
-                        if (entity instanceof ServerPlayer serverPlayer) {
-                            serverPlayer.startFallFlying();
-                        }
-                    }
-                }
-            });
-
+            initiateHypertubeTravelForEntities(level, entities, hypertubeSupportBlockEntity, pos, finalCheckpos);
 
         }
         super.tick(state, level, pos, random);
     }
 
+
+    private void initiateHypertubeTravelForEntities(Level level, List<Entity> entities, HypertubeSupportBlockEntity hypertubeSupportBlockEntity, BlockPos pos, BlockPos finalCheckPos) {
+        entities.forEach(entity -> {
+        if(!hypertubeSupportBlockEntity.ignoredEntities.containsKey(entity) && !(entity instanceof HypertubeEntity)) {
+            HypertubeEntity hyperTubeEntity = new HypertubeEntity(ModEntities.HYPERTUBE_ENTITY.get(), level);
+            hyperTubeEntity.setPos(pos.getX() + 0.5, pos.getY()+0.5, pos.getZ() + 0.5);
+            //hyperTubeEntity.path
+            //level.addFreshEntity(hyperTubeEntity);
+            //entity.startRiding(hyperTubeEntity);
+            BlockPos currentPos = pos;
+                    /*
+                    crash fix for: Cannot get property EnumProperty{name=axis, clazz=class net.minecraft.core.Direction$Axis, values=[x, y, z]} as it does not exist in Block{minecraft:air}
+                    when entering 2 hypertubes
+                    */
+            if(!level.getBlockState(currentPos).getProperties().contains(AXIS)) return;
+
+            Direction.Axis currentAxis = level.getBlockState(currentPos).getValue(AXIS);
+            int dir = ((pos.getX() - finalCheckPos.getX()) + (pos.getY() - finalCheckPos.getY()) + (pos.getZ() - finalCheckPos.getZ()));
+            int currentDirection = (dir) > 0 ? 1 : -1;
+            BlockPos nextPos = hypertubeSupportBlockEntity.getTargetPos(currentDirection);
+            if(!level.getBlockState(nextPos).getProperties().contains(AXIS)) return; //crashfix part 2
+            Direction.Axis nextAxis = level.getBlockState(nextPos).getValue(AXIS);
+            BlockEntity nextEntity = level.getBlockEntity(nextPos);
+            int nextDirection = 0;
+            if (nextEntity instanceof HypertubeSupportBlockEntity nextHypertubeSupportBlockEntity) {
+                nextDirection = nextHypertubeSupportBlockEntity.getDirection(currentPos);
+
+                String extraData1 =hypertubeSupportBlockEntity.getExtraInfo(currentDirection);
+                String extraData2 =nextHypertubeSupportBlockEntity.getExtraInfo(nextDirection);
+
+                HyperTubeCalcCore curveCore = new HyperTubeCalcCore();
+                curveCore.setData(currentPos, currentAxis, currentDirection, extraData1, nextPos, nextAxis, nextDirection, extraData2);
+
+                BlockPos[] pathArray = curveCore.getHyperTubeArray(hypertubeSupportBlockEntity.getCurveType(currentDirection));
+                if(pathArray == null){//maybe fix extra crashes
+                    hyperTubeEntity.discard();
+                    return;
+                };
+                hyperTubeEntity.addPath(
+                        Arrays.stream(pathArray).toList(),
+                        currentPos, nextPos);
+                level.addFreshEntity(hyperTubeEntity);
+                float speed = (float) Math.clamp(Math.floor( entity.getDeltaMovement().length()), 1, 20);//todo config maxSpeed
+                hyperTubeEntity.setSpeed(speed);
+                hypertubeSupportBlockEntity.addEntityToIgnore(entity);
+                entity.startRiding(hyperTubeEntity);
+            }
+        }
+    });
+    }
     
     public List<BlockPos> getNextPath(Level level, BlockPos previousSupportPos, BlockPos currentSupportPos) {
         Direction.Axis currentAxis = level.getBlockState(currentSupportPos).getValue(AXIS);
