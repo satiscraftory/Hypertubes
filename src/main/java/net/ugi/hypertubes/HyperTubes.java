@@ -12,6 +12,7 @@ import net.ugi.hypertubes.block.ModBlocks;
 import net.ugi.hypertubes.block.entity.ModBlockEntities;
 import net.ugi.hypertubes.block.entity.renderer.HypertubeSupportBlockEntityRenderer;
 import net.ugi.hypertubes.entity.ModEntities;
+import net.ugi.hypertubes.hypertube.UI.HyperTubePlacerOverlayRenderer;
 import net.ugi.hypertubes.item.ModCreativeModeTabs;
 import net.ugi.hypertubes.item.ModItems;
 import org.slf4j.Logger;
@@ -89,6 +90,8 @@ public class HyperTubes {
             EntityRenderers.register(ModEntities.HYPERTUBE_ENTITY.get(), NoopRenderer::new);
 
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.HYPERTUBE.get(), RenderType.translucent());
+
+            NeoForge.EVENT_BUS.register(HyperTubePlacerOverlayRenderer.class);
 
 
         }

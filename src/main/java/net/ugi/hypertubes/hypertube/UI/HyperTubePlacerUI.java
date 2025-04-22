@@ -1,37 +1,60 @@
 package net.ugi.hypertubes.hypertube.UI;
 
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.ugi.hypertubes.hypertube.Curves.CurveTypes;
 import net.ugi.hypertubes.hypertube.HyperTubeUtil;
 import net.ugi.hypertubes.item.custom.HyperTubePlacerItem;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class HyperTubePlacerUI {
 
-    public void makeUI(Player player, ItemStack stack, int tubeLength, int maxTubeLength, CurveTypes.Curves curvetype) {
+    public void makeUI(Player player, ItemStack stack, int tubeLength, int maxTubeLength, CurveTypes.Curves curvetype, boolean isValidCurve) {
         HyperTubePlacerItem hyperTubePlacerItem = (HyperTubePlacerItem) stack.getItem();
         int availableResourcesCount = HyperTubeUtil.getResourcesCount(player);
 
-        ChatFormatting errorColor = ChatFormatting.RED;
-        ChatFormatting validColor = ChatFormatting.DARK_AQUA;
-        ChatFormatting curveTypeColor = ChatFormatting.GOLD;
+        int errorColor = 0xFF6363;
+        int validColor = 0x28ACFF;
+        HyperTubePlacerOverlayData.colorTubeType = 0xFFB630;
+
+        HyperTubePlacerOverlayData.colorErrorMessage = errorColor;
 
 
-        ChatFormatting lengthColor = player.isCreative() ?
+        HyperTubePlacerOverlayData.colorTubeLength = player.isCreative() ?
                 validColor :
                 tubeLength > maxTubeLength ? errorColor : validColor;
 
-        ChatFormatting resourceColor = player.isCreative() ?
+        HyperTubePlacerOverlayData.colorResources = player.isCreative() ?
                 validColor :
                 availableResourcesCount < tubeLength ? errorColor : validColor;
 
-        Component text = Component.literal("Type: ").withStyle(curveTypeColor)
-                .append(Component.translatable("hypertubes.curvetype." + curvetype.toString()).withStyle(curveTypeColor))
-                .append(Component.literal("    " + "Length: " + tubeLength + " / " + (player.isCreative() ? "∞" : maxTubeLength)).withStyle(lengthColor))
-                .append(Component.literal("    "  + "Resource: " + (player.isCreative() ? "∞" : availableResourcesCount) + " / " + tubeLength).withStyle(resourceColor));
+        HyperTubePlacerOverlayData.hypertubeType = "hypertubes.curvetype." + curvetype.toString();
+        HyperTubePlacerOverlayData.tubeLength = String.valueOf(tubeLength);
+        HyperTubePlacerOverlayData.maxTubeLength = player.isCreative() ? "∞" : String.valueOf(maxTubeLength);
+        HyperTubePlacerOverlayData.availableResources = player.isCreative() ? "∞" : String.valueOf(availableResourcesCount);
 
-        player.displayClientMessage(text, true);
+
+        HyperTubePlacerOverlayData.showError = !isValidCurve || (tubeLength > maxTubeLength || availableResourcesCount < tubeLength) && !player.isCreative();
+
+        List<String> errors = new ArrayList<>();
+
+        if (!isValidCurve) errors.add("Invalid placement");
+        if (tubeLength > maxTubeLength && !player.isCreative()) errors.add("Too long");
+        if (availableResourcesCount < tubeLength && !player.isCreative()) errors.add("Not enough Resources");
+
+        int numberOfErrors = errors.size();
+        AtomicInteger i = new AtomicInteger();
+        HyperTubePlacerOverlayData.errorMessage = "";
+        errors.forEach(error -> {
+            HyperTubePlacerOverlayData.errorMessage = HyperTubePlacerOverlayData.errorMessage + error;
+            if( i.get() < numberOfErrors - 1) HyperTubePlacerOverlayData.errorMessage = HyperTubePlacerOverlayData.errorMessage + "  &  ";
+            i.getAndIncrement();
+        });
+
+
+
     }
 }

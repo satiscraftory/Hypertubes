@@ -288,7 +288,7 @@ public class HyperTubePlacerItem extends Item {
                 Vector3f color = isValidCurve ?new Vector3f(0,255,255) : new Vector3f(255,0,0);
 
                 HyperTubePlacerUI hyperTubePlacerUI = new HyperTubePlacerUI();
-                hyperTubePlacerUI.makeUI(player,stack,blockPosArray.length-2, this.maxTubeLength, this.curveType.get(stack));
+                hyperTubePlacerUI.makeUI(player,stack,blockPosArray.length-2, this.maxTubeLength, this.curveType.get(stack), isValidCurve);
 
                 for (int i = 0; i < blockPosArray.length; i++) {
                     for(int j = 0; j < level.players().size(); ++j) {
