@@ -255,13 +255,14 @@ public class HyperTubePlacerItem extends Item {
         int tubelength = 0;
         boolean isValidCurve = false;
 
+        this.selectedBlock1.putIfAbsent(stack, false);
+        this.curveType.putIfAbsent(stack, CurveTypes.Curves.CURVED);
+
         if(!level.isClientSide()) {
             if(entity instanceof Player player){
                 ItemStack selectedItem = player.getMainHandItem().getItem() == ModItems.HYPERTUBE_PLACER.get()? player.getMainHandItem() : player.getOffhandItem();
                 if(selectedItem != stack) return;
 
-                this.selectedBlock1.putIfAbsent(stack, false);
-                this.curveType.putIfAbsent(stack, CurveTypes.Curves.CURVED);
 
                 Vec3 looking = entity.getLookAngle();
                 if(selectedBlock1.get(stack)) {
@@ -307,6 +308,7 @@ public class HyperTubePlacerItem extends Item {
         }
         else{
             if(entity instanceof Player player){
+                if (!this.selectedBlock1.get(stack)) return;
                 HyperTubePlacerUI hyperTubePlacerUI = new HyperTubePlacerUI();
                 hyperTubePlacerUI.makeUI(player,stack,tubelength, this.maxTubeLength, this.curveType.get(stack), isValidCurve);
         }
