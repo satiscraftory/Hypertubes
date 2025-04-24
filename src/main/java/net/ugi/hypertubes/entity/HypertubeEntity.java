@@ -303,7 +303,7 @@ public class HypertubeEntity extends Entity {
                                         this.setYRot(yaw);
                                     }
                                     if (!this.getPassengers().isEmpty()) {
-                                        hypertubeSupportBlockEntity.addEntityToDiscard(this.getPassengers().get(0));
+                                        hypertubeSupportBlockEntity.addEntityToIgnore(this.getPassengers().get(0));
                                     }
                                 } else {
                                     //launch player or entity
@@ -349,7 +349,7 @@ public class HypertubeEntity extends Entity {
 
             passenger.teleportTo(exitPos.getCenter().x, exitPos.getCenter().y, exitPos.getCenter().z);
 
-            hypertubeSupportBlockEntity.addEntityToDiscard(passenger);
+            hypertubeSupportBlockEntity.addEntityToIgnore(passenger);
             passenger.setDeltaMovement(vector);//maybe we need to somehow call this on the client too
             passenger.hasImpulse = true;
             if (passenger instanceof ServerPlayer serverPlayer) {
