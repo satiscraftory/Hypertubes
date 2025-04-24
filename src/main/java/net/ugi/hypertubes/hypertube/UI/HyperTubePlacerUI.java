@@ -12,9 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class HyperTubePlacerUI {
 
-    public void makeUI(Player player, ItemStack stack, int tubeLength, int maxTubeLength, CurveTypes.Curves curvetype, boolean isValidCurve) {
-        HyperTubePlacerItem hyperTubePlacerItem = (HyperTubePlacerItem) stack.getItem();
-        int availableResourcesCount = HyperTubeUtil.getResourcesCount(player);
+    public void makeUI(Player player, int availableResourcesCount , int tubeLength, int maxTubeLength, CurveTypes.Curves curvetype, boolean isValidCurve) {
 
         int errorColor = 0xFF6363;
         int validColor = 0x28ACFF;

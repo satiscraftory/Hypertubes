@@ -1,10 +1,20 @@
 package net.ugi.hypertubes.network;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
+import net.ugi.hypertubes.hypertube.Curves.CurveTypes;
+import net.ugi.hypertubes.hypertube.UI.HyperTubePlacerUI;
+
+import java.lang.reflect.Type;
 
 
 /**
@@ -30,6 +40,16 @@ public class ModNetwork {
                             }
                         }
                     });
+                }
+        );
+
+        registrar.playToClient(
+                HyperTubeOverlayPacket.TYPE,
+                HyperTubeOverlayPacket.STREAM_CODEC,
+                (payload, ctx) -> {
+                    if (FMLEnvironment.dist.isClient()) {
+                        ClientOnlyHooks.hyperTubeOverlayClientOnly(payload);
+                    }
                 }
         );
     }
