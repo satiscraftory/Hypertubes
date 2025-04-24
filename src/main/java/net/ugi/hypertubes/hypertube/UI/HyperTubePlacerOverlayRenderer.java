@@ -37,6 +37,14 @@ public class HyperTubePlacerOverlayRenderer {
 
         int spacing = 15;
 
+        if (HyperTubePlacerOverlayData.showOnlyType){
+            spacing = 0;
+            lengthWidth = 0;
+            resourceWidth = 0;
+            lengthComponent = Component.literal("");
+            resourceComponent = Component.literal("");
+        }
+
         int x = (screenWidth - (typeWidth + spacing + lengthWidth + spacing + resourceWidth)) / 2;
 
         guiGraphics.drawString(font, typeComponent, x, y, HyperTubePlacerOverlayData.colorTubeType, false);

@@ -255,7 +255,11 @@ public class HyperTubePlacerItem extends Item {
         super.inventoryTick(stack, level, entity, slotId, isSelected);
 
         if(level.isClientSide()) return;
+
+
+
         if(entity instanceof Player player){
+
             ItemStack selectedItem = player.getMainHandItem().getItem() == ModItems.HYPERTUBE_PLACER.get()? player.getMainHandItem() : player.getOffhandItem();
             if(selectedItem != stack) return;
 
@@ -300,6 +304,11 @@ public class HyperTubePlacerItem extends Item {
                         ((ServerLevel) level).sendParticles(serverplayer, new DustParticleOptions(color,1), true,
                             blockPosArray[i].getX()+0.5,blockPosArray[i].getY()+0.5,blockPosArray[i].getZ()+0.5, 1, 0.2, 0.2, 0.2,1);
                     }
+                }
+            }else{
+                if (player instanceof ServerPlayer serverPlayer) {
+                    // if not selected block 1 => send packet for only "Type" overlay, no length / resources
+                    serverPlayer.connection.send(new HyperTubeOverlayPacket(this.curveType.get(stack).toString(), -1,-1,-1,false));
                 }
             }
         }

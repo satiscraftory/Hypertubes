@@ -30,6 +30,15 @@ public class HyperTubePlacerUI {
                 availableResourcesCount < tubeLength ? errorColor : validColor;
 
         HyperTubePlacerOverlayData.hypertubeType = "hypertubes.curvetype." + curvetype.toString();
+
+
+        if(tubeLength == -1 && maxTubeLength == -1 && availableResourcesCount == -1){
+            HyperTubePlacerOverlayData.showOnlyType = true;
+            return;
+        }
+
+        HyperTubePlacerOverlayData.showOnlyType = false;
+
         HyperTubePlacerOverlayData.tubeLength = String.valueOf(tubeLength);
         HyperTubePlacerOverlayData.maxTubeLength = player.isCreative() ? "∞" : String.valueOf(maxTubeLength);
         HyperTubePlacerOverlayData.availableResources = player.isCreative() ? "∞" : String.valueOf(availableResourcesCount);
