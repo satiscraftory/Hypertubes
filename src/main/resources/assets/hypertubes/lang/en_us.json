@@ -1,7 +1,13 @@
 {
   "itemGroup.hypertubes": "Example Mod Tab",
+
   "block.hypertubes.hypertube": "Hypertube",
+  "block.hypertubes.hypertube_support": "Hypertube Support",
+
+
   "item.hypertubes.hypertube_placer": "Hypertube Placer",
+  "item.hypertubes.hypertube_entrance": "Hypertube Entrance",
+  "item.hypertubes.hypertube_booster": "Hypertube Booster",
 
   "hypertubes.curvetype.curved": "Curved",
   "hypertubes.curvetype.overkill": "Overkill",

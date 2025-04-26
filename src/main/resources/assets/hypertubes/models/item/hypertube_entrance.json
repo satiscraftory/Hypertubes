@@ -1,3 +1,7 @@
 {
-  "parent": "hypertubes:block/hypertube_entrance"
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "hypertubes:item/blockitem/hypertube_entrance_front",
+    "side": "hypertubes:item/blockitem/hypertube_entrance"
+  }
 }
