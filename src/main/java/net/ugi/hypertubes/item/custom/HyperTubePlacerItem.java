@@ -241,6 +241,10 @@ public class HyperTubePlacerItem extends Item {
 
             placeHypertubeSupport(level,block2Pos.get(stack),block2Axis.get(stack));
 
+            if (this.curveType.get(stack) == CurveTypes.Curves.MINECRAFT){
+                this.extraData1.put(stack,"isFirst");
+            }
+
             modifyData(level,block1Pos.get(stack),curveCore.block1UsedDirection,block2Pos.get(stack), curveType.get(stack),extraData1.get(stack));
             modifyData(level,block2Pos.get(stack),curveCore.block2UsedDirection,block1Pos.get(stack), curveType.get(stack),extraData2.get(stack));
 
