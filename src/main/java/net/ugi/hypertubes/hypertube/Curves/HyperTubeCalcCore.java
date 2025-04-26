@@ -44,7 +44,7 @@ public class HyperTubeCalcCore {
 
         if(hypertubeSupportBlockEntity1==null || hypertubeSupportBlockEntity2==null) return;
 
-        int direction1 = -hypertubeSupportBlockEntity1.getDirection(supportPos1);
+        int direction1 = hypertubeSupportBlockEntity1.getDirection(supportPos2);
         int direction2 = hypertubeSupportBlockEntity2.getDirection(supportPos1);
         String extraData1 =hypertubeSupportBlockEntity1.getExtraInfo(direction1);
         String extraData2 =hypertubeSupportBlockEntity2.getExtraInfo(direction2);
