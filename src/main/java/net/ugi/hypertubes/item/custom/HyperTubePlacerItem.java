@@ -9,6 +9,7 @@ import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -316,5 +317,12 @@ public class HyperTubePlacerItem extends Item {
                 }
             }
         }
+    }
+
+    @Override
+    public boolean onEntitySwing(ItemStack stack, LivingEntity entity, InteractionHand hand) { // cancel when left-clicking
+        selectedBlock1.put(stack,false);
+        return super.onEntitySwing(stack, entity, hand);
+
     }
 }
