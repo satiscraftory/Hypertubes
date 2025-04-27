@@ -21,10 +21,10 @@ public class HyperTubeUtil {
             }
         }
         if(player.isCreative()) return isValidCurve;
-        if (blockPosArray.length-2 > getResourcesCount(player)){
+        if (blockPosArray.length > getResourcesCount(player)){
             isValidCurve = false;
         }
-        if (blockPosArray.length-2 > maxTubeLength) isValidCurve = false;
+        if (blockPosArray.length > maxTubeLength) isValidCurve = false;
         return isValidCurve;
 
     }

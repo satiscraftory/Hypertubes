@@ -236,8 +236,8 @@ public class HyperTubePlacerItem extends Item {
                 level.blockUpdated(blockPosArray[i],hyperTubeBlock);
             }
             if(!player.isShiftKeyDown()){
-                removeItems(player, Items.GLASS_PANE,blockPosArray.length-2);
-                removeItems(player, Items.GOLD_NUGGET,blockPosArray.length-2);
+                removeItems(player, Items.GLASS_PANE,blockPosArray.length);
+                removeItems(player, Items.GOLD_NUGGET,blockPosArray.length);
             }
 
             placeHypertubeSupport(level,block2Pos.get(stack),block2Axis.get(stack));
@@ -298,11 +298,11 @@ public class HyperTubePlacerItem extends Item {
                 boolean isValidCurve = HyperTubeUtil.checkValidCurve(level,blockPosArray,player,this.maxTubeLength);
                 Vector3f color = isValidCurve ?new Vector3f(0,255,255) : new Vector3f(255,0,0);
 
-//                HyperTubePlacerUI hyperTubePlacerUI = new HyperTubePlacerUI();
-//                hyperTubePlacerUI.makeUI(player,stack,blockPosArray.length-2, this.maxTubeLength, this.curveType.get(stack), isValidCurve);
+
                 if (player instanceof ServerPlayer serverPlayer) {
                     serverPlayer.connection.send(new HyperTubeOverlayPacket(this.curveType.get(stack).toString(), blockPosArray.length - 2, this.maxTubeLength, HyperTubeUtil.getResourcesCount(player), isValidCurve));
                 }
+
                 for (int i = 0; i < blockPosArray.length; i++) {
                     for(int j = 0; j < level.players().size(); ++j) {
                         ServerPlayer serverplayer = (ServerPlayer)level.players().get(j);
@@ -321,7 +321,9 @@ public class HyperTubePlacerItem extends Item {
 
     @Override
     public boolean onEntitySwing(ItemStack stack, LivingEntity entity, InteractionHand hand) { // cancel when left-clicking
-        selectedBlock1.put(stack,false);
+        if(!entity.isShiftKeyDown()){ // entity swings when shift + right click, this fixes the problem
+            selectedBlock1.put(stack,false);
+        }
         return super.onEntitySwing(stack, entity, hand);
 
     }

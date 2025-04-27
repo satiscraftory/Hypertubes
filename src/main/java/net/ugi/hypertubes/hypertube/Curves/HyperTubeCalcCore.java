@@ -27,12 +27,39 @@ public class HyperTubeCalcCore {
     public HyperTubeCalcCore() {
     }
 
+    private int getDirectionIfUnspecified(BlockPos pos, Direction.Axis axis, BlockPos pos2) {
+        int dir = 0;
+        if (axis == Direction.Axis.X) {
+            dir = (pos2.getX() - pos.getX());
+        }
+        if (axis == Direction.Axis.Y) {
+            dir= (pos2.getY() - pos.getY());
+        }
+        if (axis == Direction.Axis.Z) {
+            dir = (pos2.getZ() - pos.getZ());
+        }
+        if (dir == 0) dir = 1;
+
+        dir = dir / Math.abs(dir);
+        return dir;
+
+    }
+
     public void setData(BlockPos b1Pos, Direction.Axis b1Axis, int b1Direction, String b1ExtraData, BlockPos b2Pos, Direction.Axis b2Axis, int b2Direction, String b2ExtraData){
-        this.block1Pos = b1Pos;
+        if (b1Direction == 0){ // 0 = unspecified direction, code takes shortest path
+            b1Direction = getDirectionIfUnspecified(b1Pos, b1Axis, b2Pos);
+        }
+        if (b2Direction == 0){ // 0 = unspecified direction, code takes shortest path
+            b2Direction = getDirectionIfUnspecified(b2Pos, b2Axis, b1Pos);
+        }
+
+        this.setUsedDirections(b1Direction, b2Direction);
+
+        this.block1Pos = b1Pos.relative(b1Axis,b1Direction);
         this.block1Axis = b1Axis;
         this.block1Direction = b1Direction;
         this.block1ExtraData = b1ExtraData;
-        this.block2Pos = b2Pos;
+        this.block2Pos = b2Pos.relative(b2Axis,b2Direction);
         this.block2Axis = b2Axis;
         this.block2Direction = b2Direction;
         this.block2ExtraData = b2ExtraData;
