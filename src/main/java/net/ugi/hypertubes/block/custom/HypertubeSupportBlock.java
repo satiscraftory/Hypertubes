@@ -31,6 +31,7 @@ import net.ugi.hypertubes.block.entity.HypertubeSupportBlockEntity;
 import net.ugi.hypertubes.entity.HypertubeEntity;
 import net.ugi.hypertubes.entity.ModEntities;
 import net.ugi.hypertubes.hypertube.Curves.HyperTubeCalcCore;
+import net.ugi.hypertubes.hypertube.Functionalities.HyperTubeDetector;
 import net.ugi.hypertubes.hypertube.Functionalities.HyperTubeEntrance;
 import net.ugi.hypertubes.item.ModItems;
 import org.jetbrains.annotations.Nullable;
@@ -108,15 +109,8 @@ public class HypertubeSupportBlock extends BaseEntityBlock {
         Direction.Axis axis = state.getValue(BlockStateProperties.AXIS);
         if (blockEntity instanceof HypertubeSupportBlockEntity hypertubeSupportBlockEntity ) {
 
-            if (hypertubeSupportBlockEntity.redstonePowerOutput != 0){
-                if (hypertubeSupportBlockEntity.redstonePowerTimer == 2){
-                    hypertubeSupportBlockEntity.redstonePowerTimer = 0;
-                    hypertubeSupportBlockEntity.redstonePowerOutput = 0;
-                    level.blockUpdated(pos, ModBlocks.HYPERTUBE_SUPPORT.get());
-                }
-                else {
-                    hypertubeSupportBlockEntity.redstonePowerTimer = hypertubeSupportBlockEntity.redstonePowerTimer + 1;
-                }
+            if(hypertubeSupportBlockEntity.isDetector(level,pos)){
+                HyperTubeDetector.resetDetector(hypertubeSupportBlockEntity,level,pos,2);
             }
 
             if(!hypertubeSupportBlockEntity.isEntrance(level,pos)) return;
