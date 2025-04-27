@@ -17,6 +17,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.JukeboxBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -25,6 +26,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.ugi.hypertubes.block.ModBlocks;
 import net.ugi.hypertubes.block.entity.HypertubeSupportBlockEntity;
 import net.ugi.hypertubes.entity.HypertubeEntity;
 import net.ugi.hypertubes.entity.ModEntities;
@@ -105,6 +107,18 @@ public class HypertubeSupportBlock extends BaseEntityBlock {
         BlockEntity blockEntity = level.getBlockEntity(pos);
         Direction.Axis axis = state.getValue(BlockStateProperties.AXIS);
         if (blockEntity instanceof HypertubeSupportBlockEntity hypertubeSupportBlockEntity ) {
+
+            if (hypertubeSupportBlockEntity.redstonePowerOutput != 0){
+                if (hypertubeSupportBlockEntity.redstonePowerTimer == 2){
+                    hypertubeSupportBlockEntity.redstonePowerTimer = 0;
+                    hypertubeSupportBlockEntity.redstonePowerOutput = 0;
+                    level.blockUpdated(pos, ModBlocks.HYPERTUBE_SUPPORT.get());
+                }
+                else {
+                    hypertubeSupportBlockEntity.redstonePowerTimer = hypertubeSupportBlockEntity.redstonePowerTimer + 1;
+                }
+            }
+
             if(!hypertubeSupportBlockEntity.isEntrance(level,pos)) return;
 
             List<Entity> entities = level.getEntities(null, HyperTubeEntrance.getEntranceZone(axis, HyperTubeEntrance.getEntranceDirection(hypertubeSupportBlockEntity), pos));
@@ -274,7 +288,7 @@ public class HypertubeSupportBlock extends BaseEntityBlock {
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
                                               Player player, InteractionHand hand, BlockHitResult hitResult) {
         if(level.getBlockEntity(pos) instanceof HypertubeSupportBlockEntity hypertubeSupportBlockEntity) {
-            if(hypertubeSupportBlockEntity.inventory.getStackInSlot(0).isEmpty() && stack.is(ModItems.HYPERTUBE_BOOSTER) || stack.is(ModItems.HYPERTUBE_ENTRANCE)) {
+            if(hypertubeSupportBlockEntity.inventory.getStackInSlot(0).isEmpty() && stack.is(ModItems.HYPERTUBE_BOOSTER) || stack.is(ModItems.HYPERTUBE_ENTRANCE) || stack.is(ModItems.HYPERTUBE_DETECTOR)) {
                 hypertubeSupportBlockEntity.inventory.insertItem(0, stack.copy(), false);
                 if(!player.isCreative()) {
                     stack.shrink(1);
@@ -294,5 +308,21 @@ public class HypertubeSupportBlock extends BaseEntityBlock {
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
         return ItemInteractionResult.SUCCESS;
+    }
+
+    @Override
+    protected boolean hasAnalogOutputSignal(BlockState state) {
+        return true;
+    }
+
+    @Override
+    protected int getAnalogOutputSignal(BlockState blockState, Level level, BlockPos pos) {
+        BlockEntity blockEntity = level.getBlockEntity(pos);
+        int redstonePower = 0;
+        if (blockEntity instanceof HypertubeSupportBlockEntity hypertubeBlockEntity) {
+            redstonePower = hypertubeBlockEntity.redstonePowerOutput;
+        }
+
+        return redstonePower;
     }
 }

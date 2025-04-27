@@ -35,6 +35,9 @@ public class HypertubeSupportBlockEntity extends BlockEntity {
 
     public final WeakHashMap<Entity, Integer> ignoredEntities = new WeakHashMap<>();
 
+    public int redstonePowerOutput = 0;
+    public int redstonePowerTimer = 0;
+
     public final ItemStackHandler inventory = new ItemStackHandler(1) {
         @Override
         protected int getStackLimit(int slot, ItemStack stack) {
@@ -215,5 +218,10 @@ public class HypertubeSupportBlockEntity extends BlockEntity {
     public boolean isBooster(Level level, BlockPos pos){//todo replace with a float or int once we add a different booster
         return this.inventory.getStackInSlot(0).is(ModItems.HYPERTUBE_BOOSTER)  && !level.hasNeighborSignal(pos); // false if redstone powered
     }
+
+    public boolean isDetector(Level level, BlockPos pos){//todo replace with a float or int once we add a different booster
+        return this.inventory.getStackInSlot(0).is(ModItems.HYPERTUBE_DETECTOR)  && !level.hasNeighborSignal(pos); // false if redstone powered
+    }
+
 
 }

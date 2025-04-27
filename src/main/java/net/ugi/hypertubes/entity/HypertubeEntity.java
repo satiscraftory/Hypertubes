@@ -15,6 +15,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.Vec3;
+import net.ugi.hypertubes.block.ModBlocks;
 import net.ugi.hypertubes.block.custom.HypertubeSupportBlock;
 import net.ugi.hypertubes.block.entity.HypertubeSupportBlockEntity;
 import net.ugi.hypertubes.network.UncappedMotionPayload;
@@ -258,6 +259,13 @@ public class HypertubeEntity extends Entity {
                             HypertubeSupportBlockEntity hypertubeSupportBlockEntity = (HypertubeSupportBlockEntity)this.level().getBlockEntity(this.currentPos);
                             if(hypertubeSupportBlockEntity.isBooster(this.level(),currentPos)){
                                 this.setSpeed(this.getSpeed()+1);
+                            }
+
+                            if(hypertubeSupportBlockEntity.isDetector(this.level(),currentPos)){
+                                System.out.println((int)(this.getSpeed() / 2));
+                                hypertubeSupportBlockEntity.redstonePowerOutput = (int)(this.getSpeed() / 2);
+                                this.level().blockUpdated(currentPos, ModBlocks.HYPERTUBE_SUPPORT.get());
+
                             }
 
                             this.addPath(hypertubeSupportBlock.getNextPath(this.level(),this.previousPos,this.currentPos), this.currentPos, hypertubeSupportBlock.getNextTargetPos(this.level(), previousPos, currentPos));
