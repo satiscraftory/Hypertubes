@@ -29,6 +29,7 @@ import net.ugi.hypertubes.block.entity.HypertubeSupportBlockEntity;
 import net.ugi.hypertubes.entity.HypertubeEntity;
 import net.ugi.hypertubes.entity.ModEntities;
 import net.ugi.hypertubes.hypertube.Curves.HyperTubeCalcCore;
+import net.ugi.hypertubes.hypertube.Functionalities.HyperTubeEntrance;
 import net.ugi.hypertubes.item.ModItems;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.system.MathUtil;
@@ -104,29 +105,20 @@ public class HypertubeSupportBlock extends BaseEntityBlock {
         BlockEntity blockEntity = level.getBlockEntity(pos);
         Direction.Axis axis = state.getValue(BlockStateProperties.AXIS);
         if (blockEntity instanceof HypertubeSupportBlockEntity hypertubeSupportBlockEntity ) {
-            if(!hypertubeSupportBlockEntity.isEntrance(level,pos)) return;// if redstone powered => stop working
-            BlockPos checkpos = null;
-            if (hypertubeSupportBlockEntity.targetNegative != null && hypertubeSupportBlockEntity.targetPositive == null) {
-                checkpos  = pos.relative(axis, 2);
-            }
-            if (hypertubeSupportBlockEntity.targetNegative == null && hypertubeSupportBlockEntity.targetPositive != null) {
-                checkpos = pos.relative(axis, -2);
-            }
-            if (checkpos == null) return;
-            List<Entity> entities = level.getEntities(null, new AABB(checkpos.offset(1,2,1).getBottomCenter(), checkpos.offset(-1,0,-1).getBottomCenter()));
+            if(!hypertubeSupportBlockEntity.isEntrance(level,pos)) return;
+
+            List<Entity> entities = level.getEntities(null, HyperTubeEntrance.getEntranceZone(axis, HyperTubeEntrance.getEntranceDirection(hypertubeSupportBlockEntity), pos));
             hypertubeSupportBlockEntity.removeEntitiesFromIgnore(entities);
             if(entities.isEmpty()) return;
 
-            BlockPos finalCheckpos = checkpos;
-
-            initiateHypertubeTravelForEntities(level, entities, hypertubeSupportBlockEntity, pos, finalCheckpos);
+            initiateHypertubeTravelForEntities(level, entities, hypertubeSupportBlockEntity, pos);
 
         }
         super.tick(state, level, pos, random);
     }
 
 
-    private void initiateHypertubeTravelForEntities(Level level, List<Entity> entities, HypertubeSupportBlockEntity hypertubeSupportBlockEntity, BlockPos pos, BlockPos finalCheckPos) {
+    private void initiateHypertubeTravelForEntities(Level level, List<Entity> entities, HypertubeSupportBlockEntity hypertubeSupportBlockEntity, BlockPos pos) {
         entities.forEach(entity -> {
         if(!hypertubeSupportBlockEntity.ignoredEntities.containsKey(entity) && !(entity instanceof HypertubeEntity)) {
             HypertubeEntity hyperTubeEntity = new HypertubeEntity(ModEntities.HYPERTUBE_ENTITY.get(), level);
@@ -142,8 +134,8 @@ public class HypertubeSupportBlock extends BaseEntityBlock {
             if(!level.getBlockState(currentPos).getProperties().contains(AXIS)) return;
 
             Direction.Axis currentAxis = level.getBlockState(currentPos).getValue(AXIS);
-            int dir = ((pos.getX() - finalCheckPos.getX()) + (pos.getY() - finalCheckPos.getY()) + (pos.getZ() - finalCheckPos.getZ()));
-            int currentDirection = (dir) > 0 ? 1 : -1;
+            int currentDirection = - HyperTubeEntrance.getEntranceDirection(hypertubeSupportBlockEntity);
+
             BlockPos nextPos = hypertubeSupportBlockEntity.getTargetPos(currentDirection);
             if(!level.getBlockState(nextPos).getProperties().contains(AXIS)) return; //crashfix part 2
             Direction.Axis nextAxis = level.getBlockState(nextPos).getValue(AXIS);
