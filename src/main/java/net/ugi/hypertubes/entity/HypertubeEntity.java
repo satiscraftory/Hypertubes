@@ -256,7 +256,7 @@ public class HypertubeEntity extends Entity {
                     if(block instanceof HypertubeSupportBlock hypertubeSupportBlock){
                         if(hypertubeSupportBlock.isConnectedBothSides(this.level(), this.currentPos)){
                             HypertubeSupportBlockEntity hypertubeSupportBlockEntity = (HypertubeSupportBlockEntity)this.level().getBlockEntity(this.currentPos);
-                            if(hypertubeSupportBlockEntity.isBooster()){
+                            if(hypertubeSupportBlockEntity.isBooster(this.level(),currentPos)){
                                 this.setSpeed(this.getSpeed()+1);
                             }
 

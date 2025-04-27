@@ -104,7 +104,7 @@ public class HypertubeSupportBlock extends BaseEntityBlock {
         BlockEntity blockEntity = level.getBlockEntity(pos);
         Direction.Axis axis = state.getValue(BlockStateProperties.AXIS);
         if (blockEntity instanceof HypertubeSupportBlockEntity hypertubeSupportBlockEntity ) {
-            if(!hypertubeSupportBlockEntity.isEntrance()) return;
+            if(!hypertubeSupportBlockEntity.isEntrance(level,pos)) return;// if redstone powered => stop working
             BlockPos checkpos = null;
             if (hypertubeSupportBlockEntity.targetNegative != null && hypertubeSupportBlockEntity.targetPositive == null) {
                 checkpos  = pos.relative(axis, 2);

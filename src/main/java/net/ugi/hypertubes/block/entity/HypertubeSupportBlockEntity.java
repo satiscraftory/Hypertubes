@@ -11,6 +11,7 @@ import net.minecraft.world.Containers;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -207,12 +208,12 @@ public class HypertubeSupportBlockEntity extends BlockEntity {
         return -1;//sets y axis
     }
 
-    public boolean isEntrance(){
-        return this.inventory.getStackInSlot(0).is(ModItems.HYPERTUBE_ENTRANCE);
+    public boolean isEntrance(Level level, BlockPos pos){
+        return this.inventory.getStackInSlot(0).is(ModItems.HYPERTUBE_ENTRANCE) && !level.hasNeighborSignal(pos); // false if redstone powered
     }
 
-    public boolean isBooster(){//todo replace with a float or int once we add a different booster
-        return this.inventory.getStackInSlot(0).is(ModItems.HYPERTUBE_BOOSTER);
+    public boolean isBooster(Level level, BlockPos pos){//todo replace with a float or int once we add a different booster
+        return this.inventory.getStackInSlot(0).is(ModItems.HYPERTUBE_BOOSTER)  && !level.hasNeighborSignal(pos); // false if redstone powered
     }
 
 }
