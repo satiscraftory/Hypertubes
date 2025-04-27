@@ -310,6 +310,20 @@ public class HyperTubePlacerItem extends Item {
                             blockPosArray[i].getX()+0.5,blockPosArray[i].getY()+0.5,blockPosArray[i].getZ()+0.5, 1, 0.2, 0.2, 0.2,1);
                     }
                 }
+
+                //display support direction ( with particles)
+                BlockPos startpos = block2Pos.get(stack);
+                BlockPos endpos = block2Pos.get(stack).relative(block2Axis.get(stack), -curveCore.block2UsedDirection);
+                Vec3 vec = endpos.getCenter().subtract(startpos.getCenter()).scale(1/5.0);
+                for (int i = -5; i < 6; i++) {
+                    for(int j = 0; j < level.players().size(); ++j) {
+                        ServerPlayer serverplayer = (ServerPlayer)level.players().get(j);
+                        ((ServerLevel) level).sendParticles(serverplayer, new DustParticleOptions(new Vector3f(1,1,1),0.5f), true,
+                                block2Pos.get(stack).getX()+0.5+vec.x*i,block2Pos.get(stack).getY()+0.5+vec.y*i,block2Pos.get(stack).getZ()+0.5+vec.z*i, 1, 0, 0, 0,1);
+                    }
+                }
+
+
             }else{
                 if (player instanceof ServerPlayer serverPlayer) {
                     // if not selected block 1 => send packet for only "Type" overlay, no length / resources
