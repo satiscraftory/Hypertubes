@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "hypertubes:block/hypertube_support_horizontal",
+      "x": 90,
+      "y": 90
+    },
+    "axis=y": {
+      "model": "hypertubes:block/hypertube_support"
+    },
+    "axis=z": {
+      "model": "hypertubes:block/hypertube_support_horizontal",
+      "x": 90
+    }
+  }
+}
