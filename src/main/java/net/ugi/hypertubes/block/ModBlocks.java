@@ -13,6 +13,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import net.ugi.hypertubes.block.custom.HyperTubeSupportPoleBlock;
 import net.ugi.hypertubes.block.custom.HypertubeSupportBlock;
 import net.ugi.hypertubes.item.ModItems;
 
@@ -29,6 +30,11 @@ public class ModBlocks {
     public static final DeferredBlock<Block> HYPERTUBE_SUPPORT = registerBlock("hypertube_support",
             () -> new HypertubeSupportBlock(
                     BlockBehaviour.Properties.of().strength(2f).noLootTable().noOcclusion()));
+
+    public static final DeferredBlock<Block> HYPERTUBE_SUPPORT_POLE= registerBlock("hypertube_support_pole",
+            () ->   new HyperTubeSupportPoleBlock(
+                    BlockBehaviour.Properties.of().strength(2f).noLootTable().noOcclusion())
+            );
 
     public static final DeferredBlock<Block> HYPERTUBE= registerBlock("hypertube",
             () ->   new TransparentBlock(
