@@ -1,5 +1,6 @@
 package net.ugi.hypertubes.entity;
 
+import it.unimi.dsi.fastutil.booleans.BooleanIntImmutablePair;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -14,6 +15,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.ugi.hypertubes.block.ModBlocks;
 import net.ugi.hypertubes.block.custom.HypertubeSupportBlock;
@@ -138,17 +140,21 @@ public class HypertubeEntity extends Entity {
         entityToUpdate.setYHeadRot(entityToUpdate.getYRot());
     }
 
+
     @Override
     protected void positionRider(Entity passenger, MoveFunction callback) {
         super.positionRider(passenger, callback);
         if (!passenger.getType().is(EntityTypeTags.CAN_TURN_IN_BOATS)) {
             //passenger.setYRot(passenger.getVehicle().getYRot());
-            //passenger.setYHeadRot(passenger.getYHeadRot() );
-            passenger.setPose(Pose.FALL_FLYING);
+            //passenger.setPose(Pose.FALL_FLYING);
+            AABB smallBox = new AABB(
+                    passenger.getX() - 0.25, passenger.getY() -0.25, passenger.getZ() - 0.25,
+                    passenger.getX() + 0.25, passenger.getY() + 0.25, passenger.getZ() + 0.25
+            );
+            passenger.setBoundingBox(smallBox);
             this.clampRotation(passenger);
             if (passenger instanceof Animal && this.getPassengers().size() == 1) {
                 passenger.setYBodyRot(passenger.getVehicle().getYRot());
-                //passenger.setYHeadRot(passenger.getYHeadRot() + (float)i);
             }
         }
     }
@@ -208,6 +214,15 @@ public class HypertubeEntity extends Entity {
         }
     }
 
+    @Override
+    protected Vec3 getPassengerAttachmentPoint(Entity entity, EntityDimensions dimensions, float partialTick) {
+        if(!(entity instanceof Animal)) { //todo fix checks for entity heights
+            return new Vec3(0,0.6, 0);
+        }
+        return new Vec3(0,0,0);
+    }
+
+
     // ─── DO NOT TOUCH AT ANY COST ──────────────────────
     @Override
     public void tick() {//DO NOT TOUCH AT ANY COST
@@ -222,6 +237,7 @@ public class HypertubeEntity extends Entity {
                 return;
             }
             this.ticks = 0;
+
 
             // Path handling (ensure path & index are valid)
             if (path != null && currentPathIndex >= 0 && currentPathIndex < path.size()) {
@@ -247,11 +263,30 @@ public class HypertubeEntity extends Entity {
 
                 // rotate smoothly
                 if (dist > 1e-3) {
-                    float yaw = (float)(Math.toDegrees(Math.atan2(diff.z, diff.x)) - 90.0);
-                    this.setYRot(yaw);
+                    // Normalize direction vector
+                    Vec3 dir = diff.normalize();
+
+                    // Calculate yaw: rotation around Y axis (horizontal turn)
+                    float targetYaw = (float)(Math.toDegrees(Math.atan2(dir.z, dir.x)) - 90.0f);
+
+                    // Calculate pitch: rotation around X axis (looking up/down)
+                    float horizontalMag = (float) Math.sqrt(dir.x * dir.x + dir.z * dir.z);
+                    float targetPitch = (float)(-Math.toDegrees(Math.atan2(dir.y, horizontalMag)));
+
+                    // Get current rotation
+                    float currentYaw = this.getYRot();
+                    float currentPitch = this.getXRot();
+
+                    // Interpolate smoothly (adjust 0.25f to control smoothness)
+                    float smoothYaw = Mth.rotLerp(0.25f, currentYaw, targetYaw);
+                    float smoothPitch = Mth.lerp(0.25f, currentPitch, targetPitch);
+
+                    // Apply new rotation
+                    this.setYRot(smoothYaw);
+                    this.setXRot(smoothPitch);
                 }
             } else {
-                if ( path != null){
+                if (path !=null  && !path.isEmpty()){
                     Block block = this.level().getBlockState(this.currentPos).getBlock();
 
                     if(block instanceof HypertubeSupportBlock hypertubeSupportBlock){
@@ -307,8 +342,27 @@ public class HypertubeEntity extends Entity {
 
                                     // rotate smoothly
                                     if (dist > 1e-3) {
-                                        float yaw = (float) (Math.toDegrees(Math.atan2(diff.z, diff.x)) - 90.0);
-                                        this.setYRot(yaw);
+                                        // Normalize direction vector
+                                        Vec3 dir = diff.normalize();
+
+                                        // Calculate yaw: rotation around Y axis (horizontal turn)
+                                        float targetYaw = (float)(Math.toDegrees(Math.atan2(dir.z, dir.x)) - 90.0f);
+
+                                        // Calculate pitch: rotation around X axis (looking up/down)
+                                        float horizontalMag = (float) Math.sqrt(dir.x * dir.x + dir.z * dir.z);
+                                        float targetPitch = (float)(-Math.toDegrees(Math.atan2(dir.y, horizontalMag)));
+
+                                        // Get current rotation
+                                        float currentYaw = this.getYRot();
+                                        float currentPitch = this.getXRot();
+
+                                        // Interpolate smoothly (adjust 0.25f to control smoothness)
+                                        float smoothYaw = Mth.rotLerp(0.25f, currentYaw, targetYaw);
+                                        float smoothPitch = Mth.lerp(0.25f, currentPitch, targetPitch);
+
+                                        // Apply new rotation
+                                        this.setYRot(smoothYaw);
+                                        this.setXRot(smoothPitch);
                                     }
                                     if (!this.getPassengers().isEmpty()) {
                                         hypertubeSupportBlockEntity.addEntityToIgnore(this.getPassengers().get(0));
@@ -371,7 +425,7 @@ public class HypertubeEntity extends Entity {
 
     @Override
     public boolean shouldRiderSit() {
-        return true;
+        return false;
     }
 
 
