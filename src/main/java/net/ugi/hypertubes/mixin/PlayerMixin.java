@@ -1,5 +1,4 @@
 package net.ugi.hypertubes.mixin;
-
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import net.ugi.hypertubes.entity.HypertubeEntity;
@@ -10,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Player.class)
-public class PlayerPoseMixin {
+public class PlayerMixin {
 
     @Inject(method = "setForcedPose", at = @At("HEAD"), cancellable = true)
     public void onSetForcedPose(Pose pose, CallbackInfo ci) {

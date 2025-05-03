@@ -15,7 +15,7 @@ public class ModEntities {
 
     public static final Supplier<EntityType<HypertubeEntity>> HYPERTUBE_ENTITY =
             ENTITY_TYPES.register("hypertube_entity", () -> EntityType.Builder.of(HypertubeEntity::new, MobCategory.MISC)
-                    .passengerAttachments(new Vec3(0,-0.40,0)).sized(0.1f, 0.1f).build("hypertube_entity"));
+                    .passengerAttachments(new Vec3(0,0,0)).sized(0.1f, 0.1f).build("hypertube_entity"));
 
 
     public static void register(IEventBus eventBus) {
