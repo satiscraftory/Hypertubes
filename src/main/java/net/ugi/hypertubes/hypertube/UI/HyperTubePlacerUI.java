@@ -34,6 +34,7 @@ public class HyperTubePlacerUI {
 
         if(tubeLength == -1 && maxTubeLength == -1 && availableResourcesCount == -1){
             HyperTubePlacerOverlayData.showOnlyType = true;
+            HyperTubePlacerOverlayData.errorMessage = "";
             return;
         }
 
@@ -42,9 +43,6 @@ public class HyperTubePlacerUI {
         HyperTubePlacerOverlayData.tubeLength = String.valueOf(tubeLength);
         HyperTubePlacerOverlayData.maxTubeLength = player.isCreative() ? "∞" : String.valueOf(maxTubeLength);
         HyperTubePlacerOverlayData.availableResources = player.isCreative() ? "∞" : String.valueOf(availableResourcesCount);
-
-
-        HyperTubePlacerOverlayData.showError = !isValidCurve || (tubeLength > maxTubeLength || availableResourcesCount < tubeLength) && !player.isCreative();
 
         List<String> errors = new ArrayList<>();
 

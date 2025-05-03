@@ -12,7 +12,6 @@ public class HyperTubePlacerOverlayData {
 
     public static boolean showOnlyType = false;
 
-    public static boolean showError = false;
     public static String  errorMessage= "";
     public static  int colorErrorMessage = -1;
 }

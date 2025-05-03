@@ -10,6 +10,8 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
 import net.ugi.hypertubes.item.custom.HyperTubePlacerItem;
 
+import java.util.Objects;
+
 public class HyperTubePlacerOverlayRenderer {
 
     @SubscribeEvent
@@ -53,7 +55,7 @@ public class HyperTubePlacerOverlayRenderer {
 
         guiGraphics.drawString(font, resourceComponent, x + typeWidth + spacing + lengthWidth + spacing, y, HyperTubePlacerOverlayData.colorResources, false);
 
-        if (HyperTubePlacerOverlayData.showError) {
+        if (!Objects.equals(HyperTubePlacerOverlayData.errorMessage, "")) {
             guiGraphics.drawString(font, HyperTubePlacerOverlayData.errorMessage, (screenWidth - font.width(HyperTubePlacerOverlayData.errorMessage)) / 2, y + 10, HyperTubePlacerOverlayData.colorErrorMessage, false);
         }
     }
