@@ -145,6 +145,7 @@ public class HypertubeSupportBlock extends BaseEntityBlock {
             int currentDirection = - HyperTubeEntrance.getEntranceDirection(hypertubeSupportBlockEntity);
 
             BlockPos nextPos = hypertubeSupportBlockEntity.getTargetPos(currentDirection);
+            if (nextPos == null) return;
             if(!level.getBlockState(nextPos).getProperties().contains(AXIS)) return; //crashfix part 2
             Direction.Axis nextAxis = level.getBlockState(nextPos).getValue(AXIS);
             BlockEntity nextEntity = level.getBlockEntity(nextPos);
