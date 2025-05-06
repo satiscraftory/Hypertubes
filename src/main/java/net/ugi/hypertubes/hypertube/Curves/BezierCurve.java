@@ -6,6 +6,7 @@ import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 
 import java.sql.SQLOutput;
+import java.util.Arrays;
 
 public class BezierCurve {
 
@@ -80,7 +81,7 @@ public class BezierCurve {
         steps2 = (int)(steps2 / (speed * 2)); // todo: config : "2"
         double[] ts = new double[steps2 - (int)(current_t * steps2) + 1];
         int index = 0;
-        for (int i = (int)Math.round(current_t * steps2); i <= steps2; i++) {
+        for (int i = (int)(current_t * steps2); i <= steps2; i++) {
             ts[index++] = (double)i / steps2;
         }
 

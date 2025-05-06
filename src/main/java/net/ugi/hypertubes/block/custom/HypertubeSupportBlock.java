@@ -143,73 +143,20 @@ public class HypertubeSupportBlock extends BaseEntityBlock {
                     */
             if(!level.getBlockState(currentPos).getProperties().contains(AXIS)) return;
 
-            Direction.Axis currentAxis = level.getBlockState(currentPos).getValue(AXIS);
             int currentDirection = - HyperTubeEntrance.getEntranceDirection(hypertubeSupportBlockEntity);
 
             BlockPos nextPos = hypertubeSupportBlockEntity.getTargetPos(currentDirection);
             if (nextPos == null) return;
             if(!level.getBlockState(nextPos).getProperties().contains(AXIS)) return; //crashfix part 2
-            Direction.Axis nextAxis = level.getBlockState(nextPos).getValue(AXIS);
-            BlockEntity nextEntity = level.getBlockEntity(nextPos);
-            int nextDirection = 0;
-            if (nextEntity instanceof HypertubeSupportBlockEntity nextHypertubeSupportBlockEntity) {
-                nextDirection = nextHypertubeSupportBlockEntity.getDirection(currentPos);
 
-                String extraData1 =hypertubeSupportBlockEntity.getExtraInfo(currentDirection);
-                String extraData2 =nextHypertubeSupportBlockEntity.getExtraInfo(nextDirection);
-
-                HyperTubeCalcCore curveCore = new HyperTubeCalcCore();
-                curveCore.setData(currentPos, currentAxis, currentDirection, extraData1, nextPos, nextAxis, nextDirection, extraData2);
-
-                BlockPos[] pathArray = curveCore.getHyperTubeBlockPosArray(hypertubeSupportBlockEntity.getCurveType(currentDirection));
-                if(pathArray == null){//maybe fix extra crashes
-                    hyperTubeEntity.discard();
-                    return;
-                };
-                hyperTubeEntity.newCurve(currentPos, nextPos, 0 ,0);
-                level.addFreshEntity(hyperTubeEntity);
-                float speed = (float) Math.clamp(entity.getDeltaMovement().length(), 0.01, 20)*10;//todo config maxSpeed
-                hyperTubeEntity.setSpeed(speed);
-                hypertubeSupportBlockEntity.addEntityToIgnore(entity);
-                entity.startRiding(hyperTubeEntity);
-            }
+            hyperTubeEntity.newCurve(currentPos, nextPos, 0 ,0);
+            level.addFreshEntity(hyperTubeEntity);
+            float speed = (float) Math.clamp(entity.getDeltaMovement().length(), 0.01, 20);//todo config maxSpeed
+            hyperTubeEntity.setSpeed(speed);
+            hypertubeSupportBlockEntity.addEntityToIgnore(entity);
+            entity.startRiding(hyperTubeEntity);
         }
     });
-    }
-    
-    public List<BlockPos> getNextPath(Level level, BlockPos previousSupportPos, BlockPos currentSupportPos) {
-        Direction.Axis currentAxis = level.getBlockState(currentSupportPos).getValue(AXIS);
-
-        BlockEntity currentEntity = level.getBlockEntity(currentSupportPos);
-        if(currentEntity instanceof HypertubeSupportBlockEntity currentHypertubeSupportBlockEntity) {
-            int currentDirection = -currentHypertubeSupportBlockEntity.getDirection(previousSupportPos);
-            BlockPos nextPos = currentHypertubeSupportBlockEntity.getTargetPos(currentDirection);
-            BlockEntity nextEntity = level.getBlockEntity(nextPos);
-            if(!(level.getBlockState(nextPos).getBlock() instanceof HypertubeSupportBlock)){//extra anti crash
-                if(currentHypertubeSupportBlockEntity.getDirection(nextPos)==1){//todo maybe make this a function and call more often
-                    currentHypertubeSupportBlockEntity.targetPositive = null;
-                    currentHypertubeSupportBlockEntity.targetPositiveType = null;
-                }else if(currentHypertubeSupportBlockEntity.getDirection(nextPos)==-1){
-                    currentHypertubeSupportBlockEntity.targetNegative = null;
-                    currentHypertubeSupportBlockEntity.targetNegativeType = null;
-                }
-                return null;
-            }
-            Direction.Axis nextAxis = level.getBlockState(nextPos).getValue(AXIS);
-            if(nextEntity instanceof HypertubeSupportBlockEntity nextHypertubeSupportBlockEntity) {
-                int nextDirection = nextHypertubeSupportBlockEntity.getDirection(currentSupportPos);
-
-                String extraData1 =currentHypertubeSupportBlockEntity.getExtraInfo(currentDirection);
-                String extraData2 =nextHypertubeSupportBlockEntity.getExtraInfo(nextDirection);
-
-                HyperTubeCalcCore curveCore = new HyperTubeCalcCore();
-                curveCore.setData(currentSupportPos, currentAxis, currentDirection, extraData1, nextPos, nextAxis, nextDirection, extraData2);
-
-
-                return List.of(curveCore.getHyperTubeBlockPosArray(currentHypertubeSupportBlockEntity.getCurveType(currentDirection)));
-            }
-        }
-        return null;
     }
 
     public double getNextT(Level level, BlockPos previousSupportPos, BlockPos currentSupportPos, double t, float speed) {

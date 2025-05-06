@@ -12,6 +12,8 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.vehicle.VehicleEntity;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -27,7 +29,7 @@ import java.util.List;
 
 import static net.minecraft.world.level.block.state.properties.BlockStateProperties.AXIS;
 
-public class HypertubeEntity extends Entity {
+public class HypertubeEntity extends VehicleEntity {
     private int lerpSteps;
     private double lerpX;
     private double lerpY;
@@ -54,6 +56,11 @@ public class HypertubeEntity extends Entity {
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
 
+    }
+
+    @Override
+    protected Item getDropItem() {
+        return null;
     }
 
     public ListTag savePath(ListTag listTag) {
@@ -226,9 +233,12 @@ public class HypertubeEntity extends Entity {
 
     private void atSupportBlock() {
         Block block = this.level().getBlockState(this.currentPos).getBlock();
+        System.out.println("atSupportBlock");
 
         if(block instanceof HypertubeSupportBlock hypertubeSupportBlock){
+            System.out.println("hypertubeSupportBlock");
             if(hypertubeSupportBlock.isConnectedBothSides(this.level(), this.currentPos)){
+                System.out.println("isConnectedBothSides");
                 HypertubeSupportBlockEntity hypertubeSupportBlockEntity = (HypertubeSupportBlockEntity)this.level().getBlockEntity(this.currentPos);
 
                 if(hypertubeSupportBlockEntity.isBooster(this.level(),currentPos)){
@@ -241,7 +251,8 @@ public class HypertubeEntity extends Entity {
 
                 }
 
-                this.newCurve(this.currentPos, hypertubeSupportBlock.getNextTargetPos(this.level(), previousPos, currentPos), 1 - this.lastT, 0);
+                this.newCurve(this.currentPos, hypertubeSupportBlock.getNextTargetPos(this.level(), previousPos, currentPos), 0, 0);
+                System.out.println("NEW");
                 this.tick();
             }
             else {
@@ -308,11 +319,12 @@ public class HypertubeEntity extends Entity {
             Vec3 current   = this.position();
             Vec3 diff      = target.subtract(current);
             double dist    = diff.length();
-
             if(t == 1.0 && dist < this.speed  || this.exit == true){
                 this.atSupportBlock();
                 return;
             }
+
+            this.setSpeed(this.updateSpeed(this.getSpeed()));
 
             if (dist < speed) {
                 // snap to block center and advance
@@ -351,6 +363,12 @@ public class HypertubeEntity extends Entity {
                 this.setXRot(smoothPitch);
             }
         }
+    }
+
+    float updateSpeed(double currentSpeed) {
+        double targetSpeed = 0.28; // todo: config
+        double dampingFactor = 0.007; // Change this between 0 and 1 //todo: config
+        return (float)(currentSpeed + dampingFactor * (targetSpeed - currentSpeed));
     }
 
     public void setSpeed(float speed){
@@ -393,6 +411,43 @@ public class HypertubeEntity extends Entity {
     @Override
     public boolean canRiderInteract() {
         return false;
+    }
+
+    public void setInput(boolean inputLeft, boolean inputRight, boolean inputUp, boolean inputDown) {
+        this.inputLeft = inputLeft;
+        this.inputRight = inputRight;
+        this.inputUp = inputUp;
+        this.inputDown = inputDown;
+    }
+
+    private void controlBoat() {
+        if (this.isVehicle()) {
+            float f = 0.0F;
+            if (this.inputLeft) {
+                --this.deltaRotation;
+            }
+
+            if (this.inputRight) {
+                ++this.deltaRotation;
+            }
+
+            if (this.inputRight != this.inputLeft && !this.inputUp && !this.inputDown) {
+                f += 0.005F;
+            }
+
+            this.setYRot(this.getYRot() + this.deltaRotation);
+            if (this.inputUp) {
+                f += 0.04F;
+            }
+
+            if (this.inputDown) {
+                f -= 0.005F;
+            }
+
+            this.setDeltaMovement(this.getDeltaMovement().add((double)(Mth.sin(-this.getYRot() * ((float)Math.PI / 180F)) * f), (double)0.0F, (double)(Mth.cos(this.getYRot() * ((float)Math.PI / 180F)) * f)));
+            this.setPaddleState(this.inputRight && !this.inputLeft || this.inputUp, this.inputLeft && !this.inputRight || this.inputUp);
+        }
+
     }
 
 
