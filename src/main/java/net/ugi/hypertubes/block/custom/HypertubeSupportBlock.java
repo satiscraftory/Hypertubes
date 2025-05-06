@@ -151,7 +151,7 @@ public class HypertubeSupportBlock extends BaseEntityBlock {
 
             hyperTubeEntity.newCurve(currentPos, nextPos, 0 ,0);
             level.addFreshEntity(hyperTubeEntity);
-            float speed = (float) Math.clamp(entity.getDeltaMovement().length(), 0.01, 20);//todo config maxSpeed
+            float speed = (float) Math.clamp(entity.getDeltaMovement().length(), 0.025, 20);//todo config maxSpeed
             hyperTubeEntity.setSpeed(speed);
             hypertubeSupportBlockEntity.addEntityToIgnore(entity);
             entity.startRiding(hyperTubeEntity);

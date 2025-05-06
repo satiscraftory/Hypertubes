@@ -1,11 +1,14 @@
 package net.ugi.hypertubes.entity;
 
 import it.unimi.dsi.fastutil.booleans.BooleanIntImmutablePair;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.util.Mth;
@@ -29,7 +32,7 @@ import java.util.List;
 
 import static net.minecraft.world.level.block.state.properties.BlockStateProperties.AXIS;
 
-public class HypertubeEntity extends VehicleEntity {
+public class HypertubeEntity extends Entity {
     private int lerpSteps;
     private double lerpX;
     private double lerpY;
@@ -56,11 +59,6 @@ public class HypertubeEntity extends VehicleEntity {
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
 
-    }
-
-    @Override
-    protected Item getDropItem() {
-        return null;
     }
 
     public ListTag savePath(ListTag listTag) {
@@ -325,6 +323,12 @@ public class HypertubeEntity extends VehicleEntity {
             }
 
             this.setSpeed(this.updateSpeed(this.getSpeed()));
+            if (!this.getPassengers().isEmpty() && this.getPassengers().get(0) instanceof Player player){
+                this.getPlayerInputs(player);
+            }
+            if (this.speed < 0.02){
+                swapDirection();
+            }
 
             if (dist < speed) {
                 // snap to block center and advance
@@ -388,7 +392,9 @@ public class HypertubeEntity extends VehicleEntity {
             BlockPos blockPosVector = new BlockPos(0,0,0).relative(axis,-hypertubeSupportBlockEntity.getDirection(this.previousPos));
             Vec3 vector = new Vec3(blockPosVector.getX(),blockPosVector.getY(), blockPosVector.getZ()).scale((float)speed);
 
+            passenger.setPos(exitPos.getCenter().x, exitPos.getCenter().y, exitPos.getCenter().z);
             passenger.teleportTo(exitPos.getCenter().x, exitPos.getCenter().y, exitPos.getCenter().z);
+
 
             hypertubeSupportBlockEntity.addEntityToIgnore(passenger);
             passenger.setDeltaMovement(vector);//maybe we need to somehow call this on the client too
@@ -413,42 +419,33 @@ public class HypertubeEntity extends VehicleEntity {
         return false;
     }
 
-    public void setInput(boolean inputLeft, boolean inputRight, boolean inputUp, boolean inputDown) {
-        this.inputLeft = inputLeft;
-        this.inputRight = inputRight;
-        this.inputUp = inputUp;
-        this.inputDown = inputDown;
-    }
+    Minecraft mc = Minecraft.getInstance();
+    KeyMapping forwardKey = mc.options.keyUp;
+    KeyMapping downKey = mc.options.keyDown;
 
-    private void controlBoat() {
-        if (this.isVehicle()) {
-            float f = 0.0F;
-            if (this.inputLeft) {
-                --this.deltaRotation;
-            }
+    private void getPlayerInputs(Player player) {
 
-            if (this.inputRight) {
-                ++this.deltaRotation;
-            }
-
-            if (this.inputRight != this.inputLeft && !this.inputUp && !this.inputDown) {
-                f += 0.005F;
-            }
-
-            this.setYRot(this.getYRot() + this.deltaRotation);
-            if (this.inputUp) {
-                f += 0.04F;
-            }
-
-            if (this.inputDown) {
-                f -= 0.005F;
-            }
-
-            this.setDeltaMovement(this.getDeltaMovement().add((double)(Mth.sin(-this.getYRot() * ((float)Math.PI / 180F)) * f), (double)0.0F, (double)(Mth.cos(this.getYRot() * ((float)Math.PI / 180F)) * f)));
-            this.setPaddleState(this.inputRight && !this.inputLeft || this.inputUp, this.inputLeft && !this.inputRight || this.inputUp);
+        if (forwardKey.isDown() && speed < 2) { //todo: config?
+            setSpeed(this.getSpeed() + 0.01f);//todo: config?
         }
 
+        if (downKey.isDown()) {
+            setSpeed(this.getSpeed() - 0.01f);//todo: config?
+        }
+
+
+
     }
+
+    private void swapDirection(){
+        BlockPos tempPos = this.currentPos;
+        this.currentPos = this.previousPos;
+        this.previousPos = tempPos;
+        this.t = 1 - this.t;
+        this.lastT = 0;
+        this.speed = 0.025f;
+    }
+
 
 
 }
