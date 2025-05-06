@@ -24,6 +24,8 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.ugi.hypertubes.block.ModBlocks;
@@ -159,16 +161,14 @@ public class HypertubeSupportBlock extends BaseEntityBlock {
                 HyperTubeCalcCore curveCore = new HyperTubeCalcCore();
                 curveCore.setData(currentPos, currentAxis, currentDirection, extraData1, nextPos, nextAxis, nextDirection, extraData2);
 
-                BlockPos[] pathArray = curveCore.getHyperTubeArray(hypertubeSupportBlockEntity.getCurveType(currentDirection));
+                BlockPos[] pathArray = curveCore.getHyperTubeBlockPosArray(hypertubeSupportBlockEntity.getCurveType(currentDirection));
                 if(pathArray == null){//maybe fix extra crashes
                     hyperTubeEntity.discard();
                     return;
                 };
-                hyperTubeEntity.addPath(
-                        Arrays.stream(pathArray).toList(),
-                        currentPos, nextPos);
+                hyperTubeEntity.newCurve(currentPos, nextPos, 0 ,0);
                 level.addFreshEntity(hyperTubeEntity);
-                float speed = (float) Math.clamp(Math.floor( entity.getDeltaMovement().length()), 1, 20);//todo config maxSpeed
+                float speed = (float) Math.clamp(entity.getDeltaMovement().length(), 0.01, 20)*10;//todo config maxSpeed
                 hyperTubeEntity.setSpeed(speed);
                 hypertubeSupportBlockEntity.addEntityToIgnore(entity);
                 entity.startRiding(hyperTubeEntity);
@@ -206,10 +206,32 @@ public class HypertubeSupportBlock extends BaseEntityBlock {
                 curveCore.setData(currentSupportPos, currentAxis, currentDirection, extraData1, nextPos, nextAxis, nextDirection, extraData2);
 
 
-                return List.of(curveCore.getHyperTubeArray(currentHypertubeSupportBlockEntity.getCurveType(currentDirection)));
+                return List.of(curveCore.getHyperTubeBlockPosArray(currentHypertubeSupportBlockEntity.getCurveType(currentDirection)));
             }
         }
         return null;
+    }
+
+    public double getNextT(Level level, BlockPos previousSupportPos, BlockPos currentSupportPos, double t, float speed) {
+        HyperTubeCalcCore curveCore = new HyperTubeCalcCore();
+        curveCore.setDataFromPos(level,previousSupportPos,currentSupportPos);
+
+        return curveCore.getNextT(t,speed);
+
+    }
+
+    public Vec3 getPos(Level level, BlockPos previousSupportPos, BlockPos currentSupportPos, double t) {
+        HyperTubeCalcCore curveCore = new HyperTubeCalcCore();
+        curveCore.setDataFromPos(level,previousSupportPos,currentSupportPos);
+
+        return curveCore.getHyperTubePos(t);
+    }
+
+    public Vec3 getRot(Level level, BlockPos previousSupportPos, BlockPos currentSupportPos, double t) {
+        HyperTubeCalcCore curveCore = new HyperTubeCalcCore();
+        curveCore.setDataFromPos(level,previousSupportPos,currentSupportPos);
+
+        return curveCore.getHyperTubeRotation(t);
     }
 
 
@@ -252,7 +274,7 @@ public class HypertubeSupportBlock extends BaseEntityBlock {
                     HypertubeSupportBlockEntity hypertubeSupportBlockEntity2 = (HypertubeSupportBlockEntity)level.getBlockEntity(hypertubeSupportBlockEntity1.targetPositive);
                     HyperTubeCalcCore hyperTubeCalc = new HyperTubeCalcCore();
                     hyperTubeCalc.setDataFromPosAndAxis(level, pos, state.getValue(AXIS), hypertubeSupportBlockEntity1.targetPositive, level.getBlockState(hypertubeSupportBlockEntity1.targetPositive).getValue(AXIS));
-                    List<BlockPos> path = new java.util.ArrayList<>(List.of(hyperTubeCalc.getHyperTubeArray(hypertubeSupportBlockEntity1.targetPositiveType)));
+                    List<BlockPos> path = new java.util.ArrayList<>(List.of(hyperTubeCalc.getHyperTubeBlockPosArray(hypertubeSupportBlockEntity1.targetPositiveType)));
                     path.remove(hypertubeSupportBlockEntity1.targetPositive);
                     RemovePath(level, path, state);
                     hypertubeSupportBlockEntity2.removeTarget(pos);
@@ -261,7 +283,7 @@ public class HypertubeSupportBlock extends BaseEntityBlock {
                     HypertubeSupportBlockEntity hypertubeSupportBlockEntity2 = (HypertubeSupportBlockEntity)level.getBlockEntity(hypertubeSupportBlockEntity1.targetNegative);
                     HyperTubeCalcCore hyperTubeCalc = new HyperTubeCalcCore();
                     hyperTubeCalc.setDataFromPosAndAxis(level, pos, state.getValue(AXIS), hypertubeSupportBlockEntity1.targetNegative, level.getBlockState(hypertubeSupportBlockEntity1.targetNegative).getValue(AXIS));
-                    List<BlockPos> path = new java.util.ArrayList<>(List.of((hyperTubeCalc.getHyperTubeArray(hypertubeSupportBlockEntity1.targetNegativeType))));
+                    List<BlockPos> path = new java.util.ArrayList<>(List.of((hyperTubeCalc.getHyperTubeBlockPosArray(hypertubeSupportBlockEntity1.targetNegativeType))));
                     path.remove(hypertubeSupportBlockEntity1.targetNegative);
                     RemovePath(level, path, state);
                     hypertubeSupportBlockEntity2.removeTarget(pos);

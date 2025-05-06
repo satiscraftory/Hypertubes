@@ -38,11 +38,12 @@ public class HypertubeEntity extends Entity {
     private List<BlockPos> path = new ArrayList<>();
     private BlockPos previousPos;
     private BlockPos currentPos;
-    private int ticks = 0;
-    private int speed = 1;
-    private int moveEveryXTicks = 1 ;
+    private float speed = 1;
     private int currentPathIndex = 0;
 
+    private double t = 0;
+    private double lastT = 0;
+    private boolean exit = false ;
 
 
     public HypertubeEntity(EntityType<?> entityType, Level level) {
@@ -175,8 +176,9 @@ public class HypertubeEntity extends Entity {
         }
     }
 
-    public void addPath(List<BlockPos> path, BlockPos currentPos, BlockPos nextPos) {
-        this.path.addAll(path);
+    public void newCurve(BlockPos currentPos, BlockPos nextPos, double t, double lastT) {
+        this.t = t;
+        this.lastT = lastT;
         this.previousPos = currentPos;
         this.currentPos = nextPos;
     }
@@ -222,6 +224,73 @@ public class HypertubeEntity extends Entity {
         return new Vec3(0,0,0);
     }
 
+    private void atSupportBlock() {
+        Block block = this.level().getBlockState(this.currentPos).getBlock();
+
+        if(block instanceof HypertubeSupportBlock hypertubeSupportBlock){
+            if(hypertubeSupportBlock.isConnectedBothSides(this.level(), this.currentPos)){
+                HypertubeSupportBlockEntity hypertubeSupportBlockEntity = (HypertubeSupportBlockEntity)this.level().getBlockEntity(this.currentPos);
+
+                if(hypertubeSupportBlockEntity.isBooster(this.level(),currentPos)){
+                    this.setSpeed(this.getSpeed()*1.2f);//todo: config
+                }
+
+                if(hypertubeSupportBlockEntity.isDetector(this.level(),currentPos)){
+                    hypertubeSupportBlockEntity.redstonePowerOutput = (int)(this.getSpeed() / 2);
+                    this.level().blockUpdated(currentPos, ModBlocks.HYPERTUBE_SUPPORT.get());
+
+                }
+
+                this.newCurve(this.currentPos, hypertubeSupportBlock.getNextTargetPos(this.level(), previousPos, currentPos), 1 - this.lastT, 0);
+                this.tick();
+            }
+            else {
+                //start exit process
+                if(!this.level().getBlockState(this.currentPos).hasProperty(AXIS))return;//anti crash
+                Direction.Axis axis = this.level().getBlockState(this.currentPos).getValue(AXIS);
+                if(this.level().getBlockEntity(this.currentPos)== null)return;//anti crash
+                BlockEntity blockEntity = this.level().getBlockEntity(this.currentPos);
+
+                if(blockEntity instanceof HypertubeSupportBlockEntity hypertubeSupportBlockEntity) {
+                    BlockPos exitPos = this.currentPos.relative(axis, -hypertubeSupportBlockEntity.getDirection(this.previousPos));
+                    if (!this.position().equals(exitPos.getCenter())) {
+                        //move player to the end of the tube
+
+                        Vec3 target = Vec3.atCenterOf(exitPos);
+                        Vec3 current = this.position();
+                        Vec3 diff = target.subtract(current);
+                        double dist = diff.length();
+
+
+                        if (dist < speed) {
+                            // snap to block center and advance
+                            this.setPos(target.x, target.y, target.z);
+                            //this.setDeltaMovement(Vec3.ZERO);
+                        } else {
+                            // move a small step toward the target
+                            Vec3 step = diff; //.normalize().scale(speed);
+                            this.setDeltaMovement(step);
+                            this.move(MoverType.SELF, step);
+                        }
+
+                        this.exit = true;
+
+                        if (!this.getPassengers().isEmpty()) {
+                            hypertubeSupportBlockEntity.addEntityToIgnore(this.getPassengers().get(0));
+                        }
+                    } else {
+                        //launch player or entity
+                        this.tryLaunchEntity(exitPos, hypertubeSupportBlockEntity, axis);
+                    }
+                    //TEST-------
+
+                    //continue path to inside hypertubesupport (currentpos) and yeet player
+                }
+            }
+        }
+
+    }
+
 
     // ─── DO NOT TOUCH AT ANY COST ──────────────────────
     @Override
@@ -232,172 +301,64 @@ public class HypertubeEntity extends Entity {
 
         // Server‑only motion
         if (!this.level().isClientSide /*&& this.hasExactlyOnePlayerPassenger()*/) {
-            if(!(this.ticks >= this.moveEveryXTicks-1)) {//ticks 0 movevery1 ->
-                this.ticks++;
-                return;
-            }
-            this.ticks = 0;
-
 
             // Path handling (ensure path & index are valid)
-            if (path != null && currentPathIndex >= 0 && currentPathIndex < path.size()) {
-                Vec3 target    = Vec3.atCenterOf(path.get(currentPathIndex));
-                Vec3 current   = this.position();
-                Vec3 diff      = target.subtract(current);
-                double dist    = diff.length();
+            this.t = ((HypertubeSupportBlock)this.level().getBlockState(this.previousPos).getBlock()).getNextT(this.level(),this.previousPos,this.currentPos,this.t,this.speed);
+            Vec3 target    = ((HypertubeSupportBlock)this.level().getBlockState(this.previousPos).getBlock()).getPos(this.level(),this.previousPos,this.currentPos,this.t);
+            Vec3 current   = this.position();
+            Vec3 diff      = target.subtract(current);
+            double dist    = diff.length();
 
+            if(t == 1.0 && dist < this.speed  || this.exit == true){
+                this.atSupportBlock();
+                return;
+            }
 
-                if (dist <= (float)speed/moveEveryXTicks) {
-                    // snap to block center and advance
-                    this.setPos(target.x, target.y, target.z);
-                    this.teleportTo(target.x, target.y, target.z);
+            if (dist < speed) {
+                // snap to block center and advance
+                this.setPos(target.x, target.y, target.z);
+                this.teleportTo(target.x, target.y, target.z);
 
-                    currentPathIndex+= speed;
-                    //this.setDeltaMovement(Vec3.ZERO);
-                } else {
-                    // move a small step toward the target
-                    Vec3 step = diff.normalize().scale((float)speed/moveEveryXTicks);
-                    this.setDeltaMovement(step);
-                    this.move(MoverType.SELF, step);
-                }
-
-                // rotate smoothly
-                if (dist > 1e-3) {
-                    // Normalize direction vector
-                    Vec3 dir = diff.normalize();
-
-                    // Calculate yaw: rotation around Y axis (horizontal turn)
-                    float targetYaw = (float)(Math.toDegrees(Math.atan2(dir.z, dir.x)) - 90.0f);
-
-                    // Calculate pitch: rotation around X axis (looking up/down)
-                    float horizontalMag = (float) Math.sqrt(dir.x * dir.x + dir.z * dir.z);
-                    float targetPitch = (float)(-Math.toDegrees(Math.atan2(dir.y, horizontalMag)));
-
-                    // Get current rotation
-                    float currentYaw = this.getYRot();
-                    float currentPitch = this.getXRot();
-
-                    // Interpolate smoothly (adjust 0.25f to control smoothness)
-                    float smoothYaw = Mth.rotLerp(0.25f, currentYaw, targetYaw);
-                    float smoothPitch = Mth.lerp(0.25f, currentPitch, targetPitch);
-
-                    // Apply new rotation
-                    this.setYRot(smoothYaw);
-                    this.setXRot(smoothPitch);
-                }
             } else {
-                if (path !=null  && !path.isEmpty()){
-                    Block block = this.level().getBlockState(this.currentPos).getBlock();
+                // move a small step toward the target
+                Vec3 step = diff;//.normalize().scale(speed);
+                this.setDeltaMovement(step);
+                this.move(MoverType.SELF, step);
+            }
 
-                    if(block instanceof HypertubeSupportBlock hypertubeSupportBlock){
-                        if(hypertubeSupportBlock.isConnectedBothSides(this.level(), this.currentPos)){
-                            HypertubeSupportBlockEntity hypertubeSupportBlockEntity = (HypertubeSupportBlockEntity)this.level().getBlockEntity(this.currentPos);
-                            if(hypertubeSupportBlockEntity.isBooster(this.level(),currentPos)){
-                                this.setSpeed(this.getSpeed()+1);
-                            }
+            // rotate smoothly
+            if (dist > 1e-3) {
 
-                            if(hypertubeSupportBlockEntity.isDetector(this.level(),currentPos)){
-                                System.out.println((int)(this.getSpeed() / 2));
-                                hypertubeSupportBlockEntity.redstonePowerOutput = (int)(this.getSpeed() / 2);
-                                this.level().blockUpdated(currentPos, ModBlocks.HYPERTUBE_SUPPORT.get());
+                Vec3 dir = ((HypertubeSupportBlock)this.level().getBlockState(this.previousPos).getBlock()).getRot(this.level(),this.previousPos,this.currentPos,this.t);
 
-                            }
+                // Calculate yaw: rotation around Y axis (horizontal turn)
+                float targetYaw = (float)(Math.toDegrees(Math.atan2(dir.z, dir.x)) - 90.0f);
 
-                            this.addPath(hypertubeSupportBlock.getNextPath(this.level(),this.previousPos,this.currentPos), this.currentPos, hypertubeSupportBlock.getNextTargetPos(this.level(), previousPos, currentPos));
-                            //cull path array
-                            for (int i = currentPathIndex -1; i >=0 && !this.path.isEmpty(); i--) {//cull path array
-                                this.path.removeFirst();
-                                currentPathIndex--;//needed?
-                            }
-                            currentPathIndex = 0;
+                // Calculate pitch: rotation around X axis (looking up/down)
+                float horizontalMag = (float) Math.sqrt(dir.x * dir.x + dir.z * dir.z);
+                float targetPitch = (float)(-Math.toDegrees(Math.atan2(dir.y, horizontalMag)));
 
-                            tick();
-                        }   else{
-                            //start exit process
-                            if(!this.level().getBlockState(this.currentPos).hasProperty(AXIS))return;//anti crash
-                            Direction.Axis axis = this.level().getBlockState(this.currentPos).getValue(AXIS);
-                            if(this.level().getBlockEntity(this.currentPos)== null)return;//anti crash
-                            BlockEntity blockEntity = this.level().getBlockEntity(this.currentPos);
+                // Get current rotation
+                float currentYaw = this.getYRot();
+                float currentPitch = this.getXRot();
 
-                            if(blockEntity instanceof HypertubeSupportBlockEntity hypertubeSupportBlockEntity) {
-                                BlockPos exitPos = this.currentPos.relative(axis, -hypertubeSupportBlockEntity.getDirection(this.previousPos));
-                                if (!this.position().equals(exitPos.getCenter())) {
-                                    //move player to the end of the tube
+                // Interpolate smoothly (adjust 0.25f to control smoothness)
+                float smoothYaw = Mth.rotLerp(0.25f, currentYaw, targetYaw);
+                float smoothPitch = Mth.lerp(0.25f, currentPitch, targetPitch);
 
-                                    Vec3 target = Vec3.atCenterOf(exitPos);
-                                    Vec3 current = this.position();
-                                    Vec3 diff = target.subtract(current);
-                                    double dist = diff.length();
-
-                                    if (dist <= (float) speed / moveEveryXTicks) {
-                                        // snap to block center and advance
-                                        this.setPos(target.x, target.y, target.z);
-                                        //this.setDeltaMovement(Vec3.ZERO);
-                                    } else {
-                                        // move a small step toward the target
-                                        Vec3 step = diff.normalize().scale(speed);
-                                        this.setDeltaMovement(step);
-                                        this.move(MoverType.SELF, step);
-                                    }
-
-                                    // rotate smoothly
-                                    if (dist > 1e-3) {
-                                        // Normalize direction vector
-                                        Vec3 dir = diff.normalize();
-
-                                        // Calculate yaw: rotation around Y axis (horizontal turn)
-                                        float targetYaw = (float)(Math.toDegrees(Math.atan2(dir.z, dir.x)) - 90.0f);
-
-                                        // Calculate pitch: rotation around X axis (looking up/down)
-                                        float horizontalMag = (float) Math.sqrt(dir.x * dir.x + dir.z * dir.z);
-                                        float targetPitch = (float)(-Math.toDegrees(Math.atan2(dir.y, horizontalMag)));
-
-                                        // Get current rotation
-                                        float currentYaw = this.getYRot();
-                                        float currentPitch = this.getXRot();
-
-                                        // Interpolate smoothly (adjust 0.25f to control smoothness)
-                                        float smoothYaw = Mth.rotLerp(0.25f, currentYaw, targetYaw);
-                                        float smoothPitch = Mth.lerp(0.25f, currentPitch, targetPitch);
-
-                                        // Apply new rotation
-                                        this.setYRot(smoothYaw);
-                                        this.setXRot(smoothPitch);
-                                    }
-                                    if (!this.getPassengers().isEmpty()) {
-                                        hypertubeSupportBlockEntity.addEntityToIgnore(this.getPassengers().get(0));
-                                    }
-                                } else {
-                                    //launch player or entity
-                                    this.tryLaunchEntity(exitPos, hypertubeSupportBlockEntity, axis);
-                                }
-                                //TEST-------
-
-                                //continue path to inside hypertubesupport (currentpos) and yeet player
-                            }
-                        }
-                    }
-                }
-
-
-
-                // no path or done – stop moving
-                this.setDeltaMovement(Vec3.ZERO);
+                // Apply new rotation
+                this.setYRot(smoothYaw);
+                this.setXRot(smoothPitch);
             }
         }
     }
 
     public void setSpeed(float speed){
-        float f = (speed- (int)speed);
-        f = f == 0 ? 1 : f;
-        int multiplier = (int)Math.round(1.0/f);
-        this.moveEveryXTicks = multiplier;
-        this.speed = (int)(speed*multiplier);
-        System.out.println(" speed: "+speed + " this.speed: " + this.speed + " this.moveverticuikslf: "+ this.moveEveryXTicks);
+        this.speed = speed;
     }
 
     public float getSpeed(){
-        return (float)this.speed/(float)this.moveEveryXTicks;
+        return this.speed;
     }
 
     public void tryLaunchEntity(BlockPos exitPos, HypertubeSupportBlockEntity hypertubeSupportBlockEntity,  Direction.Axis axis){
@@ -407,7 +368,7 @@ public class HypertubeEntity extends Entity {
             this.discard();
 
             BlockPos blockPosVector = new BlockPos(0,0,0).relative(axis,-hypertubeSupportBlockEntity.getDirection(this.previousPos));
-            Vec3 vector = new Vec3(blockPosVector.getX(),blockPosVector.getY(), blockPosVector.getZ()).scale((float)speed/moveEveryXTicks);
+            Vec3 vector = new Vec3(blockPosVector.getX(),blockPosVector.getY(), blockPosVector.getZ()).scale((float)speed);
 
             passenger.teleportTo(exitPos.getCenter().x, exitPos.getCenter().y, exitPos.getCenter().z);
 

@@ -3,6 +3,9 @@ package net.ugi.hypertubes.hypertube.Curves;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
 import net.ugi.hypertubes.block.entity.HypertubeSupportBlockEntity;
 
 import java.util.LinkedHashSet;
@@ -22,6 +25,8 @@ public class HyperTubeCalcCore {
 
     public int block1UsedDirection = 0;
     public int block2UsedDirection = 0;
+
+    public CurveTypes.Curves curveType;
 
 
     public HyperTubeCalcCore() {
@@ -63,6 +68,7 @@ public class HyperTubeCalcCore {
         this.block2Axis = b2Axis;
         this.block2Direction = b2Direction;
         this.block2ExtraData = b2ExtraData;
+
     }
 
     public void setDataFromPosAndAxis(Level level, BlockPos supportPos1, Direction.Axis axis1, BlockPos supportPos2, Direction.Axis axis2) {
@@ -76,6 +82,8 @@ public class HyperTubeCalcCore {
         String extraData1 =hypertubeSupportBlockEntity1.getExtraInfo(direction1);
         String extraData2 =hypertubeSupportBlockEntity2.getExtraInfo(direction2);
         setData(supportPos1, axis1, direction1, extraData1, supportPos2, axis2, direction2, extraData2);
+
+        this.curveType = hypertubeSupportBlockEntity1.getCurveType(direction1);
     }
 
     public void setDataFromPos(Level level, BlockPos supportPos1, BlockPos supportPos2) {
@@ -103,26 +111,29 @@ public class HyperTubeCalcCore {
         return blockSet.toArray(new BlockPos[0]);
     }
 
-    public BlockPos[] getHyperTubeArray(CurveTypes.Curves curvetype){
+    public BlockPos[] getHyperTubeBlockPosArray(CurveTypes.Curves curvetype){
 
-        BezierCurve bezierCurve = new BezierCurve(this);
+        BezierCurve bezierCurve = new BezierCurve();
         MinecraftCurve minecraftCurve = new MinecraftCurve(this);
 
         if(curvetype==null) return null;
         BlockPos[] blockArray = new BlockPos[0];
         switch(curvetype) {
             case CURVED -> {
-                blockArray = bezierCurve.getCurve(0.5);
+                bezierCurve.calcCurveData(0.5,this.block1Pos,this.block1Axis,this.block1Direction,this.block2Pos,this.block2Axis,this.block2Direction);
+                blockArray = bezierCurve.getCurveBlockposArray();
             }
             case OVERKILL -> {
-                blockArray = bezierCurve.getCurve(3);
+                bezierCurve.calcCurveData(3,this.block1Pos,this.block1Axis,this.block1Direction,this.block2Pos,this.block2Axis,this.block2Direction);
+                blockArray = bezierCurve.getCurveBlockposArray();
             }
             case STRAIGHT -> {
-                blockArray = bezierCurve.getCurve(0);
+                bezierCurve.calcCurveData(0,this.block1Pos,this.block1Axis,this.block1Direction,this.block2Pos,this.block2Axis,this.block2Direction);
+                blockArray = bezierCurve.getCurveBlockposArray();
             }
-            case MINECRAFT -> {
-                blockArray = minecraftCurve.getCurve();
-            }
+//            case MINECRAFT -> {
+//                blockArray = minecraftCurve.getCurve();
+//            }
 //            case HELIX -> {
 //
 //            }
@@ -130,4 +141,94 @@ public class HyperTubeCalcCore {
         }
         return checkDuplicate(blockArray);
     }
+
+    public double getNextT(double currentT, float speed){
+        CurveTypes.Curves curvetype = this.curveType;
+        BezierCurve bezierCurve = new BezierCurve();
+        MinecraftCurve minecraftCurve = new MinecraftCurve(this);
+        double t = currentT;
+        switch(curvetype) {
+            case CURVED -> {
+                bezierCurve.calcCurveData(0.5,this.block1Pos,this.block1Axis,this.block1Direction,this.block2Pos,this.block2Axis,this.block2Direction);
+                t = bezierCurve.getNextT(currentT,speed);
+            }
+            case OVERKILL -> {
+                bezierCurve.calcCurveData(3,this.block1Pos,this.block1Axis,this.block1Direction,this.block2Pos,this.block2Axis,this.block2Direction);
+                t = bezierCurve.getNextT(currentT,speed);
+            }
+            case STRAIGHT -> {
+                bezierCurve.calcCurveData(0,this.block1Pos,this.block1Axis,this.block1Direction,this.block2Pos,this.block2Axis,this.block2Direction);
+                t = bezierCurve.getNextT(currentT,speed);
+            }
+//            case MINECRAFT -> {
+//                blockArray = minecraftCurve.getCurve();
+//            }
+//            case HELIX -> {
+//
+//            }
+
+        }
+        return t;
+    }
+
+    public Vec3 getHyperTubeRotation(double t){
+        CurveTypes.Curves curvetype = this.curveType;
+        BezierCurve bezierCurve = new BezierCurve();
+        MinecraftCurve minecraftCurve = new MinecraftCurve(this);
+        Vec3 rotationVec = new Vec3(0,0,0);
+        switch(curvetype) {
+            case CURVED -> {
+                bezierCurve.calcCurveData(0.5,this.block1Pos,this.block1Axis,this.block1Direction,this.block2Pos,this.block2Axis,this.block2Direction);
+                rotationVec = bezierCurve.getCurverotation(t);
+            }
+            case OVERKILL -> {
+                bezierCurve.calcCurveData(3,this.block1Pos,this.block1Axis,this.block1Direction,this.block2Pos,this.block2Axis,this.block2Direction);
+                rotationVec = bezierCurve.getCurverotation(t);
+            }
+            case STRAIGHT -> {
+                bezierCurve.calcCurveData(0,this.block1Pos,this.block1Axis,this.block1Direction,this.block2Pos,this.block2Axis,this.block2Direction);
+                rotationVec = bezierCurve.getCurverotation(t);
+            }
+//            case MINECRAFT -> {
+//                rotationVec = minecraftCurve.getCurve();
+//            }
+//            case HELIX -> {
+//
+//            }
+
+        }
+        return rotationVec;
+    }
+
+    public Vec3 getHyperTubePos(double t){
+        CurveTypes.Curves curvetype = this.curveType;
+        BezierCurve bezierCurve = new BezierCurve();
+        MinecraftCurve minecraftCurve = new MinecraftCurve(this);
+        Vec3 pos = null;
+        switch(curvetype) {
+            case CURVED -> {
+                bezierCurve.calcCurveData(0.5,this.block1Pos,this.block1Axis,this.block1Direction,this.block2Pos,this.block2Axis,this.block2Direction);
+                pos = bezierCurve.getCurvePos(t);
+            }
+            case OVERKILL -> {
+                bezierCurve.calcCurveData(3,this.block1Pos,this.block1Axis,this.block1Direction,this.block2Pos,this.block2Axis,this.block2Direction);
+                pos = bezierCurve.getCurvePos(t);
+            }
+            case STRAIGHT -> {
+                bezierCurve.calcCurveData(0,this.block1Pos,this.block1Axis,this.block1Direction,this.block2Pos,this.block2Axis,this.block2Direction);
+                pos = bezierCurve.getCurvePos(t);
+            }
+//            case MINECRAFT -> {
+//                blockArray = minecraftCurve.getCurve();
+//            }
+//            case HELIX -> {
+//
+//            }
+
+        }
+        return pos;
+    }
+
+
+
 }

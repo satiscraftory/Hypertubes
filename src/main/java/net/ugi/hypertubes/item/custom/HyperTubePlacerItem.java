@@ -231,7 +231,7 @@ public class HyperTubePlacerItem extends Item {
 
             HyperTubeCalcCore curveCore = new HyperTubeCalcCore();
             curveCore.setData(block1Pos.get(stack),block1Axis.get(stack),block1Direction.get(stack), extraData1.get(stack), block2Pos.get(stack),block2Axis.get(stack),block2Direction.get(stack), extraData2.get(stack));
-            BlockPos[] blockPosArray = curveCore.getHyperTubeArray(this.curveType.get(stack));
+            BlockPos[] blockPosArray = curveCore.getHyperTubeBlockPosArray(this.curveType.get(stack));
 
             boolean isValidCurve = HyperTubeUtil.checkValidCurve(level,blockPosArray,player,this.maxTubeLength);
             if (!isValidCurve) return InteractionResultHolder.pass(player.getItemInHand(usedHand));
@@ -300,7 +300,7 @@ public class HyperTubePlacerItem extends Item {
                 }
                 HyperTubeCalcCore curveCore = new HyperTubeCalcCore();
                 curveCore.setData(block1Pos.get(stack),block1Axis.get(stack),block1Direction.get(stack), extraData1.get(stack), block2Pos.get(stack),block2Axis.get(stack),block2Direction.get(stack), extraData2.get(stack));
-                BlockPos[] blockPosArray = curveCore.getHyperTubeArray(this.curveType.get(stack));
+                BlockPos[] blockPosArray = curveCore.getHyperTubeBlockPosArray(this.curveType.get(stack));
 
                 boolean isValidCurve = HyperTubeUtil.checkValidCurve(level,blockPosArray,player,this.maxTubeLength);
                 Vector3f color = isValidCurve ?new Vector3f(0,255,255) : new Vector3f(255,0,0);
