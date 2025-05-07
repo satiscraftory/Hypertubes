@@ -223,5 +223,4 @@ public class HypertubeSupportBlockEntity extends BlockEntity {
         return this.inventory.getStackInSlot(0).is(ModItems.HYPERTUBE_DETECTOR)  && !level.hasNeighborSignal(pos); // false if redstone powered
     }
 
-
 }
