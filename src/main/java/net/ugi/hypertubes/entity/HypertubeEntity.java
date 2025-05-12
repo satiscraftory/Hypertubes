@@ -314,6 +314,7 @@ public class HypertubeEntity extends Entity {
             // Path handling (ensure path & index are valid)
             this.t = ((HypertubeSupportBlock)this.level().getBlockState(this.previousPos).getBlock()).getNextT(this.level(),this.previousPos,this.currentPos,this.t,this.speed);
             Vec3 target    = ((HypertubeSupportBlock)this.level().getBlockState(this.previousPos).getBlock()).getPos(this.level(),this.previousPos,this.currentPos,this.t);
+            Vec3 rot = ((HypertubeSupportBlock)this.level().getBlockState(this.previousPos).getBlock()).getRot(this.level(),this.previousPos,this.currentPos,this.t);
             Vec3 current   = this.position();
             Vec3 diff      = target.subtract(current);
             double dist    = diff.length();
@@ -323,8 +324,9 @@ public class HypertubeEntity extends Entity {
             }
 
             this.setSpeed(this.updateSpeed(this.getSpeed()));
+
             if (!this.getPassengers().isEmpty() && this.getPassengers().get(0) instanceof Player player){
-                this.getPlayerInputs(player);
+                this.getPlayerInputs(player,rot);
             }
             if (this.speed < 0.02){
                 swapDirection();
@@ -345,14 +347,12 @@ public class HypertubeEntity extends Entity {
             // rotate smoothly
             if (dist > 1e-3) {
 
-                Vec3 dir = ((HypertubeSupportBlock)this.level().getBlockState(this.previousPos).getBlock()).getRot(this.level(),this.previousPos,this.currentPos,this.t);
-
                 // Calculate yaw: rotation around Y axis (horizontal turn)
-                float targetYaw = (float)(Math.toDegrees(Math.atan2(dir.z, dir.x)) - 90.0f);
+                float targetYaw = (float)(Math.toDegrees(Math.atan2(rot.z, rot.x)) - 90.0f);
 
                 // Calculate pitch: rotation around X axis (looking up/down)
-                float horizontalMag = (float) Math.sqrt(dir.x * dir.x + dir.z * dir.z);
-                float targetPitch = (float)(-Math.toDegrees(Math.atan2(dir.y, horizontalMag)));
+                float horizontalMag = (float) Math.sqrt(rot.x *rot.x + rot.z * rot.z);
+                float targetPitch = (float)(-Math.toDegrees(Math.atan2(rot.y, horizontalMag)));
 
                 // Get current rotation
                 float currentYaw = this.getYRot();
@@ -422,16 +422,41 @@ public class HypertubeEntity extends Entity {
     Minecraft mc = Minecraft.getInstance();
     KeyMapping forwardKey = mc.options.keyUp;
     KeyMapping downKey = mc.options.keyDown;
+    KeyMapping leftKey = mc.options.keyLeft;
+    KeyMapping rightKey = mc.options.keyRight;
 
-    private void getPlayerInputs(Player player) {
+    private void getPlayerInputs(Player player, Vec3 moveDirection) {
+
+        Vec3 lookDir = player.getLookAngle();
+        Vec3 normalizedVec = lookDir.normalize();
+        double vecLength = lookDir.length();
+
+
+        Vec3 finalVec = new Vec3(0,0,0);
+
 
         if (forwardKey.isDown() && speed < 2) { //todo: config?
-            setSpeed(this.getSpeed() + 0.01f);//todo: config?
+            finalVec.add(new Vec3(normalizedVec.x,normalizedVec.y,normalizedVec.z).scale(vecLength));
         }
 
         if (downKey.isDown()) {
-            setSpeed(this.getSpeed() - 0.01f);//todo: config?
+            finalVec.add(new Vec3(-normalizedVec.x,-normalizedVec.y,-normalizedVec.z).scale(vecLength));
         }
+
+        if (leftKey.isDown()) {
+            finalVec.add(new Vec3(normalizedVec.z,0,-normalizedVec.x).scale(vecLength));
+        }
+        if (rightKey.isDown()) {
+            finalVec.add(new Vec3(-normalizedVec.z,0,normalizedVec.x).scale(vecLength));
+        }
+
+        finalVec = moveDirection.scale((moveDirection.dot(finalVec))/moveDirection.lengthSqr());
+
+        finalVec.scale(0.01); //todo : config
+
+
+        this.setSpeed((float)finalVec.length());
+
 
 
 
