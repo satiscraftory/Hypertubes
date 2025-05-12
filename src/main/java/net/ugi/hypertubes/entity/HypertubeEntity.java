@@ -428,34 +428,33 @@ public class HypertubeEntity extends Entity {
     private void getPlayerInputs(Player player, Vec3 moveDirection) {
 
         Vec3 lookDir = player.getLookAngle();
-        Vec3 normalizedVec = lookDir.normalize();
         double vecLength = lookDir.length();
+        Vec3 normalizedVec = lookDir.normalize();
 
 
         Vec3 finalVec = new Vec3(0,0,0);
 
 
         if (forwardKey.isDown() && speed < 2) { //todo: config?
-            finalVec.add(new Vec3(normalizedVec.x,normalizedVec.y,normalizedVec.z).scale(vecLength));
+            finalVec = finalVec.add(new Vec3(normalizedVec.x,normalizedVec.y,normalizedVec.z).scale(vecLength));
         }
 
         if (downKey.isDown()) {
-            finalVec.add(new Vec3(-normalizedVec.x,-normalizedVec.y,-normalizedVec.z).scale(vecLength));
+            finalVec = finalVec.add(new Vec3(-normalizedVec.x,-normalizedVec.y,-normalizedVec.z).scale(vecLength));
         }
 
         if (leftKey.isDown()) {
-            finalVec.add(new Vec3(normalizedVec.z,0,-normalizedVec.x).scale(vecLength));
+            finalVec = finalVec.add(new Vec3(normalizedVec.z,0,-normalizedVec.x).scale(vecLength));
         }
         if (rightKey.isDown()) {
-            finalVec.add(new Vec3(-normalizedVec.z,0,normalizedVec.x).scale(vecLength));
+            finalVec = finalVec.add(new Vec3(-normalizedVec.z,0,normalizedVec.x).scale(vecLength));
         }
 
         finalVec = moveDirection.scale((moveDirection.dot(finalVec))/moveDirection.lengthSqr());
-
         finalVec.scale(0.01); //todo : config
 
 
-        this.setSpeed((float)finalVec.length());
+        this.setSpeed(getSpeed() + (float)finalVec.length()); //ADD DIRECTION WITH (nu altijd positief)
 
 
 
