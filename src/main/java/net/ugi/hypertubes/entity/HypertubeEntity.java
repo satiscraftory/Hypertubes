@@ -450,11 +450,13 @@ public class HypertubeEntity extends Entity {
             finalVec = finalVec.add(new Vec3(-normalizedVec.z,0,normalizedVec.x).scale(vecLength));
         }
 
-        finalVec = moveDirection.scale((moveDirection.dot(finalVec))/moveDirection.lengthSqr());
-        finalVec.scale(0.01); //todo : config
+        //finalVec = moveDirection.scale((moveDirection.dot(finalVec))/moveDirection.lengthSqr());
+        //finalVec.scale(0.01); //todo : config
+
+        float finalAcceleration = (float)((moveDirection.dot(finalVec))/moveDirection.lengthSqr()) * 0.01f;//todo : config "0.01"
 
 
-        this.setSpeed(getSpeed() + (float)finalVec.length()); //ADD DIRECTION WITH (nu altijd positief)
+        this.setSpeed(getSpeed() + finalAcceleration); //ADD DIRECTION WITH (nu altijd positief)
 
 
 
