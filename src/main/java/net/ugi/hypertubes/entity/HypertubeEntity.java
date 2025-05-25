@@ -435,7 +435,7 @@ public class HypertubeEntity extends Entity {
         Vec3 finalVec = new Vec3(0,0,0);
 
 
-        if (forwardKey.isDown() && speed < 2) { //todo: config?
+        if (forwardKey.isDown()) {
             finalVec = finalVec.add(new Vec3(normalizedVec.x,normalizedVec.y,normalizedVec.z).scale(vecLength));
         }
 
@@ -446,17 +446,18 @@ public class HypertubeEntity extends Entity {
         if (leftKey.isDown()) {
             finalVec = finalVec.add(new Vec3(normalizedVec.z,0,-normalizedVec.x).scale(vecLength));
         }
-        if (rightKey.isDown()) {
+        if (rightKey.isDown() && speed < 2) {
             finalVec = finalVec.add(new Vec3(-normalizedVec.z,0,normalizedVec.x).scale(vecLength));
         }
 
-        //finalVec = moveDirection.scale((moveDirection.dot(finalVec))/moveDirection.lengthSqr());
-        //finalVec.scale(0.01); //todo : config
+        float finalAcceleration = (float)((moveDirection.dot(finalVec))/moveDirection.lengthSqr()) * 0.001f;//todo : config "0.001" acceleration strength
 
-        float finalAcceleration = (float)((moveDirection.dot(finalVec))/moveDirection.lengthSqr()) * 0.01f;//todo : config "0.01"
+        if(this.speed > 2 && finalAcceleration >0){ //todo: config "2" max speed for acceleeration with keys
+            return;
+        }
 
 
-        this.setSpeed(getSpeed() + finalAcceleration); //ADD DIRECTION WITH (nu altijd positief)
+        this.setSpeed(getSpeed() + finalAcceleration);
 
 
 
