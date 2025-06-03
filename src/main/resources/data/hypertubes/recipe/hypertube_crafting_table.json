@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "G": {
+      "item": "minecraft:glass"
+    },
+    "O": {
+      "item": "minecraft:gold_ingot"
+    }
+  },
+  "pattern": [
+    "OGO",
+    "G G",
+    "OGO"
+  ],
+  "result": {
+    "count": 32,
+    "id": "hypertubes:hypertube"
+  }
+}
