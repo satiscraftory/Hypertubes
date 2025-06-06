@@ -1,20 +1,30 @@
 package net.ugi.hypertubes.item;
 
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EquipmentSlotGroup;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.TransparentBlock;
-import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import net.ugi.hypertubes.Config;
+import net.ugi.hypertubes.HyperTubes;
 import net.ugi.hypertubes.item.custom.HyperTubePlacerItem;
 
 public class ModItems {
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(net.ugi.hypertubes.HyperTubes.MOD_ID);
 
     public static final DeferredItem<Item> HYPERTUBE_PLACER = ITEMS.register("hypertube_placer",
-            () -> new HyperTubePlacerItem(new Item.Properties()));
+            () -> new HyperTubePlacerItem(new Item.Properties().attributes(ItemAttributeModifiers.builder()
+                    .add(Attributes.BLOCK_INTERACTION_RANGE,
+                            new AttributeModifier(
+                                    ResourceLocation.fromNamespaceAndPath(HyperTubes.MOD_ID, "hypertube_place_reach"),
+                                    /*Config.hypertubePlaceReach*/10,//reach//TODO startup config (so it's not 0 at startup)
+                                    AttributeModifier.Operation.ADD_VALUE
+                            ),
+                            EquipmentSlotGroup.MAINHAND).build())));
 
 
     public static final DeferredItem<Item> HYPERTUBE_ENTRANCE = ITEMS.register("hypertube_entrance",

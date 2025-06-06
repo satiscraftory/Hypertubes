@@ -8,6 +8,8 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.gui.ConfigurationScreen;
+import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.ugi.hypertubes.block.ModBlocks;
 import net.ugi.hypertubes.block.entity.ModBlockEntities;
 import net.ugi.hypertubes.block.entity.renderer.HypertubeSupportBlockEntityRenderer;
@@ -58,7 +60,8 @@ public class HyperTubes {
         // Register the item to a creative tab
         modEventBus.addListener(this::addCreative);
         // Register our mod's ModConfigSpec so that FML can create and load the config file for us
-        modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
+        modContainer.registerConfig(ModConfig.Type.SERVER, Config.SPEC);
+        modContainer.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
@@ -92,7 +95,6 @@ public class HyperTubes {
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.HYPERTUBE.get(), RenderType.translucent());
 
             NeoForge.EVENT_BUS.register(HyperTubePlacerOverlayRenderer.class);
-
 
         }
 
