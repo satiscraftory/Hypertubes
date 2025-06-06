@@ -17,19 +17,17 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.Vec3;
+import net.ugi.hypertubes.Config;
 import net.ugi.hypertubes.block.ModBlocks;
 import net.ugi.hypertubes.block.entity.HypertubeSupportBlockEntity;
 import net.ugi.hypertubes.hypertube.Curves.HyperTubeCalcCore;
 import net.ugi.hypertubes.hypertube.Curves.CurveTypes;
-import net.ugi.hypertubes.hypertube.UI.HyperTubePlacerUI;
 import net.ugi.hypertubes.hypertube.HyperTubeUtil;
 import net.ugi.hypertubes.item.ModItems;
 import net.ugi.hypertubes.network.HyperTubeOverlayPacket;
-import net.ugi.hypertubes.network.UncappedMotionPayload;
 import org.joml.Vector3f;
 
 import java.util.*;
@@ -52,13 +50,10 @@ public class HyperTubePlacerItem extends Item {
     private final WeakHashMap<ItemStack, String> extraData2  = new WeakHashMap<>();
     private final WeakHashMap<ItemStack, CurveTypes.Curves> curveType  = new WeakHashMap<>();
 
-    private int maxTubeLength = 128;
-
     Block hyperTubeSupportBlock = ModBlocks.HYPERTUBE_SUPPORT.get();
     Block hyperTubeBlock = ModBlocks.HYPERTUBE.get();
-    double placeDistance = 20;
-    
-    
+
+
 
     private void placeHypertubeSupport(Level level, BlockPos pos, Direction.Axis axis, Direction placeDirection){
         level.setBlock(pos, hyperTubeSupportBlock.defaultBlockState().setValue(BlockStateProperties.AXIS, axis),2 );
@@ -181,8 +176,8 @@ public class HyperTubePlacerItem extends Item {
         }
 
         Vec3 looking = player.getLookAngle();
-        BlockPos blockpos = level.clip(new ClipContext(player.getEyePosition(), player.getEyePosition().add(looking.x * placeDistance, looking.y * placeDistance, looking.z * placeDistance), ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, player)).getBlockPos();
-        Direction placeDirection = level.clip(new ClipContext(player.getEyePosition(), player.getEyePosition().add(looking.x * placeDistance, looking.y * placeDistance, looking.z * placeDistance), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player)).getDirection();
+        BlockPos blockpos = level.clip(new ClipContext(player.getEyePosition(), player.getEyePosition().add(looking.x * Config.hypertubePlaceReach, looking.y * Config.hypertubePlaceReach, looking.z * Config.hypertubePlaceReach), ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, player)).getBlockPos();
+        Direction placeDirection = level.clip(new ClipContext(player.getEyePosition(), player.getEyePosition().add(looking.x * Config.hypertubePlaceReach, looking.y * Config.hypertubePlaceReach, looking.z * Config.hypertubePlaceReach), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player)).getDirection();
 
         if (level.getBlockState(blockpos).isAir()) return InteractionResultHolder.fail(player.getItemInHand(usedHand));
 
@@ -233,7 +228,7 @@ public class HyperTubePlacerItem extends Item {
             curveCore.setData(block1Pos.get(stack),block1Axis.get(stack),block1Direction.get(stack), extraData1.get(stack), block2Pos.get(stack),block2Axis.get(stack),block2Direction.get(stack), extraData2.get(stack));
             BlockPos[] blockPosArray = curveCore.getHyperTubeBlockPosArray(this.curveType.get(stack));
 
-            boolean isValidCurve = HyperTubeUtil.checkValidCurve(level,blockPosArray,player,this.maxTubeLength);
+            boolean isValidCurve = HyperTubeUtil.checkValidCurve(level,blockPosArray,player,Config.maxHypertubeLength);
             if (!isValidCurve) return InteractionResultHolder.pass(player.getItemInHand(usedHand));
 
             for (int i = 0; i < blockPosArray.length; i++) {
@@ -279,8 +274,8 @@ public class HyperTubePlacerItem extends Item {
 
             Vec3 looking = entity.getLookAngle();
             if(selectedBlock1.get(stack)) {
-                BlockPos blockpos = level.clip(new ClipContext(entity.getEyePosition(), entity.getEyePosition().add(looking.x * placeDistance, looking.y * placeDistance, looking.z * placeDistance), ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, entity)).getBlockPos();
-                Direction placeDirection = level.clip(new ClipContext(player.getEyePosition(), player.getEyePosition().add(looking.x * placeDistance, looking.y * placeDistance, looking.z * placeDistance), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player)).getDirection();
+                BlockPos blockpos = level.clip(new ClipContext(entity.getEyePosition(), entity.getEyePosition().add(looking.x * Config.hypertubePlaceReach, looking.y * Config.hypertubePlaceReach, looking.z * Config.hypertubePlaceReach), ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, entity)).getBlockPos();
+                Direction placeDirection = level.clip(new ClipContext(player.getEyePosition(), player.getEyePosition().add(looking.x * Config.hypertubePlaceReach, looking.y * Config.hypertubePlaceReach, looking.z * Config.hypertubePlaceReach), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player)).getDirection();
 
                 if (level.getBlockState(blockpos).is(hyperTubeSupportBlock)){ // if clicking on hypertyubeSupportBlock
 
@@ -302,12 +297,12 @@ public class HyperTubePlacerItem extends Item {
                 curveCore.setData(block1Pos.get(stack),block1Axis.get(stack),block1Direction.get(stack), extraData1.get(stack), block2Pos.get(stack),block2Axis.get(stack),block2Direction.get(stack), extraData2.get(stack));
                 BlockPos[] blockPosArray = curveCore.getHyperTubeBlockPosArray(this.curveType.get(stack));
 
-                boolean isValidCurve = HyperTubeUtil.checkValidCurve(level,blockPosArray,player,this.maxTubeLength);
+                boolean isValidCurve = HyperTubeUtil.checkValidCurve(level,blockPosArray,player,Config.maxHypertubeLength);
                 Vector3f color = isValidCurve ?new Vector3f(0,255,255) : new Vector3f(255,0,0);
 
 
                 if (player instanceof ServerPlayer serverPlayer) {
-                    serverPlayer.connection.send(new HyperTubeOverlayPacket(this.curveType.get(stack).toString(), blockPosArray.length - 2, this.maxTubeLength, HyperTubeUtil.getResourcesCount(player), isValidCurve));
+                    serverPlayer.connection.send(new HyperTubeOverlayPacket(this.curveType.get(stack).toString(), blockPosArray.length - 2, Config.maxHypertubeLength, HyperTubeUtil.getResourcesCount(player), isValidCurve));
                 }
 
                 for (int i = 0; i < blockPosArray.length; i++) {
