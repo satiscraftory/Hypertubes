@@ -60,11 +60,11 @@ public class HyperTubeCalcCore {
 
         this.setUsedDirections(b1Direction, b2Direction);
 
-        this.block1Pos = b1Pos.relative(b1Axis,b1Direction);
+        this.block1Pos = b1Pos;//.relative(b1Axis,b1Direction);
         this.block1Axis = b1Axis;
         this.block1Direction = b1Direction;
         this.block1ExtraData = b1ExtraData;
-        this.block2Pos = b2Pos.relative(b2Axis,b2Direction);
+        this.block2Pos = b2Pos;//.relative(b2Axis,b2Direction);
         this.block2Axis = b2Axis;
         this.block2Direction = b2Direction;
         this.block2ExtraData = b2ExtraData;

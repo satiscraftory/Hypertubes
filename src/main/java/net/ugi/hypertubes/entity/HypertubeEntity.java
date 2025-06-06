@@ -231,12 +231,9 @@ public class HypertubeEntity extends Entity {
 
     private void atSupportBlock() {
         Block block = this.level().getBlockState(this.currentPos).getBlock();
-        System.out.println("atSupportBlock");
 
         if(block instanceof HypertubeSupportBlock hypertubeSupportBlock){
-            System.out.println("hypertubeSupportBlock");
             if(hypertubeSupportBlock.isConnectedBothSides(this.level(), this.currentPos)){
-                System.out.println("isConnectedBothSides");
                 HypertubeSupportBlockEntity hypertubeSupportBlockEntity = (HypertubeSupportBlockEntity)this.level().getBlockEntity(this.currentPos);
 
                 if(hypertubeSupportBlockEntity.isBooster(this.level(),currentPos)){
@@ -250,7 +247,6 @@ public class HypertubeEntity extends Entity {
                 }
 
                 this.newCurve(this.currentPos, hypertubeSupportBlock.getNextTargetPos(this.level(), previousPos, currentPos), 0, 0);
-                System.out.println("NEW");
                 this.tick();
             }
             else {
@@ -446,18 +442,17 @@ public class HypertubeEntity extends Entity {
         if (leftKey.isDown()) {
             finalVec = finalVec.add(new Vec3(normalizedVec.z,0,-normalizedVec.x).scale(vecLength));
         }
-        if (rightKey.isDown() && speed < 2) {
+        if (rightKey.isDown()) {
             finalVec = finalVec.add(new Vec3(-normalizedVec.z,0,normalizedVec.x).scale(vecLength));
         }
 
-        float finalAcceleration = (float)((moveDirection.dot(finalVec))/moveDirection.lengthSqr()) * 0.001f;//todo : config "0.001" acceleration strength
+        float finalAcceleration = (float)((moveDirection.dot(finalVec))/moveDirection.lengthSqr()) * 0.01f;//todo : config "0.01" acceleration strength
 
-        if(this.speed > 2 && finalAcceleration >0){ //todo: config "2" max speed for acceleeration with keys
+        if(this.speed > 2 && finalAcceleration > 0){ //todo: config "2" max speed for acceleeration with keys
             return;
         }
 
-
-        this.setSpeed(getSpeed() + finalAcceleration);
+        this.setSpeed(this.getSpeed() + finalAcceleration);
 
 
 
