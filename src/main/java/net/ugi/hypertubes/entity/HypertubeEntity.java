@@ -3,6 +3,7 @@ package net.ugi.hypertubes.entity;
 import it.unimi.dsi.fastutil.booleans.BooleanIntImmutablePair;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -26,6 +27,7 @@ import net.ugi.hypertubes.block.ModBlocks;
 import net.ugi.hypertubes.block.custom.HypertubeSupportBlock;
 import net.ugi.hypertubes.block.entity.HypertubeSupportBlockEntity;
 import net.ugi.hypertubes.network.UncappedMotionPayload;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +49,6 @@ public class HypertubeEntity extends Entity {
     private int currentPathIndex = 0;
 
     private double t = 0;
-    private double lastT = 0;
     private boolean exit = false ;
 
 
@@ -153,11 +154,11 @@ public class HypertubeEntity extends Entity {
         if (!passenger.getType().is(EntityTypeTags.CAN_TURN_IN_BOATS)) {
             //passenger.setYRot(passenger.getVehicle().getYRot());
             //passenger.setPose(Pose.FALL_FLYING);
-            AABB smallBox = new AABB(
+            /*AABB smallBox = new AABB(
                     passenger.getX() - 0.25, passenger.getY() -0.25, passenger.getZ() - 0.25,
                     passenger.getX() + 0.25, passenger.getY() + 0.25, passenger.getZ() + 0.25
             );
-            passenger.setBoundingBox(smallBox);
+            passenger.setBoundingBox(smallBox);*/ // todo:fix? , smaller box = less render distance
             this.clampRotation(passenger);
             if (passenger instanceof Animal && this.getPassengers().size() == 1) {
                 passenger.setYBodyRot(passenger.getVehicle().getYRot());
@@ -183,7 +184,6 @@ public class HypertubeEntity extends Entity {
 
     public void newCurve(BlockPos currentPos, BlockPos nextPos, double t, double lastT) {
         this.t = t;
-        this.lastT = lastT;
         this.previousPos = currentPos;
         this.currentPos = nextPos;
     }
@@ -464,7 +464,6 @@ public class HypertubeEntity extends Entity {
         this.currentPos = this.previousPos;
         this.previousPos = tempPos;
         this.t = 1 - this.t;
-        this.lastT = 0;
         this.speed = 0.025f;
     }
 
