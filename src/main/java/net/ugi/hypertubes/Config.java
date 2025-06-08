@@ -18,9 +18,24 @@ public class Config
             .comment("Maximum survival/adventure build length for hypertubes")
             .defineInRange("maxHypertubeLength", 128, 0, Integer.MAX_VALUE);
 
+    //creativeBypassMaxBuildLength? (default true)
+
     private static final ModConfigSpec.IntValue HYPERTUBE_PLACE_REACH = BUILDER
             .comment("The max reach for placing hypertubes")
             .defineInRange("hypertubePlaceReach", 15, 0, Integer.MAX_VALUE);
+
+    //enabled tube types?
+
+    //max booster speed (tier 1)
+
+    //max Player boost speed
+
+    //booster Boosting multiplier
+
+    //allow survival dismounting (default: true)
+
+
+
 
 /*    private static final ModConfigSpec.BooleanValue LOG_DIRT_BLOCK = BUILDER
             .comment("Whether to log the dirt block on common setup")
