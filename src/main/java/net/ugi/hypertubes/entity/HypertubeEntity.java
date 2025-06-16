@@ -47,7 +47,7 @@ public class HypertubeEntity extends Entity {
     private BlockPos currentPos;
     private float speed = 1;
     private int currentPathIndex = 0;
-
+    private static double viewScale = 1.0;
     private double t = 0;
     private boolean exit = false ;
 
@@ -199,7 +199,7 @@ public class HypertubeEntity extends Entity {
         this.lerpSteps = steps;
     }
 
-    // ─── Bo​at’s diffused client interpolation ─────────────────────────────────
+    // ─── Boat’s diffused client interpolation ─────────────────────────────────
     private void tickLerp() {
         if (this.isControlledByLocalInstance()) {
             // on the server (or host), zero out lerp and push immediate position
@@ -467,6 +467,19 @@ public class HypertubeEntity extends Entity {
         this.speed = 0.025f;
     }
 
+
+
+    /**
+     * Checks if the entity is in range to render.
+     */
+    @Override
+    public boolean shouldRenderAtSqrDistance(double distance) {
+        double d0 = this.getPassengers().isEmpty() ? 2D: 100d;
+
+
+        d0 *= 64.0 * viewScale;
+        return distance < d0 * d0;
+    }
 
 
 }
