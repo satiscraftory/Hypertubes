@@ -28,6 +28,7 @@ import net.ugi.hypertubes.hypertube.Curves.CurveTypes;
 import net.ugi.hypertubes.hypertube.HyperTubeUtil;
 import net.ugi.hypertubes.item.ModItems;
 import net.ugi.hypertubes.network.HyperTubeOverlayPacket;
+import net.ugi.hypertubes.util.ModTags;
 import org.joml.Vector3f;
 
 import java.util.*;
@@ -179,7 +180,7 @@ public class HyperTubePlacerItem extends Item {
         BlockPos blockpos = level.clip(new ClipContext(player.getEyePosition(), player.getEyePosition().add(looking.x * Config.hypertubePlaceReach, looking.y * Config.hypertubePlaceReach, looking.z * Config.hypertubePlaceReach), ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, player)).getBlockPos();
         Direction placeDirection = level.clip(new ClipContext(player.getEyePosition(), player.getEyePosition().add(looking.x * Config.hypertubePlaceReach, looking.y * Config.hypertubePlaceReach, looking.z * Config.hypertubePlaceReach), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player)).getDirection();
 
-        if (level.getBlockState(blockpos).isAir()) return InteractionResultHolder.fail(player.getItemInHand(usedHand));
+        if (level.getBlockState(blockpos).is(ModTags.Blocks.DONT_OBSTRUCT_HYPERTUBE)) return InteractionResultHolder.fail(player.getItemInHand(usedHand));
 
         if(!selectedBlock1.get(stack)){ // get first block pos
             if (level.getBlockState(blockpos).is(hyperTubeSupportBlock)){ // if clicking on hypertyubeSupportBlock
@@ -190,7 +191,7 @@ public class HyperTubePlacerItem extends Item {
                 selectedBlock1.put(stack,true);
             }
             else { //if clicking on ground to start placing a hypertube
-                if (!level.getBlockState(blockpos.relative(placeDirection)).isAir()||!level.getBlockState(blockpos.relative(placeDirection,2)).isAir()) return InteractionResultHolder.fail(player.getItemInHand(usedHand));
+                if (!level.getBlockState(blockpos.relative(placeDirection)).is(ModTags.Blocks.DONT_OBSTRUCT_HYPERTUBE)||!level.getBlockState(blockpos.relative(placeDirection,2)).is(ModTags.Blocks.DONT_OBSTRUCT_HYPERTUBE)) return InteractionResultHolder.fail(player.getItemInHand(usedHand));
 
                 boolean result = calcBlockIfBlock(level,stack,blockpos,player,placeDirection,block1Pos,block1Axis,block1Direction);
                 if (!result) return InteractionResultHolder.fail(player.getItemInHand(usedHand));
@@ -218,7 +219,7 @@ public class HyperTubePlacerItem extends Item {
             }
             else { //if clicking on ground to end placing a hypertube
 
-                if (!level.getBlockState(blockpos.relative(placeDirection)).isAir()||!level.getBlockState(blockpos.relative(placeDirection,2)).isAir()) return InteractionResultHolder.fail(player.getItemInHand(usedHand));
+                if (!level.getBlockState(blockpos.relative(placeDirection)).is(ModTags.Blocks.DONT_OBSTRUCT_HYPERTUBE)||!level.getBlockState(blockpos.relative(placeDirection,2)).is(ModTags.Blocks.DONT_OBSTRUCT_HYPERTUBE)) return InteractionResultHolder.fail(player.getItemInHand(usedHand));
 
                 boolean result = calcBlockIfBlock(level,stack,blockpos,player,placeDirection,block2Pos,block2Axis,block2Direction);
                 if (!result) return InteractionResultHolder.fail(player.getItemInHand(usedHand));
@@ -243,9 +244,9 @@ public class HyperTubePlacerItem extends Item {
 
             placeHypertubeSupport(level,block2Pos.get(stack),block2Axis.get(stack), placeDirection);
 
-            if (this.curveType.get(stack) == CurveTypes.Curves.MINECRAFT){
-                this.extraData1.put(stack,"isFirst");
-            }
+//            if (this.curveType.get(stack) == CurveTypes.Curves.MINECRAFT){
+//                this.extraData1.put(stack,"isFirst");
+//            }
 
             modifyData(level,block1Pos.get(stack),curveCore.block1UsedDirection,block2Pos.get(stack), curveType.get(stack),extraData1.get(stack));
             modifyData(level,block2Pos.get(stack),curveCore.block2UsedDirection,block1Pos.get(stack), curveType.get(stack),extraData2.get(stack));
@@ -284,7 +285,7 @@ public class HyperTubePlacerItem extends Item {
                 }
                 else {
 
-                    if (!level.getBlockState(blockpos).isAir() && level.getBlockState(blockpos.above(1)).isAir() && level.getBlockState(blockpos.above(2)).isAir()) {
+                    if (!level.getBlockState(blockpos).is(ModTags.Blocks.DONT_OBSTRUCT_HYPERTUBE) && level.getBlockState(blockpos.above(1)).is(ModTags.Blocks.DONT_OBSTRUCT_HYPERTUBE) && level.getBlockState(blockpos.above(2)).is(ModTags.Blocks.DONT_OBSTRUCT_HYPERTUBE)) {
                         boolean result = calcBlockIfBlock(level,stack,blockpos,player,placeDirection,block2Pos,block2Axis,block2Direction);
                         if (!result) return;
                     }

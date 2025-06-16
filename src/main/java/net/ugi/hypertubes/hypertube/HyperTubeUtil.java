@@ -4,7 +4,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.ugi.hypertubes.block.ModBlocks;
+import net.ugi.hypertubes.util.ModTags;
 
 public class HyperTubeUtil {
     public HyperTubeUtil() {}
@@ -16,7 +18,7 @@ public class HyperTubeUtil {
     public static boolean checkValidCurve(Level level, BlockPos[] blockPosArray, Player player, int maxTubeLength){
         boolean isValidCurve = true;
         for (int i = 0; i < blockPosArray.length; i++) {
-            if(!(level.getBlockState(blockPosArray[i]).isAir() || level.getBlockState(blockPosArray[i]).is(ModBlocks.HYPERTUBE_SUPPORT))){
+            if(!(level.getBlockState(blockPosArray[i]).is(ModTags.Blocks.DONT_OBSTRUCT_HYPERTUBE) || level.getBlockState(blockPosArray[i]).is(ModBlocks.HYPERTUBE_SUPPORT))){
                 isValidCurve = false;
             }
         }

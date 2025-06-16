@@ -5,8 +5,8 @@ public class CurveTypes {
     public enum Curves {
         CURVED("curved"),
         OVERKILL("overkill"),
-        STRAIGHT("straight"),
-        MINECRAFT("minecraft");
+        STRAIGHT("straight");
+        //MINECRAFT("minecraft");
         //HELIX("helix");
 
         private final String name;

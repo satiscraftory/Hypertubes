@@ -26,7 +26,7 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
 
     @Override
     protected void generate() {
-        dropSelf(ModBlocks.HYPERTUBE_SUPPORT.get());
+        dropSelf(ModBlocks.HYPERTUBE.get());
 /*
         add(ModBlocks.BISMUTH_ORE.get(),
                 block -> createOreDrop(ModBlocks.BISMUTH_ORE.get(), ModItems.RAW_BISMUTH.get()));

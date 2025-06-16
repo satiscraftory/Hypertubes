@@ -1,0 +1,11 @@
+{
+  "values": [
+    "#minecraft:replaceable",
+    "#minecraft:flowers",
+    "#minecraft:corals",
+    "minecraft:kelp",
+    "minecraft:moss_carpet",
+    "minecraft:twisting_vines",
+    "minecraft:weeping_vines"
+  ]
+}
