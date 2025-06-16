@@ -180,7 +180,7 @@ public class HyperTubePlacerItem extends Item {
         BlockPos blockpos = level.clip(new ClipContext(player.getEyePosition(), player.getEyePosition().add(looking.x * Config.hypertubePlaceReach, looking.y * Config.hypertubePlaceReach, looking.z * Config.hypertubePlaceReach), ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, player)).getBlockPos();
         Direction placeDirection = level.clip(new ClipContext(player.getEyePosition(), player.getEyePosition().add(looking.x * Config.hypertubePlaceReach, looking.y * Config.hypertubePlaceReach, looking.z * Config.hypertubePlaceReach), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player)).getDirection();
 
-        if (level.getBlockState(blockpos).is(ModTags.Blocks.DONT_OBSTRUCT_HYPERTUBE)) return InteractionResultHolder.fail(player.getItemInHand(usedHand));
+        if (level.getBlockState(blockpos).isAir()) return InteractionResultHolder.fail(player.getItemInHand(usedHand));
 
         if(!selectedBlock1.get(stack)){ // get first block pos
             if (level.getBlockState(blockpos).is(hyperTubeSupportBlock)){ // if clicking on hypertyubeSupportBlock
