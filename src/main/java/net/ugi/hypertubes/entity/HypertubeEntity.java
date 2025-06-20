@@ -355,8 +355,8 @@ public class HypertubeEntity extends Entity {
                 float currentPitch = this.getXRot();
 
                 // Interpolate smoothly (adjust 0.25f to control smoothness)
-                float smoothYaw = Mth.rotLerp(0.25f, currentYaw, targetYaw);
-                float smoothPitch = Mth.lerp(0.25f, currentPitch, targetPitch);
+                float smoothYaw = Mth.rotLerp(1f, currentYaw, targetYaw);//might be able to cut most of this code since interpolation delta is 1
+                float smoothPitch = Mth.lerp(1f, currentPitch, targetPitch);
 
                 // Apply new rotation
                 this.setYRot(smoothYaw);
