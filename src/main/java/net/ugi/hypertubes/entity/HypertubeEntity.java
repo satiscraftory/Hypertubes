@@ -1,33 +1,27 @@
 package net.ugi.hypertubes.entity;
 
-import it.unimi.dsi.fastutil.booleans.BooleanIntImmutablePair;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.vehicle.VehicleEntity;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.ugi.hypertubes.Config;
 import net.ugi.hypertubes.block.ModBlocks;
 import net.ugi.hypertubes.block.custom.HypertubeSupportBlock;
 import net.ugi.hypertubes.block.entity.HypertubeSupportBlockEntity;
 import net.ugi.hypertubes.network.UncappedMotionPayload;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -161,7 +155,9 @@ public class HypertubeEntity extends Entity {
             passenger.setBoundingBox(smallBox);*/ // todo:fix? , smaller box = less render distance
             this.clampRotation(passenger);
             if (passenger instanceof Animal && this.getPassengers().size() == 1) {
-                passenger.setYBodyRot(passenger.getVehicle().getYRot());
+                Entity vehicle =  passenger.getVehicle();
+                if(vehicle == null) return;//fixes crash idk how passanger.getvehicle ever got null though
+                passenger.setYBodyRot(vehicle.getYRot());
             }
         }
     }
@@ -304,6 +300,7 @@ public class HypertubeEntity extends Entity {
         super.tick();
         tickLerp();  // always run first
 
+        if(this.getPassengers().isEmpty() /*&& !this.isChunkLoadint()*/){this.kill();}
         // Server‑only motion
         if (!this.level().isClientSide /*&& this.hasExactlyOnePlayerPassenger()*/) {
 
@@ -366,7 +363,7 @@ public class HypertubeEntity extends Entity {
     }
 
     float updateSpeed(double currentSpeed) {
-        double targetSpeed = 0.28; // todo: config
+        double targetSpeed = Config.unBoostedSpeed; // todo: config
         double dampingFactor = 0.007; // Change this between 0 and 1 //todo: config
         return (float)(currentSpeed + dampingFactor * (targetSpeed - currentSpeed));
     }
@@ -432,31 +429,26 @@ public class HypertubeEntity extends Entity {
 
 
         if (forwardKey.isDown()) {
-            finalVec = finalVec.add(new Vec3(normalizedVec.x,normalizedVec.y,normalizedVec.z).scale(vecLength));
+            finalVec = finalVec.add(new Vec3(normalizedVec.x,normalizedVec.y,normalizedVec.z));
         }
 
         if (downKey.isDown()) {
-            finalVec = finalVec.add(new Vec3(-normalizedVec.x,-normalizedVec.y,-normalizedVec.z).scale(vecLength));
+            finalVec = finalVec.add(new Vec3(-normalizedVec.x,-normalizedVec.y,-normalizedVec.z));
         }
 
         if (leftKey.isDown()) {
-            finalVec = finalVec.add(new Vec3(normalizedVec.z,0,-normalizedVec.x).scale(vecLength));
+            finalVec = finalVec.add(new Vec3(normalizedVec.z,0,-normalizedVec.x));
         }
         if (rightKey.isDown()) {
-            finalVec = finalVec.add(new Vec3(-normalizedVec.z,0,normalizedVec.x).scale(vecLength));
+            finalVec = finalVec.add(new Vec3(-normalizedVec.z,0,normalizedVec.x));
         }
-
-        float finalAcceleration = (float)((moveDirection.dot(finalVec))/moveDirection.lengthSqr()) * 0.01f;//todo : config "0.01" acceleration strength
-
-        if(this.speed > 2 && finalAcceleration > 0){ //todo: config "2" max speed for acceleeration with keys
+        float finalAcceleration = (float) (((moveDirection.dot(finalVec))/moveDirection.length()) * Config.manualAccelerationStrength);
+        System.out.println("accelerationl: " +finalAcceleration);
+        if(this.speed > Config.unBoostedSpeed && finalAcceleration > 0){
             return;
         }
 
         this.setSpeed(this.getSpeed() + finalAcceleration);
-
-
-
-
     }
 
     private void swapDirection(){

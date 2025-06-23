@@ -24,6 +24,14 @@ public class Config
             .comment("The max reach for placing hypertubes")
             .defineInRange("hypertubePlaceReach", 15, 0, Integer.MAX_VALUE);
 
+    private static final ModConfigSpec.DoubleValue UNBOOSTED_HYPERTUBE_SPEED = BUILDER
+            .comment("max speed for unboosted hypertubes in m/s")
+            .defineInRange("unboostedSpeed", 10, 0, Float.MAX_VALUE);
+
+    private static final ModConfigSpec.DoubleValue MANUAL_ACCELERATION_STRENGTH = BUILDER
+            .comment("manual acceleration strength for slowing down or speeding up in hypertubes")
+            .defineInRange("manualAccelerationStrength", 0.05, 0, Float.MAX_VALUE);
+
     //enabled tube types?
 
     //max booster speed (tier 1)
@@ -55,6 +63,8 @@ public class Config
 
     public static int maxHypertubeLength;
     public static int hypertubePlaceReach;
+    public static double unBoostedSpeed;
+    public static Double manualAccelerationStrength;
 /*    public static boolean logDirtBlock;
 
     public static String magicNumberIntroduction;
@@ -68,9 +78,10 @@ public class Config
     @SubscribeEvent
     static void onLoad(final ModConfigEvent event)
     {
-
         maxHypertubeLength = MAX_HYPERTUBE_LENGTH.get();
         hypertubePlaceReach = HYPERTUBE_PLACE_REACH.get();
+        unBoostedSpeed = UNBOOSTED_HYPERTUBE_SPEED.get()/20;
+        manualAccelerationStrength = MANUAL_ACCELERATION_STRENGTH.get();
 /*        logDirtBlock = LOG_DIRT_BLOCK.get();*/
 
 /*        magicNumberIntroduction = MAGIC_NUMBER_INTRODUCTION.get();*/

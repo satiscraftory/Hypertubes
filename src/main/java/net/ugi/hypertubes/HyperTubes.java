@@ -61,6 +61,7 @@ public class HyperTubes {
         modEventBus.addListener(this::addCreative);
         // Register our mod's ModConfigSpec so that FML can create and load the config file for us
         modContainer.registerConfig(ModConfig.Type.SERVER, Config.SPEC);
+        //modContainer.registerConfig(ModConfig.Type.STARTUP, Config.SPEC);
         modContainer.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
     }
 
