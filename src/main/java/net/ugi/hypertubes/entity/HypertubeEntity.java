@@ -291,7 +291,9 @@ public class HypertubeEntity extends Entity {
         }
 
     }
-
+    //-------debug-----
+    Vec3 lastpos = this.position();
+    //-------debug-----
 
     // ─── DO NOT TOUCH AT ANY COST ──────────────────────
     @Override
@@ -303,6 +305,16 @@ public class HypertubeEntity extends Entity {
         if(this.getPassengers().isEmpty() /*&& !this.isChunkLoadint()*/){this.kill();}
         // Server‑only motion
         if (!this.level().isClientSide /*&& this.hasExactlyOnePlayerPassenger()*/) {
+
+            //-------debug-----
+            System.out.println("tick: " + this.level().getDayTime());
+            System.out.println("this.speed: " + this.speed);
+            System.out.println("this.speed * 20: " + this.speed*20);
+            Vec3 thispos = this.position();
+            System.out.println("calculated speed: "  + thispos.subtract(this.lastpos).length());
+            System.out.println("calculated speed * 20: "  + thispos.subtract(this.lastpos).length() *20);
+            this.lastpos = thispos;
+            //-------debug-----
 
             // Path handling (ensure path & index are valid)
             this.t = ((HypertubeSupportBlock)this.level().getBlockState(this.previousPos).getBlock()).getNextT(this.level(),this.previousPos,this.currentPos,this.t,this.speed);
@@ -363,8 +375,11 @@ public class HypertubeEntity extends Entity {
     }
 
     float updateSpeed(double currentSpeed) {
-        double targetSpeed = Config.unBoostedSpeed; // todo: config
+        double targetSpeed = Config.unBoostedSpeed;
         double dampingFactor = 0.007; // Change this between 0 and 1 //todo: config
+        if (currentSpeed > targetSpeed) {
+            dampingFactor = dampingFactor/2;
+        }
         return (float)(currentSpeed + dampingFactor * (targetSpeed - currentSpeed));
     }
 
@@ -421,12 +436,8 @@ public class HypertubeEntity extends Entity {
     private void getPlayerInputs(Player player, Vec3 moveDirection) {
 
         Vec3 lookDir = player.getLookAngle();
-        double vecLength = lookDir.length();
         Vec3 normalizedVec = lookDir.normalize();
-
-
         Vec3 finalVec = new Vec3(0,0,0);
-
 
         if (forwardKey.isDown()) {
             finalVec = finalVec.add(new Vec3(normalizedVec.x,normalizedVec.y,normalizedVec.z));
@@ -443,7 +454,6 @@ public class HypertubeEntity extends Entity {
             finalVec = finalVec.add(new Vec3(-normalizedVec.z,0,normalizedVec.x));
         }
         float finalAcceleration = (float) (((moveDirection.dot(finalVec))/moveDirection.length()) * Config.manualAccelerationStrength);
-        System.out.println("accelerationl: " +finalAcceleration);
         if(this.speed > Config.unBoostedSpeed && finalAcceleration > 0){
             return;
         }
