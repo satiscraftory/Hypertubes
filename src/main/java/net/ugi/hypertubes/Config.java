@@ -32,11 +32,18 @@ public class Config
             .comment("manual acceleration strength for slowing down or speeding up in hypertubes")
             .defineInRange("manualAccelerationStrength", 0.05, 0, Float.MAX_VALUE);
 
+    //max booster speed (tier 1)
+    private static final ModConfigSpec.IntValue MAX_TIER_1_BOOST_SPEED = BUILDER
+            .comment("Maximum speed that you can achieve with boosters in m/s")
+            .defineInRange("maxTier1BoostSpeed", 25, 1, Integer.MAX_VALUE);
+
+    private static final ModConfigSpec.DoubleValue TIER_1_BOOST_MULTIPLIER = BUILDER
+            .comment("How much the speed multiplies with each booster")
+            .defineInRange("tier1BoostMultiplier", 1.2, 1, 128);
+
     //enabled tube types?
 
-    //max booster speed (tier 1)
 
-    //max Player boost speed
 
     //booster Boosting multiplier
 
@@ -65,6 +72,8 @@ public class Config
     public static int hypertubePlaceReach;
     public static double unBoostedSpeed;
     public static Double manualAccelerationStrength;
+    public static int maxTier1BoostSpeed;
+    public static double tier1BoostMultiplier;
 /*    public static boolean logDirtBlock;
 
     public static String magicNumberIntroduction;
@@ -82,6 +91,8 @@ public class Config
         hypertubePlaceReach = HYPERTUBE_PLACE_REACH.get();
         unBoostedSpeed = UNBOOSTED_HYPERTUBE_SPEED.get()/20;
         manualAccelerationStrength = MANUAL_ACCELERATION_STRENGTH.get();
+        maxTier1BoostSpeed = MAX_TIER_1_BOOST_SPEED.get()/20;
+        tier1BoostMultiplier = TIER_1_BOOST_MULTIPLIER.get();
 /*        logDirtBlock = LOG_DIRT_BLOCK.get();*/
 
 /*        magicNumberIntroduction = MAGIC_NUMBER_INTRODUCTION.get();*/

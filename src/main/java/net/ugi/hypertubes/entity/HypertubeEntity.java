@@ -231,15 +231,14 @@ public class HypertubeEntity extends Entity {
         if(block instanceof HypertubeSupportBlock hypertubeSupportBlock){
             if(hypertubeSupportBlock.isConnectedBothSides(this.level(), this.currentPos)){
                 HypertubeSupportBlockEntity hypertubeSupportBlockEntity = (HypertubeSupportBlockEntity)this.level().getBlockEntity(this.currentPos);
-
-                if(hypertubeSupportBlockEntity.isBooster(this.level(),currentPos)){
-                    this.setSpeed(this.getSpeed()*1.2f);//todo: config
+                //todo properly split into new method
+                if(hypertubeSupportBlockEntity.isBooster(this.level(),currentPos)){//tier 1 booster code
+                    this.setSpeed((float) Math.clamp (this.getSpeed()*Config.tier1BoostMultiplier, 0, Config.maxTier1BoostSpeed));
                 }
 
-                if(hypertubeSupportBlockEntity.isDetector(this.level(),currentPos)){
+                if(hypertubeSupportBlockEntity.isDetector(this.level(),currentPos)){// detector code
                     hypertubeSupportBlockEntity.redstonePowerOutput = (int)(this.getSpeed() / 2);
                     this.level().blockUpdated(currentPos, ModBlocks.HYPERTUBE_SUPPORT.get());
-
                 }
 
                 this.newCurve(this.currentPos, hypertubeSupportBlock.getNextTargetPos(this.level(), previousPos, currentPos), 0, 0);
@@ -291,6 +290,10 @@ public class HypertubeEntity extends Entity {
         }
 
     }
+
+
+
+
     //-------debug-----
     Vec3 lastpos = this.position();
     //-------debug-----

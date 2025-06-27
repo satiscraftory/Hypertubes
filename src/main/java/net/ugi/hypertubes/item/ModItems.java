@@ -9,7 +9,6 @@ import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
-import net.ugi.hypertubes.Config;
 import net.ugi.hypertubes.HyperTubes;
 import net.ugi.hypertubes.item.custom.HyperTubePlacerItem;
 
@@ -32,7 +31,7 @@ public class ModItems {
                     new Item.Properties()
             ));
 
-    public static final DeferredItem<Item> HYPERTUBE_BOOSTER = ITEMS.register("hypertube_booster",
+    public static final DeferredItem<Item> HYPERTUBE_BOOSTER_TIER_1 = ITEMS.register("hypertube_booster",
             () -> new Item(
                     new Item.Properties()
             ));
