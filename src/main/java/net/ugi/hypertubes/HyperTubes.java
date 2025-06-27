@@ -62,7 +62,7 @@ public class HyperTubes {
         // Register our mod's ModConfigSpec so that FML can create and load the config file for us
         modContainer.registerConfig(ModConfig.Type.SERVER, Config.SPEC);
         //modContainer.registerConfig(ModConfig.Type.STARTUP, Config.SPEC);
-        modContainer.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
+
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
@@ -83,27 +83,9 @@ public class HyperTubes {
     // You can use SubscribeEvent and let the Event Bus discover methods to call
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event) {
-
     }
 
-    // You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
-    @EventBusSubscriber(modid = MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
-    public static class ClientModEvents {
-        @SubscribeEvent
-        public static void onClientSetup(FMLClientSetupEvent event) {
-            EntityRenderers.register(ModEntities.HYPERTUBE_ENTITY.get(), NoopRenderer::new);
 
-            ItemBlockRenderTypes.setRenderLayer(ModBlocks.HYPERTUBE.get(), RenderType.translucent());
-
-            NeoForge.EVENT_BUS.register(HyperTubePlacerOverlayRenderer.class);
-
-        }
-
-        @SubscribeEvent
-        public static void registerBER(EntityRenderersEvent.RegisterRenderers event) {
-            event.registerBlockEntityRenderer(ModBlockEntities.HYPERTUBE_SUPPORT_BE.get(), HypertubeSupportBlockEntityRenderer::new);
-        }
-    }
 }
 
 

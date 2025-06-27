@@ -305,10 +305,10 @@ public class HypertubeEntity extends Entity {
         super.tick();
         tickLerp();  // always run first
 
-        if(this.getPassengers().isEmpty() /*&& !this.isChunkLoadint()*/){this.kill();}
+
         // Server‑only motion
         if (!this.level().isClientSide /*&& this.hasExactlyOnePlayerPassenger()*/) {
-
+            if(this.getPassengers().isEmpty() /*&& !this.isChunkLoadint()*/){this.kill();}
             //-------debug-----
             System.out.println("tick: " + this.level().getDayTime());
             System.out.println("this.speed: " + this.speed);

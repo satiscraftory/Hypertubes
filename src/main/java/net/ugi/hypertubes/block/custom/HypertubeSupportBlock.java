@@ -11,6 +11,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -25,6 +26,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.neoforged.fml.common.Mod;
 import net.ugi.hypertubes.block.entity.HypertubeSupportBlockEntity;
 import net.ugi.hypertubes.entity.HypertubeEntity;
 import net.ugi.hypertubes.entity.ModEntities;
@@ -145,7 +147,7 @@ public class HypertubeSupportBlock extends BaseEntityBlock {
 
             hyperTubeEntity.newCurve(currentPos, nextPos, 0 ,0);
             level.addFreshEntity(hyperTubeEntity);
-            float speed = (float) Math.clamp(entity.getDeltaMovement().length(), 0.025, 20);//todo config maxSpeed
+            float speed = (float) Math.clamp(entity.getDeltaMovement().length(), 0.025, 20);//todo config maxSpeed, edit: idk if this should be seperate or tier1 or tier2
             hyperTubeEntity.setSpeed(speed);
             hypertubeSupportBlockEntity.addEntityToIgnore(entity);
             entity.startRiding(hyperTubeEntity);
@@ -207,7 +209,7 @@ public class HypertubeSupportBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {//todo remove connected tube blocks
+    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
         if(state.getBlock() != newState.getBlock()) {
             if(level.getBlockEntity(pos) instanceof HypertubeSupportBlockEntity hypertubeSupportBlockEntity1){
                 hypertubeSupportBlockEntity1.drops();
@@ -245,7 +247,44 @@ public class HypertubeSupportBlock extends BaseEntityBlock {
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,//todo redo this
                                               Player player, InteractionHand hand, BlockHitResult hitResult) {
+
         if(level.getBlockEntity(pos) instanceof HypertubeSupportBlockEntity hypertubeSupportBlockEntity) {
+            Item item = stack.getItem();//alles maakt leeg behavle items zelf
+            System.out.println("------------------");;
+            System.out.println(item);
+            System.out.println(hypertubeSupportBlockEntity.inventory.getStackInSlot(0).getItem());
+            if (hypertubeSupportBlockEntity.inventory.getStackInSlot(0).isEmpty() &&
+                    (item == ModItems.HYPERTUBE_DETECTOR.asItem() ||
+                    item == ModItems.HYPERTUBE_ENTRANCE.asItem() ||
+                    item == ModItems.HYPERTUBE_BOOSTER_TIER_1.asItem())
+            ) {
+                level.playSound(player, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 1f, 2f);
+                if(level.isClientSide()) return ItemInteractionResult.SUCCESS;
+                hypertubeSupportBlockEntity.inventory.insertItem(0, stack.copy(), false);
+                if (!player.isCreative()) {
+                    stack.shrink(1);
+                }
+
+                return ItemInteractionResult.SUCCESS;
+
+            } else if (
+                    !hypertubeSupportBlockEntity.inventory.getStackInSlot(0).isEmpty() &&
+                    !hypertubeSupportBlockEntity.inventory.getStackInSlot(0).getItem().equals(item)
+            ) {
+                System.out.println("somehow this ran");
+                level.playSound(player, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 1f, 1f);
+                if(level.isClientSide()) return ItemInteractionResult.SUCCESS;
+                ItemStack stackOnSupport = hypertubeSupportBlockEntity.inventory.extractItem(0, 1, false);
+                if(!player.isCreative()){
+                    player.addItem(stackOnSupport);
+                }
+                player.swing(hand);
+                hypertubeSupportBlockEntity.clearContents();
+                return ItemInteractionResult.SUCCESS;
+            }
+        }
+            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+/*        if(level.getBlockEntity(pos) instanceof HypertubeSupportBlockEntity hypertubeSupportBlockEntity) {
             if(hypertubeSupportBlockEntity.inventory.getStackInSlot(0).isEmpty() && stack.is(ModItems.HYPERTUBE_BOOSTER_TIER_1) || stack.is(ModItems.HYPERTUBE_ENTRANCE) || stack.is(ModItems.HYPERTUBE_DETECTOR)) {
                 hypertubeSupportBlockEntity.inventory.insertItem(0, stack.copy(), false);
                 if(!player.isCreative()) {
@@ -264,8 +303,7 @@ public class HypertubeSupportBlock extends BaseEntityBlock {
                 return ItemInteractionResult.SUCCESS;
             }
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
-        }
-        return ItemInteractionResult.SUCCESS;
+        }*/
     }
 
     @Override
