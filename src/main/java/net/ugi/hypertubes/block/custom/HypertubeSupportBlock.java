@@ -17,18 +17,14 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.JukeboxBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.ugi.hypertubes.block.ModBlocks;
 import net.ugi.hypertubes.block.entity.HypertubeSupportBlockEntity;
 import net.ugi.hypertubes.entity.HypertubeEntity;
 import net.ugi.hypertubes.entity.ModEntities;
@@ -37,9 +33,7 @@ import net.ugi.hypertubes.hypertube.Functionalities.HyperTubeDetector;
 import net.ugi.hypertubes.hypertube.Functionalities.HyperTubeEntrance;
 import net.ugi.hypertubes.item.ModItems;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.system.MathUtil;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class HypertubeSupportBlock extends BaseEntityBlock {
@@ -249,10 +243,10 @@ public class HypertubeSupportBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
+    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,//todo redo this
                                               Player player, InteractionHand hand, BlockHitResult hitResult) {
         if(level.getBlockEntity(pos) instanceof HypertubeSupportBlockEntity hypertubeSupportBlockEntity) {
-            if(hypertubeSupportBlockEntity.inventory.getStackInSlot(0).isEmpty() && stack.is(ModItems.HYPERTUBE_BOOSTER) || stack.is(ModItems.HYPERTUBE_ENTRANCE) || stack.is(ModItems.HYPERTUBE_DETECTOR)) {
+            if(hypertubeSupportBlockEntity.inventory.getStackInSlot(0).isEmpty() && stack.is(ModItems.HYPERTUBE_BOOSTER_TIER_1) || stack.is(ModItems.HYPERTUBE_ENTRANCE) || stack.is(ModItems.HYPERTUBE_DETECTOR)) {
                 hypertubeSupportBlockEntity.inventory.insertItem(0, stack.copy(), false);
                 if(!player.isCreative()) {
                     stack.shrink(1);

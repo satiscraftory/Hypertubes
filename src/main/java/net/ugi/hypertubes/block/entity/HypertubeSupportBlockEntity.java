@@ -216,7 +216,7 @@ public class HypertubeSupportBlockEntity extends BlockEntity {
     }
 
     public boolean isBooster(Level level, BlockPos pos){//todo replace with a float or int once we add a different booster
-        return this.inventory.getStackInSlot(0).is(ModItems.HYPERTUBE_BOOSTER)  && !level.hasNeighborSignal(pos); // false if redstone powered
+        return this.inventory.getStackInSlot(0).is(ModItems.HYPERTUBE_BOOSTER_TIER_1)  && !level.hasNeighborSignal(pos); // false if redstone powered
     }
 
     public boolean isDetector(Level level, BlockPos pos){//todo replace with a float or int once we add a different booster
