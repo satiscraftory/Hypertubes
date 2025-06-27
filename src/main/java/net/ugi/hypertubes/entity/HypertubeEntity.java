@@ -242,7 +242,7 @@ public class HypertubeEntity extends Entity {
                 }
 
                 this.newCurve(this.currentPos, hypertubeSupportBlock.getNextTargetPos(this.level(), previousPos, currentPos), 0, 0);
-                this.tick();
+                this.movement();
             }
             else {
                 //start exit process
@@ -304,8 +304,10 @@ public class HypertubeEntity extends Entity {
 
         super.tick();
         tickLerp();  // always run first
+        this.movement();
+    }
 
-
+    public void movement(){
         // Server‑only motion
         if (!this.level().isClientSide /*&& this.hasExactlyOnePlayerPassenger()*/) {
             if(this.getPassengers().isEmpty() /*&& !this.isChunkLoadint()*/){this.kill();}
