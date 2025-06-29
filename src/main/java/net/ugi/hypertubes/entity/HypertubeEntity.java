@@ -322,7 +322,14 @@ public class HypertubeEntity extends Entity {
             //-------debug-----
 
             // Path handling (ensure path & index are valid)
-            this.t = ((HypertubeSupportBlock)this.level().getBlockState(this.previousPos).getBlock()).getNextT(this.level(),this.previousPos,this.currentPos,this.t,this.speed);
+            Block block = this.level().getBlockState(this.previousPos).getBlock();
+            if(!block.equals(ModBlocks.HYPERTUBE_SUPPORT.get())){
+                Entity passenger = this.getPassengers().get(0);
+                passenger.stopRiding();
+                this.discard();
+                return;
+            }
+            this.t = ((HypertubeSupportBlock)block).getNextT(this.level(),this.previousPos,this.currentPos,this.t,this.speed);
             Vec3 target    = ((HypertubeSupportBlock)this.level().getBlockState(this.previousPos).getBlock()).getPos(this.level(),this.previousPos,this.currentPos,this.t);
             Vec3 rot = ((HypertubeSupportBlock)this.level().getBlockState(this.previousPos).getBlock()).getRot(this.level(),this.previousPos,this.currentPos,this.t);
             Vec3 current   = this.position();
@@ -398,6 +405,7 @@ public class HypertubeEntity extends Entity {
 
     public void tryLaunchEntity(BlockPos exitPos, HypertubeSupportBlockEntity hypertubeSupportBlockEntity,  Direction.Axis axis){
         if (!this.getPassengers().isEmpty()){
+
             Entity passenger = this.getPassengers().get(0);
             passenger.stopRiding();
             this.discard();
@@ -410,12 +418,12 @@ public class HypertubeEntity extends Entity {
 
 
             hypertubeSupportBlockEntity.addEntityToIgnore(passenger);
-            passenger.setDeltaMovement(vector);//maybe we need to somehow call this on the client too
+            passenger.setDeltaMovement(vector);
             passenger.hasImpulse = true;
             if (passenger instanceof ServerPlayer serverPlayer) {
                 //serverPlayer.connection.send(new ClientboundSetEntityMotionPacket(passenger));
                 serverPlayer.connection.send(new UncappedMotionPayload(passenger.getId(),vector.x, vector.y, vector.z));
-                serverPlayer.startFallFlying();
+                serverPlayer.startFallFlying();//todo config, elytra launch
             }
         }
     }
