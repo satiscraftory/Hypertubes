@@ -244,46 +244,77 @@ public class HypertubeSupportBlock extends BaseEntityBlock {
                 );
     }
 
+    private boolean isValidSupportItem(Item item) {
+        return item == ModItems.HYPERTUBE_DETECTOR.asItem() ||
+                item == ModItems.HYPERTUBE_ENTRANCE.asItem() ||
+                item == ModItems.HYPERTUBE_BOOSTER_TIER_1.asItem();
+    }
+
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,//todo redo this
-                                              Player player, InteractionHand hand, BlockHitResult hitResult) {
+    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
+                                              Player player, InteractionHand hand, BlockHitResult hitResult) {//thx gemini
+        // We only want to process the main hand to avoid the off-hand 'air' click issue
+        if (hand != InteractionHand.MAIN_HAND) {
+            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        }
 
-        if(level.getBlockEntity(pos) instanceof HypertubeSupportBlockEntity hypertubeSupportBlockEntity) {
-            Item item = stack.getItem();//alles maakt leeg behavle items zelf
-            System.out.println("------------------");;
-            System.out.println(item);
-            System.out.println(hypertubeSupportBlockEntity.inventory.getStackInSlot(0).getItem());
-            if (hypertubeSupportBlockEntity.inventory.getStackInSlot(0).isEmpty() &&
-                    (item == ModItems.HYPERTUBE_DETECTOR.asItem() ||
-                    item == ModItems.HYPERTUBE_ENTRANCE.asItem() ||
-                    item == ModItems.HYPERTUBE_BOOSTER_TIER_1.asItem())
-            ) {
-                level.playSound(player, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 1f, 2f);
-                if(level.isClientSide()) return ItemInteractionResult.SUCCESS;
-                hypertubeSupportBlockEntity.inventory.insertItem(0, stack.copy(), false);
-                if (!player.isCreative()) {
-                    stack.shrink(1);
-                }
+        if (level.getBlockEntity(pos) instanceof HypertubeSupportBlockEntity hypertubeSupportBlockEntity) {
+            ItemStack inventoryStack = hypertubeSupportBlockEntity.inventory.getStackInSlot(0);
+            Item playerItem = stack.getItem();
 
-                return ItemInteractionResult.SUCCESS;
+            boolean playerHoldingValidItem = isValidSupportItem(playerItem);
 
-            } else if (
-                    !hypertubeSupportBlockEntity.inventory.getStackInSlot(0).isEmpty() &&
-                    !hypertubeSupportBlockEntity.inventory.getStackInSlot(0).getItem().equals(item)
-            ) {
-                System.out.println("somehow this ran");
-                level.playSound(player, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 1f, 1f);
-                if(level.isClientSide()) return ItemInteractionResult.SUCCESS;
-                ItemStack stackOnSupport = hypertubeSupportBlockEntity.inventory.extractItem(0, 1, false);
-                if(!player.isCreative()){
-                    player.addItem(stackOnSupport);
+            // Case 1: Placing on an empty support
+            if (inventoryStack.isEmpty() && playerHoldingValidItem) {
+                if (!level.isClientSide()) {
+                    ItemStack toInsert = stack.copy();
+                    toInsert.setCount(1);
+                    hypertubeSupportBlockEntity.inventory.insertItem(0, toInsert, false);
+                    if (!player.getAbilities().instabuild) {
+                        stack.shrink(1);
+                    }
                 }
                 player.swing(hand);
-                hypertubeSupportBlockEntity.clearContents();
-                return ItemInteractionResult.SUCCESS;
+                return ItemInteractionResult.sidedSuccess(level.isClientSide());
+
+                // Case 2: Retrieving with an empty hand (or any non-valid item)
+            } else if (!inventoryStack.isEmpty() && !playerHoldingValidItem) {
+                // Specifically check for empty hand to make intent clear
+                if (stack.isEmpty()) {
+                    if (!level.isClientSide()) {
+                        ItemStack stackOnSupport = hypertubeSupportBlockEntity.inventory.extractItem(0, 1, false);
+                        player.getInventory().add(stackOnSupport);
+                    }
+                    player.swing(hand);
+                    return ItemInteractionResult.sidedSuccess(level.isClientSide());
+                }
+                // If holding a non-valid item, just pass
+                return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+
+                // Case 3: Swapping with a different, valid item
+            } else if (!inventoryStack.isEmpty() && playerHoldingValidItem && playerItem != inventoryStack.getItem()) {
+                if (!level.isClientSide()) {
+                    // Extract the item currently on the support
+                    ItemStack itemFromSupport = hypertubeSupportBlockEntity.inventory.extractItem(0, 1, false);
+
+                    // Create a new stack for the item from the player's hand and insert it
+                    ItemStack itemToPlace = new ItemStack(playerItem, 1);
+                    hypertubeSupportBlockEntity.inventory.insertItem(0, itemToPlace, false);
+
+                    // Consume one item from the player's hand
+                    if (!player.getAbilities().instabuild) {
+                        stack.shrink(1);
+                    }
+
+                    // Give the old item back to the player
+                    player.getInventory().add(itemFromSupport);
+                }
+                player.swing(hand);
+                return ItemInteractionResult.sidedSuccess(level.isClientSide());
             }
         }
-            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+    }
 /*        if(level.getBlockEntity(pos) instanceof HypertubeSupportBlockEntity hypertubeSupportBlockEntity) {
             if(hypertubeSupportBlockEntity.inventory.getStackInSlot(0).isEmpty() && stack.is(ModItems.HYPERTUBE_BOOSTER_TIER_1) || stack.is(ModItems.HYPERTUBE_ENTRANCE) || stack.is(ModItems.HYPERTUBE_DETECTOR)) {
                 hypertubeSupportBlockEntity.inventory.insertItem(0, stack.copy(), false);
@@ -304,7 +335,6 @@ public class HypertubeSupportBlock extends BaseEntityBlock {
             }
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }*/
-    }
 
     @Override
     protected boolean hasAnalogOutputSignal(BlockState state) {
